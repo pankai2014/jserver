@@ -32,7 +32,7 @@ public class QueueIntFlip
 
     public int remainingCapacity() 
     {
-        if ( ! flipped) {
+        if ( ! flipped ) {
             return capacity - writePos;
         }
         return readPos - writePos;
@@ -151,7 +151,7 @@ public class QueueIntFlip
     public int take(int[] into, int length)
     {
         int intoWritePos = 0;
-        if ( ! flipped) {
+        if ( ! flipped ) {
             //writePos higher than readPos - available section is writePos - readPos
 
             int endPos = Math.min(this.writePos, this.readPos + length);
