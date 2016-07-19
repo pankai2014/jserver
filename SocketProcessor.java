@@ -150,7 +150,7 @@ public class SocketProcessor
             	boolean result = messageReader.read(socket, readByteBuffer);
             	if ( result == false ) {
             		readEndOfStreamSockets.add(socket);
-            		return;
+            		continue;
             	}
             	
             	List<Message> fullMessages = messageReader.getMessages();

@@ -49,7 +49,7 @@ public class Socket
 
         /**
          * ByteBuffer method: remaining
-         *    return limit(length) - position
+         *    return limit(length) = opacity - position
          */
         while ( bytesWritten > 0 && byteBuffer.hasRemaining() ) {
             bytesWritten = this.socketChannel.write(byteBuffer);

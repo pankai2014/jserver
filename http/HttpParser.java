@@ -25,14 +25,13 @@ public class HttpParser
 		
 		boolean headerComplete = false;
 		
-		int next2Index = 0;
 		while ( endOfHeader != -1 ) {
 		    // whether endOfHeader has reached the position of "\r\n\r\n"
-		    next2Index = endOfHeader + 2;
+		    metaData.endOfHeader = endOfHeader + 2;
 		    
-			if ( next2Index < message.length ) { 
+			if (  metaData.endOfHeader < message.length ) { 
 				if ( message.sharedArray[endOfHeader + 1] == '\r' 
-						&& message.sharedArray[next2Index] == '\n' ) {
+						&& message.sharedArray[ metaData.endOfHeader] == '\n' ) {
 				    headerComplete = true;
 					break;
 				}
@@ -43,7 +42,8 @@ public class HttpParser
 			metaData.headerBreakPos.add(new Integer(endOfHeader));
 			endOfHeader = findNextLineBreak(message.sharedArray, prevEndOfHeader,  message.length);
 			
-	        if ( matches(message.sharedArray, prevEndOfHeader, CONTENT_LENGTH) ) {
+	        if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST
+	                && matches(message.sharedArray, prevEndOfHeader, CONTENT_LENGTH) ) {
 	            try {
                     findContentLength(message.sharedArray, prevEndOfHeader, endOfHeader, metaData);
                 } 
@@ -56,9 +56,9 @@ public class HttpParser
 		
 		if ( metaData.headerBreakPos.size() > 0
 		        && headerComplete == true ) {
-		    if ( next2Index == 0 ) return false;
+		    if (  metaData.endOfHeader == 0 ) return false;
 		    
-		    metaData.bodyStartIndex = next2Index + 1;
+		    metaData.bodyStartIndex = metaData.endOfHeader + 1;
 		    metaData.bodyEndIndex   = metaData.bodyStartIndex + metaData.contentLength;
 		    return true;
 		}
