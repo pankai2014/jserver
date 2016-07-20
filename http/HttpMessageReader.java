@@ -14,10 +14,9 @@ public class HttpMessageReader implements IMessageReader
 {
 	private MessageBuffer    messageBuffer = null;
 	private List<Message> completeMessages = new ArrayList<Message>();
-
 	private Message		  	   nextMessage = null;
 	
-	private HttpHeaderBuffer  headerBuffer = new HttpHeaderBuffer();;
+	private HttpMessageReaderBuffer buffer = new HttpMessageReaderBuffer();;
 	
 	@Override
 	public void initialize(MessageBuffer readMessageBuffer) 
@@ -48,19 +47,19 @@ public class HttpMessageReader implements IMessageReader
 
         byteBuffer.flip();
         
-        // @todo reading data exceeds 1M
+        // TODO Reading data exceeds 1M
         nextMessage.writeToMessage(byteBuffer);
         
         // body isn't complete
-        if ( headerBuffer.headerComplete == true 
-                && headerBuffer.bodycomplete == false 
-                && headerBuffer.buffer == null ) {
+        if ( buffer.headerComplete == true 
+                && buffer.bodycomplete == false 
+                && buffer.detail == null ) {
             Message message  = messageBuffer.getMessage();
             message.metaData = new HttpHeader();
             
-            if ( headerBuffer.expectContentLength <= nextMessage.length ) {
-                headerBuffer.bodycomplete = true;
-                message.writePartialMessageToMessage(nextMessage, headerBuffer.expectContentLength);
+            if ( buffer.expectContentLength <= nextMessage.length ) {
+                buffer.bodycomplete = true;
+                message.writePartialMessageToMessage(nextMessage, buffer.expectContentLength);
             }
             
             completeMessages.add(nextMessage);
@@ -70,61 +69,62 @@ public class HttpMessageReader implements IMessageReader
             return true;
         }
         
-        // header isn't complete, merge headerBuffer and nextMessage
-        if ( headerBuffer.buffer != null
-                && headerBuffer.headerComplete == false ) {
+        HttpHeader metaData = (HttpHeader)nextMessage.metaData;
+        
+        // header isn't complete, merge buffer and nextMessage
+        if ( buffer.detail != null
+                && buffer.headerComplete == false ) {
             this.merge(nextMessage);
-        	headerBuffer.headerComplete = HttpParser.prepare(nextMessage, (HttpHeader)nextMessage.metaData);
+        	buffer.headerComplete = HttpUtil.prepare(nextMessage, metaData);
         } 
         else {
             // the new request comes
-            headerBuffer.headerComplete = HttpParser.prepare(nextMessage, (HttpHeader)nextMessage.metaData);
+            buffer.headerComplete = HttpUtil.prepare(nextMessage, metaData);
         }
         
         // header was still unfinished
-        if ( ! headerBuffer.headerComplete ) {
-            if ( nextMessage.length > HttpParser.HTTP_HEAD_MAXLEN ) {
-                // @todo write log, header is too large
-                this.headerBuffer.buffer = null;
-                this.headerBuffer = null;
+        if ( ! buffer.headerComplete ) {
+            if ( nextMessage.length > HttpUtil.HTTP_HEAD_MAXLEN ) {
+                // TODO Write log, header is too large
+                this.buffer.detail = null;
                 
                 byteBuffer.clear();
                 return false;
             }
             
-            if ( headerBuffer.buffer == null ) headerBuffer.buffer = ByteBuffer.allocate(HttpParser.HTTP_HEAD_MAXLEN);
-            headerBuffer.buffer.put(nextMessage.sharedArray, nextMessage.offset, nextMessage.length);
+            if ( buffer.detail == null ) buffer.detail = ByteBuffer.allocate(HttpUtil.HTTP_HEAD_MAXLEN);
+            buffer.detail.put(nextMessage.sharedArray, nextMessage.offset, nextMessage.length);
             
             byteBuffer.clear();
         	return true;
         }
         else {
-            if ( (((HttpHeader)nextMessage.metaData).endOfHeader - nextMessage.offset) 
-                    > HttpParser.HTTP_HEAD_MAXLEN ) {
-                // @todo write log, header is too large
-                this.headerBuffer.buffer = null;
-                this.headerBuffer = null;
+            int headerLength = metaData.endOfHeader - nextMessage.offset;
+            if ( headerLength > HttpUtil.HTTP_HEAD_MAXLEN ) {
+                // TODO Write log, header is too large
+                this.buffer.detail = null;
                 
                 byteBuffer.clear();
                 return false;
             }
             
-            headerBuffer.buffer         = null;
-            headerBuffer.headerComplete = true;
+            buffer.detail         = null;
+            buffer.headerComplete = true;
         }
-        
-        int endIndex  = ((HttpHeader)nextMessage.metaData).bodyEndIndex;
-        int realIndex = nextMessage.offset + nextMessage.length;
         
         Message message  = messageBuffer.getMessage();
         message.metaData = new HttpHeader();
+        
+        int endIndex = ((HttpHeader)nextMessage.metaData).bodyEndIndex;
+        int realIndex = nextMessage.offset + nextMessage.length;
+        
         if ( endIndex <= realIndex ) { 
-            headerBuffer.bodycomplete        = true;
+            buffer.bodycomplete        = true;
             message.writePartialMessageToMessage(nextMessage, endIndex);
         }
         else {
-            headerBuffer.bodycomplete        = false;
-            headerBuffer.expectContentLength = endIndex - realIndex;
+            buffer.bodycomplete        = false;
+            buffer.expectContentLength = endIndex - realIndex;
         }
         
         completeMessages.add(nextMessage);
@@ -136,7 +136,7 @@ public class HttpMessageReader implements IMessageReader
     
     private void merge(Message message) 
     {
-        int srcLength  = this.headerBuffer.buffer.limit();
+        int srcLength  = this.buffer.detail.limit();
         int destLength = srcLength + message.length;
         
         byte[] dest = new byte[destLength];

@@ -1,5 +1,6 @@
 package org.kaipan.www.sockets.http;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest
@@ -10,7 +11,7 @@ public class HttpRequest
     public String uri;
     public String protocol;
     
-    public Map<String, String> headers = null;
+    public Map<String, String> headers = new HashMap<>();
 
     public byte[] get;
     public byte[] post;
@@ -19,4 +20,6 @@ public class HttpRequest
     public byte[] file;
     public byte[] cookie;
     public byte[] session;
+    
+    public int expectLength = 0;
 }

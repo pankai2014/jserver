@@ -1,7 +1,7 @@
 package org.kaipan.www.sockets.http;
 
-import java.util.ArrayList;
-import java.util.List;
+//import java.util.ArrayList;
+//import java.util.List;
 
 public class HttpHeader 
 {
@@ -19,5 +19,5 @@ public class HttpHeader
     public int bodyStartIndex = 0;
     public int bodyEndIndex   = 0;
     
-	public List<Integer> headerBreakPos = new ArrayList<>();
+	//public List<Integer> headerBreakPos = new ArrayList<>();
 }

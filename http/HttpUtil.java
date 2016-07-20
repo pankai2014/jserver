@@ -4,9 +4,12 @@ import java.io.UnsupportedEncodingException;
 
 import org.kaipan.www.sockets.Message;
 
-public class HttpParser 
+public class HttpUtil 
 {
     public final static int HTTP_HEAD_MAXLEN = 8192;
+    
+    public final static String HTTP_HEADER_SPLIT = "\r\n";
+    public final static String HTTP_HEADER_EOR   = "\r\n\r\n";
     
 	private final static byte[] GET    = new byte[]{'G','E','T'};
     private final static byte[] POST   = new byte[]{'P','O','S','T'};
@@ -39,7 +42,7 @@ public class HttpParser
 			
 			int prevEndOfHeader = endOfHeader + 1;
 			
-			metaData.headerBreakPos.add(new Integer(endOfHeader));
+			//metaData.headerBreakPos.add(new Integer(endOfHeader));
 			endOfHeader = findNextLineBreak(message.sharedArray, prevEndOfHeader,  message.length);
 			
 	        if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST
@@ -54,8 +57,7 @@ public class HttpParser
 	        }
 		}
 		
-		if ( metaData.headerBreakPos.size() > 0
-		        && headerComplete == true ) {
+		if ( headerComplete == true ) {
 		    if (  metaData.endOfHeader == 0 ) return false;
 		    
 		    metaData.bodyStartIndex = metaData.endOfHeader + 1;
@@ -164,5 +166,48 @@ public class HttpParser
         }
         
         return true;
+    }
+    
+    public static HttpRequest parseHttpRequest(Message message, HttpHeader metaData) 
+    {
+        HttpRequest request = new HttpRequest();
+        
+        String   Str         = new String(message.sharedArray, message.offset, metaData.endOfHeader);
+        String[] headerLines = Str.split(HTTP_HEADER_SPLIT);
+        
+        if ( headerLines.length > 0 ) {
+            String[] meta = headerLines[0].split(" ", 3);
+            request.method     = meta[0];
+            request.uri        = meta[1];
+            request.protocol   = meta[2];
+        }
+        
+        for ( int i = 1; i < headerLines.length; i++ ) {
+            String[] keyValue = headerLines[i].split(":", 2);
+            
+            if ( keyValue.length > 1 ) {
+                request.headers.put(keyValue[0], keyValue[1]);
+                continue;
+            }
+            
+            request.headers.put(keyValue[0], "");
+        }
+        
+        if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST ) {
+            
+            request.body     = new byte[metaData.contentLength];
+            int realEndIndex = message.offset + message.length;
+            
+            if ( metaData.bodyEndIndex > realEndIndex ) {
+                request.expectLength = metaData.bodyEndIndex - realEndIndex;
+                
+                System.arraycopy(message.sharedArray, metaData.bodyStartIndex, request.body, 0, realEndIndex - metaData.bodyStartIndex);
+            }
+            else {
+                System.arraycopy(message.sharedArray, metaData.bodyStartIndex, request.body, 0, metaData.contentLength);
+            }
+        }
+        
+        return request;
     }
 }
