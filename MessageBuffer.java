@@ -81,13 +81,6 @@ public class MessageBuffer
         int nextFreeBlock = destBlockQueue.take();
         if ( nextFreeBlock == -1 ) return false;
 
-        /**
-         * public static void arraycopy(Object src,
-                             int srcPos,
-                             Object dest,
-                             int destPos,
-                             int length)
-         */
         System.arraycopy(message.sharedArray, message.offset, dest, nextFreeBlock, message.length);
 
         //srcBlockQueue.put(message.offset); //free smaller block after copy

@@ -5,8 +5,13 @@ import java.util.HashMap;
 
 public class HttpResponse
 {
-    public final static Map<Integer, String> HTTP_HEADER_CODE = new HashMap<Integer, String>() {
-        {
+	public final static String SERVER_NAME = "JAVA NIO HTTP SERVER, @author will<pan.kai@icloud.com>";
+	
+    public final static Map<Integer, String> HTTP_HEADER_CODE = new HashMap<Integer, String>() 
+    {
+		private static final long serialVersionUID = 1L;
+		
+		{
             put(100, "100 Continue");
             put(101, "101 Switching Protocols");
             put(200, "200 OK");
@@ -39,10 +44,38 @@ public class HttpResponse
         }
     };
     
-    public String protocol = "HTTP/1.1";
-    public String status   = HTTP_HEADER_CODE.get(200);
+    private String meta = null;
     
-    public String meta;
-    public Map<String, String> headers = new HashMap<>();
+    public final static String protocol = "HTTP/1.1";
+    private Map<String, String> headers = new HashMap<>();
+    
+    public void setHttpStatus(int code) 
+    {
+    	this.meta = protocol + " " + HTTP_HEADER_CODE.get(code) + "\r\n";
+    }
+    
+    public void setHeader(String key, String value) 
+    {
+    	this.headers.put(key, value);
+    }
+    
+    public String getHeader() 
+    {
+    	if ( this.meta == null ) 					this.setHttpStatus(200);
+    	if ( ! this.headers.containsKey("Server") ) this.setHeader("Server", SERVER_NAME);
+    	
+    	if ( ! this.headers.containsKey("Content-Type")) {
+    		this.setHeader("Content-Type", "text/html; charset=utf-8");
+    	}
+    	
+    	String out = this.meta;
+    	for ( Map.Entry<String, String> entry : headers.entrySet() ) {
+    		out += entry.getKey() + ": " + entry.getValue() + "\r\n"; 
+        }
+    	
+    	out += "\r\n";
+    	
+    	return out;
+    }
 }
 

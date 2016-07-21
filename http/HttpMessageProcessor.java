@@ -17,15 +17,20 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
-        response(request);
+        doStaticRequest(request);
         
         return false;
 	}
 	
-	public void response(HttpRequest request) 
+	public void doStaticRequest(HttpRequest request) 
 	{
 	    System.out.println(request.method);
 	    System.out.println(request.uri);
 	    System.out.println(request.protocol);
+	}
+	
+	public void doDynamicRequest(HttpRequest request) 
+	{
+		
 	}
 }
