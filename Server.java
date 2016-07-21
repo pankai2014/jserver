@@ -58,7 +58,7 @@ public class Server
 			e.printStackTrace();
 		}
         
-        System.out.println("listen " + address);
+        Log.write("listen " + address + "...");
     }
     
     public void accept() 

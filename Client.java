@@ -27,9 +27,39 @@ public class Client
               //used for writing data
                 //byteBuffer.rewind();
                 
-                ByteBuffer byteBuffer = StringUtil.string2Bytes("hello\n");
-                
+                ByteBuffer byteBuffer = StringUtil.string2Bytes("GET /index.html HTTP/1.1\r\n");
                 client.write(byteBuffer);
+                
+                try {
+                    Thread.sleep(3000);
+                } 
+                catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                byteBuffer = StringUtil.string2Bytes("Content-Type: text/html");
+                client.write(byteBuffer);
+                
+                try {
+                    Thread.sleep(3000);
+                } 
+                catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                byteBuffer = StringUtil.string2Bytes("\r\n\r\n");
+                client.write(byteBuffer);
+                
+                
+                try {
+                    Thread.sleep(5000);
+                } 
+                catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 
                 client.close();
                 

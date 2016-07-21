@@ -23,8 +23,8 @@ public class SocketProcessor
     
     private Map<Long, Socket> socketMap         = new HashMap<>();
     
-    private ByteBuffer readByteBuffer  = ByteBuffer.allocate(1024 * 1024 * 1);
-    private ByteBuffer writeByteBuffer = ByteBuffer.allocate(1024 * 1024 * 1);
+    private ByteBuffer readByteBuffer  = ByteBuffer.allocate(1024 * 1024 * 4);
+    private ByteBuffer writeByteBuffer = ByteBuffer.allocate(1024 * 1024 * 4);
     
     private Selector readSelector  = null;
     private Selector writeSelector = null;
@@ -118,6 +118,8 @@ public class SocketProcessor
     		
     		// not thrown exception when queue is empty
     		inSocket = inSocketQueue.poll();
+    		
+    		Log.write("client connected, socketId = " + this.nextSocketId);
     	}
     }
     
@@ -147,8 +149,10 @@ public class SocketProcessor
             	
             	IMessageReader messageReader = socket.getMessageReader();
             	
-            	boolean result = messageReader.read(socket, readByteBuffer);
-            	if ( result == false ) {
+            	boolean stillRead;
+            	stillRead = messageReader.read(socket, readByteBuffer);
+            	System.out.println(stillRead);
+            	if ( stillRead == false ) {
             		readEndOfStreamSockets.add(socket);
             		continue;
             	}
@@ -158,25 +162,34 @@ public class SocketProcessor
             	if ( fullMessages.size() > 0 ) {
             		for ( Message message : fullMessages ) {
             			message.socketId = socket.getSocketId();
-            			messageProcessor.process(message, writeProxy);
+            			stillRead = messageProcessor.process(message, writeProxy);
+            			
+            			if ( stillRead == false ) {
+            			    readEndOfStreamSockets.add(socket); 
+            			}
             		}
             	}
             	
             	fullMessages.clear();
+            	
+            	/**
+                 *  remove iteration just crossed elements,  
+                 *      why do this operation, key.isReadable() is always true?
+                 *      keyIterator is invalid?
+                 */
+                keyIterator.remove();
             } 
-            
-            /**
-             *  remove iteration just crossed elements,  
-             *      why do this operation, key.isReadable() is always true?
-             */
-            //keyIterator.remove();
         }
         
         /**
          * delete all of the elements from this collection, 
          *      same as above!!!
          */
-        //selectedKeys.clear();
+        selectedKeys.clear();
+        
+        for ( Map.Entry<Long, Socket> entry : socketMap.entrySet() ) {
+            this.registerRead(entry.getValue());
+        }
     }
     
     public void writeToSockets() 
@@ -312,7 +325,7 @@ public class SocketProcessor
             executeCycle();
             
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } 
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block

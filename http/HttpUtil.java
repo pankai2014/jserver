@@ -19,12 +19,12 @@ public class HttpUtil
     
     private static final byte[] CONTENT_LENGTH = new byte[]{'C','o','n','t','e','n','t','-','L','e','n','g','t','h'};
 	    
-	public static boolean prepare(Message message, HttpHeader metaData) 
+	public static boolean prepare(byte[] src, int offset, int length, HttpHeader metaData) 
 	{
-		int endOfHeader = findNextLineBreak(message.sharedArray, message.offset, message.length);
+		int endOfHeader = findNextLineBreak(src, offset, length);
 		
 		if ( endOfHeader == -1 ) return false;
-		resolveHttpMethod(message.sharedArray, message.offset, metaData);
+		resolveHttpMethod(src, offset, metaData);
 		
 		boolean headerComplete = false;
 		
@@ -32,9 +32,9 @@ public class HttpUtil
 		    // whether endOfHeader has reached the position of "\r\n\r\n"
 		    metaData.endOfHeader = endOfHeader + 2;
 		    
-			if (  metaData.endOfHeader < message.length ) { 
-				if ( message.sharedArray[endOfHeader + 1] == '\r' 
-						&& message.sharedArray[ metaData.endOfHeader] == '\n' ) {
+			if (  metaData.endOfHeader < length ) { 
+				if ( src[endOfHeader + 1] == '\r' 
+						&& src[ metaData.endOfHeader] == '\n' ) {
 				    headerComplete = true;
 					break;
 				}
@@ -43,12 +43,12 @@ public class HttpUtil
 			int prevEndOfHeader = endOfHeader + 1;
 			
 			//metaData.headerBreakPos.add(new Integer(endOfHeader));
-			endOfHeader = findNextLineBreak(message.sharedArray, prevEndOfHeader,  message.length);
+			endOfHeader = findNextLineBreak(src, prevEndOfHeader,  length);
 			
 	        if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST
-	                && matches(message.sharedArray, prevEndOfHeader, CONTENT_LENGTH) ) {
+	                && matches(src, prevEndOfHeader, CONTENT_LENGTH) ) {
 	            try {
-                    findContentLength(message.sharedArray, prevEndOfHeader, endOfHeader, metaData);
+                    findContentLength(src, prevEndOfHeader, endOfHeader, metaData);
                 } 
 	            catch (UnsupportedEncodingException e) {
                     // TODO Auto-generated catch block
@@ -173,17 +173,17 @@ public class HttpUtil
         HttpRequest request = new HttpRequest();
         
         String   Str         = new String(message.sharedArray, message.offset, metaData.endOfHeader);
-        String[] headerLines = Str.split(HTTP_HEADER_SPLIT);
+        String[] headerlines = Str.split(HTTP_HEADER_SPLIT);
         
-        if ( headerLines.length > 0 ) {
-            String[] meta = headerLines[0].split(" ", 3);
+        if ( headerlines.length > 0 ) {
+            String[] meta = headerlines[0].split(" ", 3);
             request.method     = meta[0];
             request.uri        = meta[1];
             request.protocol   = meta[2];
         }
         
-        for ( int i = 1; i < headerLines.length; i++ ) {
-            String[] keyValue = headerLines[i].split(":", 2);
+        for ( int i = 1; i < headerlines.length; i++ ) {
+            String[] keyValue = headerlines[i].split(":", 2);
             
             if ( keyValue.length > 1 ) {
                 request.headers.put(keyValue[0], keyValue[1]);
@@ -194,18 +194,9 @@ public class HttpUtil
         }
         
         if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST ) {
+            request.body = new byte[metaData.contentLength];
             
-            request.body     = new byte[metaData.contentLength];
-            int realEndIndex = message.offset + message.length;
-            
-            if ( metaData.bodyEndIndex > realEndIndex ) {
-                request.expectLength = metaData.bodyEndIndex - realEndIndex;
-                
-                System.arraycopy(message.sharedArray, metaData.bodyStartIndex, request.body, 0, realEndIndex - metaData.bodyStartIndex);
-            }
-            else {
-                System.arraycopy(message.sharedArray, metaData.bodyStartIndex, request.body, 0, metaData.contentLength);
-            }
+            System.arraycopy(message.sharedArray, metaData.bodyStartIndex, request.body, 0, metaData.contentLength);
         }
         
         return request;

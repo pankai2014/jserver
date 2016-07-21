@@ -8,15 +8,18 @@ public class MessageBuffer
     private static final int CAPACITY_SMALL  =   4  * KB;
     private static final int CAPACITY_MEDIUM = 128  * KB;
     private static final int CAPACITY_LARGE  = 1024 * KB;
+    private static final int CAPACITY_HUGE   =   4  * MB;
 
     //package scope (default) - so they can be accessed from unit tests.
-    byte[]  smallMessageBuffer  = new byte[1024 *   4 * KB];   //1024 x   4KB messages =  4MB.
-    byte[]  mediumMessageBuffer = new byte[128  * 128 * KB];   // 128 x 128KB messages = 16MB.
-    byte[]  largeMessageBuffer  = new byte[16   *   1 * MB];   //  16 *   1MB messages = 16MB.
+    byte[]  smallMessageBuffer  = new byte[2048 *   4 * KB];   //2048 *   4KB messages =  8MB.
+    byte[]  mediumMessageBuffer = new byte[256  * 128 * KB];   // 256 * 128KB messages = 32MB.
+    byte[]  largeMessageBuffer  = new byte[32   *   1 * MB];   //  32 *   1MB messages = 32MB.
+    byte[]  hugeMessageBuffer   = new byte[4    *   4 * MB];   //   4 *   4MB messages = 16MB. 
 
-    QueueIntFlip smallMessageBufferFreeBlocks  = new QueueIntFlip(1024); // 1024 free sections
-    QueueIntFlip mediumMessageBufferFreeBlocks = new QueueIntFlip(128);  // 128  free sections
-    QueueIntFlip largeMessageBufferFreeBlocks  = new QueueIntFlip(16);   // 16   free sections
+    QueueIntFlip smallMessageBufferFreeBlocks  = new QueueIntFlip(2048); // 2048 free sections
+    QueueIntFlip mediumMessageBufferFreeBlocks = new QueueIntFlip(256);  // 256  free sections
+    QueueIntFlip largeMessageBufferFreeBlocks  = new QueueIntFlip(32);   // 32   free sections
+    QueueIntFlip hugeMessageBufferFreeBlocks   = new QueueIntFlip(4);    // 4    free sections
 
     //todo make all message buffer capacities and block sizes configurable
     //todo calculate free block queue sizes based on capacity and block size of buffers.
@@ -34,6 +37,10 @@ public class MessageBuffer
         
         for ( int i = 0; i < largeMessageBuffer.length; i += CAPACITY_LARGE ) {
             this.largeMessageBufferFreeBlocks.put(i);
+        }
+        
+        for ( int i = 0; i < hugeMessageBuffer.length; i += CAPACITY_HUGE ) {
+            this.hugeMessageBufferFreeBlocks.put(i);
         }
     }
 
@@ -60,6 +67,9 @@ public class MessageBuffer
         } 
         else if ( message.capacity == CAPACITY_MEDIUM ) {
             return moveMessage(message, this.mediumMessageBufferFreeBlocks, this.largeMessageBufferFreeBlocks, this.largeMessageBuffer, CAPACITY_LARGE);
+        }
+        else if ( message.capacity == CAPACITY_LARGE ) {
+            return moveMessage(message, this.largeMessageBufferFreeBlocks, this.hugeMessageBufferFreeBlocks, this.hugeMessageBuffer, CAPACITY_HUGE);
         } 
         else {
             return false;

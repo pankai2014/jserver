@@ -20,11 +20,6 @@ public class Message
         this.messageBuffer = messageBuffer;
     }
     
-    public void setMessageBuffer(MessageBuffer messageBuffer) 
-    {
-        this.messageBuffer = messageBuffer;
-    }
-
     /**
      * Writes data from the ByteBuffer into this message - meaning into the buffer backing this message.
      *
@@ -33,8 +28,6 @@ public class Message
      */
     public int writeToMessage(ByteBuffer byteBuffer)
     {
-        if ( this.messageBuffer == null ) return 0;
-        
         int remaining = byteBuffer.remaining();
 
         while ( this.length + remaining > capacity ) {
@@ -58,8 +51,6 @@ public class Message
      */
     public int writeToMessage(byte[] byteArray)
     {
-        if ( this.messageBuffer == null ) return 0;
-        
         return writeToMessage(byteArray, 0, byteArray.length);
     }
 
@@ -71,8 +62,6 @@ public class Message
      */
     public int writeToMessage(byte[] byteArray, int offset, int length)
     {
-        if ( this.messageBuffer == null ) return 0;
-        
     	int remaining = length;
     	
         while ( this.length + length > capacity ) {
