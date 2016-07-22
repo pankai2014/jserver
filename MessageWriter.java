@@ -1,4 +1,4 @@
-package org.kaipan.www.sockets;
+package org.kaipan.www.socket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

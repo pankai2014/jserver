@@ -1,4 +1,4 @@
-package org.kaipan.www.sockets;
+package org.kaipan.www.socket;
 
 import java.nio.ByteBuffer;
 import java.util.List;

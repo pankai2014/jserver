@@ -1,15 +1,15 @@
-package org.kaipan.www.sockets.http;
+package org.kaipan.www.socket.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kaipan.www.sockets.IMessageReader;
-import org.kaipan.www.sockets.Log;
-import org.kaipan.www.sockets.Message;
-import org.kaipan.www.sockets.MessageBuffer;
-import org.kaipan.www.sockets.Socket;
+import org.kaipan.www.socket.IMessageReader;
+import org.kaipan.www.socket.Log;
+import org.kaipan.www.socket.Message;
+import org.kaipan.www.socket.MessageBuffer;
+import org.kaipan.www.socket.Socket;
 
 public class HttpMessageReader implements IMessageReader
 {

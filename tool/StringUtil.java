@@ -1,4 +1,4 @@
-package org.kaipan.www.sockets;
+package org.kaipan.www.socket.tool;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;

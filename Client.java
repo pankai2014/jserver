@@ -1,10 +1,12 @@
-package org.kaipan.www.sockets;
+package org.kaipan.www.socket;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
+
+import org.kaipan.www.socket.tool.StringUtil;
 
 public class Client
 {

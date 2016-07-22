@@ -1,8 +1,8 @@
-package org.kaipan.www.sockets.http;
+package org.kaipan.www.socket.http;
 
-import org.kaipan.www.sockets.IMessageProcessor;
-import org.kaipan.www.sockets.Message;
-import org.kaipan.www.sockets.WriteProxy;
+import org.kaipan.www.socket.IMessageProcessor;
+import org.kaipan.www.socket.Message;
+import org.kaipan.www.socket.WriteProxy;
 
 public class HttpMessageProcessor implements IMessageProcessor
 {	
@@ -31,6 +31,6 @@ public class HttpMessageProcessor implements IMessageProcessor
 	
 	public void doDynamicRequest(HttpRequest request) 
 	{
-		
+		HttpResponse response = new HttpResponse();
 	}
 }

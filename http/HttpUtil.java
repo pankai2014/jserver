@@ -1,8 +1,8 @@
-package org.kaipan.www.sockets.http;
+package org.kaipan.www.socket.http;
 
 import java.io.UnsupportedEncodingException;
 
-import org.kaipan.www.sockets.Message;
+import org.kaipan.www.socket.Message;
 
 public class HttpUtil 
 {
