@@ -2,7 +2,7 @@ package org.kaipan.www.socket.http;
 
 import java.io.UnsupportedEncodingException;
 
-import org.kaipan.www.socket.Message;
+import org.kaipan.www.socket.core.Message;
 
 public class HttpUtil 
 {

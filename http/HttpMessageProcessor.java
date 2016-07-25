@@ -1,8 +1,8 @@
 package org.kaipan.www.socket.http;
 
-import org.kaipan.www.socket.IMessageProcessor;
-import org.kaipan.www.socket.Message;
-import org.kaipan.www.socket.WriteProxy;
+import org.kaipan.www.socket.core.IMessageProcessor;
+import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.WriteProxy;
 
 public class HttpMessageProcessor implements IMessageProcessor
 {	
@@ -12,14 +12,12 @@ public class HttpMessageProcessor implements IMessageProcessor
 	}
 	
 	@Override
-	public boolean process(Message message, WriteProxy writeProxy) 
+	public void process(Message message, WriteProxy writeProxy) 
 	{
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
         doStaticRequest(request);
-        
-        return false;
 	}
 	
 	public void doStaticRequest(HttpRequest request) 

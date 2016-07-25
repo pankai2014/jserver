@@ -1,4 +1,4 @@
-package org.kaipan.www.socket;
+package org.kaipan.www.socket.core;
 
 public class QueueIntFlip 
 {

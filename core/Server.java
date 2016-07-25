@@ -1,4 +1,4 @@
-package org.kaipan.www.socket;
+package org.kaipan.www.socket.core;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -10,6 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public abstract class Server
 {	
+    protected IConfig iconfig = null;
+    
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel serverChannel = null;
 
@@ -18,8 +20,10 @@ public abstract class Server
     
     private Lock lock = new ReentrantLock();
     
-    protected Server()
+    protected Server(IConfig iconfig)
     {
+        this.iconfig = iconfig;
+        
         try {
             this.serverChannel = ServerSocketChannel.open();
         } 
@@ -27,22 +31,11 @@ public abstract class Server
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
+        listen(iconfig.host(), iconfig.port());
     }
     
-    protected Server(String ip, int port) 
-    {
-        try {
-            this.serverChannel = ServerSocketChannel.open();
-        } 
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    	
-    	listen(ip, port);
-    }
-    
-    protected void listen(String ip, int port) 
+    public void listen(String ip, int port) 
     {
     	SocketAddress address = new InetSocketAddress(ip, port);
         

@@ -1,23 +1,24 @@
 package org.kaipan.www.socket.http;
 
-import org.kaipan.www.socket.MessageBuffer;
-import org.kaipan.www.socket.Server;
-import org.kaipan.www.socket.SocketProcessor;
+import java.util.Properties;
+
+import org.kaipan.www.socket.core.MessageBuffer;
+import org.kaipan.www.socket.core.Server;
+import org.kaipan.www.socket.core.SocketProcessor;
+import org.kaipan.www.socket.util.Utils;
 
 public class HttpServer extends Server
 {
-    public HttpServer() 
+    public HttpServer(HttpConfig config)
     {
-        super();
-        
+        super(config);
+
         createSocketProcessor();
     }
     
-    public HttpServer(String ip, int port)
+    public HttpConfig getConfig() 
     {
-        super(ip, port);
-
-        createSocketProcessor();
+        return (HttpConfig)iconfig;
     }
 
     @Override
@@ -28,7 +29,28 @@ public class HttpServer extends Server
     
     public static void main(String[] args) 
     {
-        HttpServer server = new HttpServer("0.0.0.0", 8080);
+        HttpConfig config = new HttpConfig();
+        
+        String path = null;
+        if ( args.length > 0 ) path = args[0];
+        
+        Properties property = null;
+        if ( path == null ) {
+            String jarHome = Utils.getJarHome(config);
+            
+            property = Utils.loadConfigFile(jarHome + "/http.server.conf");
+        }
+        else {
+            property = Utils.loadConfigFile(path);
+            if ( property == null ) {
+                System.out.println("Usage: java -jar java-nio-http-server-{version}.jar "
+                        + "\"path to file http.server.conf\"");
+                return;
+            }
+        }
+        config.load(property);
+        
+        HttpServer server = new HttpServer(config);
         server.start();
     }
 }

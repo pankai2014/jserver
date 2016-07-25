@@ -1,4 +1,4 @@
-package org.kaipan.www.socket;
+package org.kaipan.www.socket.core;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,7 +40,6 @@ public class SocketProcessor
     
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
-    private Set<Socket> readEndOfStreamSockets = new HashSet<>();
     
     public SocketProcessor(IMessageReaderFactory messageReaderFactory, MessageBuffer readMessageBuffer, MessageBuffer writeMessageBuffer, IMessageProcessor messageProcessor) 
     {
@@ -125,8 +124,6 @@ public class SocketProcessor
     
     public void readFromSockets() 
     {
-    	cancelReadSockets();
-    	
         try {
             int readyChannels = readSelector.selectNow();
             
@@ -148,28 +145,33 @@ public class SocketProcessor
             	Socket socket = (Socket) key.attachment();
             	
             	IMessageReader messageReader = socket.getMessageReader();
+            	boolean endOfStreamReached   = messageReader.read(socket, readByteBuffer);
             	
-            	boolean stillRead;
-            	stillRead = messageReader.read(socket, readByteBuffer);
-            	System.out.println(stillRead);
-            	if ( stillRead == false ) {
-            		readEndOfStreamSockets.add(socket);
-            		continue;
-            	}
+                if ( ! endOfStreamReached ) {
+                    socketMap.remove(socket.getSocketId());
+                    key.attach(null);
+                    key.cancel();
+                    
+                    try {
+                        key.channel().close();
+                    } 
+                    catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    
+                    Log.write("client closed, socketId = " + socket.getSocketId());
+                }
             	
             	List<Message> fullMessages = messageReader.getMessages();
             	
             	if ( fullMessages.size() > 0 ) {
             		for ( Message message : fullMessages ) {
             			message.socketId = socket.getSocketId();
-            			stillRead = messageProcessor.process(message, writeProxy);
             			
-            			if ( stillRead == false ) {
-            			    readEndOfStreamSockets.add(socket); 
-            			}
+            			messageProcessor.process(message, writeProxy);
             		}
             	}
-            	
             	fullMessages.clear();
             	
             	/**
@@ -239,10 +241,10 @@ public class SocketProcessor
         		}
         	}
         	
-        	//keyIterator.remove();
+        	keyIterator.remove();
         }
         
-      //selectedKeys.clear();
+      selectedKeys.clear();
     }
     
     private void registerNonEmptySockets() throws ClosedChannelException 
@@ -257,34 +259,12 @@ public class SocketProcessor
     private void cancelEmptySockets() 
     {
         for ( Socket socket : nonEmptyToEmptySockets ) {
-            SelectionKey key = socket.getSocketChannel().keyFor(this.writeSelector);	// unregister from write selector
+            SelectionKey writeKey = socket.getSocketChannel().keyFor(this.writeSelector);	// unregister from write selector
 
-            key.cancel();
+            writeKey.cancel();
         }
         
         nonEmptyToEmptySockets.clear();
-    }
-
-    private void cancelReadSockets() 
-    {
-       for ( Socket socket : readEndOfStreamSockets ) {
-    	    SelectionKey readKey = socket.getSocketChannel().keyFor(this.readSelector);    // unregister from read selector
-	   	    readKey.cancel();
-	   	    
-	   	    try {
-	   			socket.getSocketChannel().close();
-	   			
-	   			socket.setMessageReader(null);
-	   			socket.setMessageWriter(null);
-	   			socket = null;
-	   		} 
-	   	    catch (IOException e) {
-	   			// TODO Auto-generated catch block
-	   			e.printStackTrace();
-	   		}
-       }
-       
-       readEndOfStreamSockets.clear();
     }
     
     public void takeNewOutboundMessages() 
@@ -306,6 +286,9 @@ public class SocketProcessor
     			else {
     				messageWriter.enqueue(outMessage);
     			}
+    		}
+    		else {
+    		    nonEmptyToEmptySockets.remove(socket);
     		}
     		
     		outMessage = outboundMessageQueue.poll();

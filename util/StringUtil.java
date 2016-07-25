@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.tool;
+package org.kaipan.www.socket.util;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
@@ -28,17 +28,16 @@ public class StringUtil
     {  
 		Charset charset	= null;
         CharsetDecoder decoder = null;  
-        CharBuffer charBuffer  = null;  
-        try  
-        {  
+        CharBuffer charBuffer  = null;
+        
+        try {  
             // used for reading data            
             charset = Charset.forName("UTF-8");  
             decoder = charset.newDecoder();  
             charBuffer = decoder.decode(buffer.asReadOnlyBuffer());  
             return charBuffer.toString();  
         }  
-        catch (Exception e)  
-        {  
+        catch (Exception e) {  
             e.printStackTrace();  
             return null;
         }  

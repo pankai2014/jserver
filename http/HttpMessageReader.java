@@ -5,11 +5,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kaipan.www.socket.IMessageReader;
-import org.kaipan.www.socket.Log;
-import org.kaipan.www.socket.Message;
-import org.kaipan.www.socket.MessageBuffer;
-import org.kaipan.www.socket.Socket;
+import org.kaipan.www.socket.core.IMessageReader;
+import org.kaipan.www.socket.core.Log;
+import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.MessageBuffer;
+import org.kaipan.www.socket.core.Socket;
 
 public class HttpMessageReader implements IMessageReader
 {
@@ -17,7 +17,7 @@ public class HttpMessageReader implements IMessageReader
 	private List<Message> completeMessages = new ArrayList<Message>();
 	private Message		  	   nextMessage = null;
 	
-	private HttpMessageReaderBuffer buffer = new HttpMessageReaderBuffer();;
+	private HttpMessageReaderBuffer buffer = new HttpMessageReaderBuffer();
 	
 	@Override
 	public void initialize(MessageBuffer readMessageBuffer) 
@@ -40,14 +40,10 @@ public class HttpMessageReader implements IMessageReader
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        if ( socket.endOfStreamReached == true ) {
-            //byteBuffer.clear();
-            //return false;
-        }
+        if ( socket.endOfStreamReached == true ) return false;
 
         byteBuffer.flip();
-        System.out.println(new String(nextMessage.sharedArray, nextMessage.offset, nextMessage.length));
+        System.out.println(byteBuffer);
         
         // TODO Reading data exceeds 1M
         nextMessage.writeToMessage(byteBuffer);

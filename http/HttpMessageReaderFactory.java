@@ -1,7 +1,7 @@
 package org.kaipan.www.socket.http;
 
-import org.kaipan.www.socket.IMessageReader;
-import org.kaipan.www.socket.IMessageReaderFactory;
+import org.kaipan.www.socket.core.IMessageReader;
+import org.kaipan.www.socket.core.IMessageReaderFactory;
 
 public class HttpMessageReaderFactory implements IMessageReaderFactory {
 
