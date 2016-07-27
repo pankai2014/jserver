@@ -44,8 +44,13 @@ public class HttpConfig extends IConfig
         }
     }
     
-    public String getRoot() 
+    public String root() 
     {
         return root;
+    }
+    
+    public void root(String root) 
+    {
+        this.root = root;
     }
 }

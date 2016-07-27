@@ -24,7 +24,7 @@ public class HttpServer extends Server
     @Override
     protected void createSocketProcessor()
     {
-        this.socketProcessor = new SocketProcessor(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor()); 
+        this.socketProcessor = new SocketProcessor(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig())); 
     }
     
     public static void main(String[] args) 
@@ -38,13 +38,13 @@ public class HttpServer extends Server
         if ( path == null ) {
             String jarHome = Utils.getJarHome(config);
             
-            property = Utils.loadConfigFile(jarHome + "/http.server.conf");
+            property = Utils.loadConfigFile(jarHome + "/http-server.properties");
         }
         else {
             property = Utils.loadConfigFile(path);
             if ( property == null ) {
                 System.out.println("Usage: java -jar java-nio-http-server-{version}.jar "
-                        + "\"path to file http.server.conf\"");
+                        + "\"path to file http-server.properties\"");
                 return;
             }
         }

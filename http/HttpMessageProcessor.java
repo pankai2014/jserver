@@ -6,9 +6,11 @@ import org.kaipan.www.socket.core.WriteProxy;
 
 public class HttpMessageProcessor implements IMessageProcessor
 {	
-	public HttpMessageProcessor() 
+    private HttpConfig config;
+    
+	public HttpMessageProcessor(HttpConfig config) 
 	{
-		
+		this.config = config;
 	}
 	
 	@Override
@@ -23,7 +25,7 @@ public class HttpMessageProcessor implements IMessageProcessor
 	public void doStaticRequest(HttpRequest request) 
 	{
 	    System.out.println(request.method);
-	    System.out.println(request.uri);
+	    System.out.println(config.root() + request.path);
 	    System.out.println(request.protocol);
 	}
 	

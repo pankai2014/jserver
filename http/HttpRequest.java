@@ -8,12 +8,12 @@ public class HttpRequest
     public long socketId;
     
     public String method;
-    public String uri;
+    public String path;
     public String protocol;
     
     public Map<String, String> headers = new HashMap<>();
 
-    public byte[] get;
+    public Map<String, String> get     = new HashMap<>();
     public byte[] post;
     public byte[] body;
     

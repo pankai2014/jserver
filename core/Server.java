@@ -15,7 +15,6 @@ public abstract class Server
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel serverChannel = null;
 
-    protected volatile int 	nextSocketId 	    = 0;
     protected static final int acceptThreadSize = 10;
     
     private Lock lock = new ReentrantLock();

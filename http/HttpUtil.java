@@ -1,6 +1,7 @@
 package org.kaipan.www.socket.http;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 import org.kaipan.www.socket.core.Message;
 
@@ -168,6 +169,25 @@ public class HttpUtil
         return true;
     }
     
+    public static int parseStr(String str, Map<String, String> get) 
+    {
+        int loc = str.indexOf('?');
+        if ( loc == -1 ) return -1;
+        
+        String   query      = str.substring(loc + 1);
+        String[] queryLines = query.split("&");
+        
+        for ( int i = 0; i < queryLines.length; i++ ) {
+            String[] keyValue = queryLines[i].split("=", 2);
+            
+            if ( keyValue.length > 1 ) {
+                get.put(keyValue[0], keyValue[1]);
+            }
+        }
+        
+        return loc;
+    }
+    
     public static HttpRequest parseHttpRequest(Message message, HttpHeader metaData) 
     {
         HttpRequest request = new HttpRequest();
@@ -178,8 +198,11 @@ public class HttpUtil
         if ( headerlines.length > 0 ) {
             String[] meta = headerlines[0].split(" ", 3);
             request.method     = meta[0];
-            request.uri        = meta[1];
+            request.path       = meta[1];
             request.protocol   = meta[2];
+            
+            int loc = parseStr(request.path, request.get);
+            if ( loc > 0 ) request.path = request.path.substring(0, loc); 
         }
         
         for ( int i = 1; i < headerlines.length; i++ ) {

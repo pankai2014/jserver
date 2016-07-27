@@ -11,7 +11,6 @@ public abstract class IConfig
         return host;
     }
     
-    
     public void host(String host) 
     {
         this.host = host;
