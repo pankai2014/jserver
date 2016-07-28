@@ -43,9 +43,9 @@ public class HttpMessageReader implements IMessageReader
         if ( socket.endOfStreamReached == true ) return false;
 
         byteBuffer.flip();
-        System.out.println(byteBuffer);
         
         // TODO Reading data exceeds 1M
+        nextMessage.socketId = socket.getSocketId();
         nextMessage.writeToMessage(byteBuffer);
         
         // body isn't complete

@@ -29,11 +29,11 @@ public class Client
               //used for writing data
                 //byteBuffer.rewind();
                 
-                ByteBuffer byteBuffer = StringUtil.string2Bytes("GET /index.html HTTP/1.1\r\n");
+                ByteBuffer byteBuffer = StringUtil.string2Bytes("GET /index.htm HTTP/1.1\r\n");
                 client.write(byteBuffer);
                 
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                 } 
                 catch (InterruptedException e) {
                     // TODO Auto-generated catch block
@@ -44,7 +44,7 @@ public class Client
                 client.write(byteBuffer);
                 
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                 } 
                 catch (InterruptedException e) {
                     // TODO Auto-generated catch block
@@ -54,9 +54,13 @@ public class Client
                 byteBuffer = StringUtil.string2Bytes("\r\n\r\n");
                 client.write(byteBuffer);
                 
+                ByteBuffer dst = ByteBuffer.allocate(200);
+                client.read(dst);
+                
+                System.out.println(dst);
                 
                 try {
-                    Thread.sleep(5000);
+                    Thread.sleep(3000);
                 } 
                 catch (InterruptedException e) {
                     // TODO Auto-generated catch block

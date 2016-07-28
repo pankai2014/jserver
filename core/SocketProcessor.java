@@ -144,10 +144,10 @@ public class SocketProcessor
                 // a channel is ready for reading
             	Socket socket = (Socket) key.attachment();
             	
-            	IMessageReader messageReader = socket.getMessageReader();
-            	boolean endOfStreamReached   = messageReader.read(socket, readByteBuffer);
+            	IMessageReader messageReader  = socket.getMessageReader();
+            	boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
             	
-                if ( ! endOfStreamReached ) {
+                if ( ! notEndOfStreamReached ) {
                     socketMap.remove(socket.getSocketId());
                     key.attach(null);
                     key.cancel();
@@ -236,7 +236,7 @@ public class SocketProcessor
 					e.printStackTrace();
 				}
         		
-        		if ( messageWriter.isEmpty() )  {
+        		if ( messageWriter.isEmpty() ) {
         			nonEmptyToEmptySockets.add(socket);
         		}
         	}

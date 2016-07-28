@@ -4,9 +4,14 @@ import java.util.Properties;
 
 import org.kaipan.www.socket.core.IConfig;
 
+import com.sun.corba.se.spi.activation.Server;
+
 public class HttpConfig extends IConfig
 {
     private String root;
+    
+    private String charset    = null;
+    private String static_ext = null;
     
     public HttpConfig() 
     {
@@ -42,6 +47,14 @@ public class HttpConfig extends IConfig
                 e.printStackTrace();
             }  
         }
+        
+        if ( property.getProperty("server.charset") != null ) {
+            this.charset = property.getProperty("server.charset");
+        }
+        
+        if ( property.getProperty("server.static_ext") != null ) {
+            this.static_ext = property.getProperty("server.static_ext");
+        }
     }
     
     public String root() 
@@ -49,8 +62,13 @@ public class HttpConfig extends IConfig
         return root;
     }
     
-    public void root(String root) 
+    public String charset() 
     {
-        this.root = root;
+        return charset;
+    }
+    
+    public String staticExt() 
+    {
+        return static_ext;
     }
 }

@@ -51,4 +51,12 @@ public class Utils
 
         return property;
     }
+    
+    public static String getFileExt(String file) 
+    {
+        int loc = file.indexOf('.');
+        if ( loc == -1 ) return null;
+        
+        return file.substring(loc + 1).toLowerCase();
+    }
 }

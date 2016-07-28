@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessageWriter 
+public class MessageWriter
 {
 	private List<Message> writeQueue  = new ArrayList<>();
 	private Message messageInProgress = null;

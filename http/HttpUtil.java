@@ -222,6 +222,8 @@ public class HttpUtil
             System.arraycopy(message.sharedArray, metaData.bodyStartIndex, request.body, 0, metaData.contentLength);
         }
         
+        request.socketId = message.socketId;
+        
         return request;
     }
 }
