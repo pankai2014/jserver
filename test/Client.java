@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.core;
+package org.kaipan.www.socket.test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

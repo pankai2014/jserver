@@ -1,6 +1,10 @@
 package org.kaipan.www.socket.http;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.kaipan.www.socket.core.IMessageProcessor;
@@ -56,8 +60,47 @@ public class HttpMessageProcessor implements IMessageProcessor
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
+            
+            writeProxy.enqueue(message);
+            return;
 	    }
 	    
+	    Long length  = null;
+	    byte[] bytes = null;
+	    try {
+			FileInputStream in 	  	  = new FileInputStream(file);
+			BufferedInputStream inBuf = new BufferedInputStream(in);
+			
+			length = file.length();
+			bytes  = new byte[length.intValue()];
+			
+			while ( inBuf.read(bytes) != -1 );
+			
+			in.close();
+			
+		} 
+	    catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+	    response.setHttpStatus(200);
+	    response.setHeader("Content-Length", length.toString());
+	    
+	    try {
+			message.writeToMessage(response.getHeader().getBytes(config.charset()));
+			message.writeToMessage(bytes);
+		} 
+	    catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    
+	    socket.closeAfterWriting = true;
 	    writeProxy.enqueue(message);
 	}
 	
