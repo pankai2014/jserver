@@ -44,6 +44,33 @@ public class HttpResponse
         }
     };
     
+    public final static Map<String, String> HTTP_MIMES_TYPE = new HashMap<String, String>() 
+    {
+		private static final long serialVersionUID = 2L;
+
+		{
+    		put("jpg",  "image/jpeg");
+    		put("jpeg", "image/jpeg");
+    		put("bmp",  "image/bmp");
+    		put("ico",  "image/x-icon");
+    		put("gif",  "image/gif");
+    		put("png",  "image/png");
+    		put("bin",  "application/octet-stream");
+    		put("js",   "application/javascript");
+    		put("css",  "text/css");
+    		put("html", "text/html; charset=utf-8");
+    		put("xml",  "text/xml");
+    		put("tar",  "application/x-tar");
+    		put("ppt",  "application/vnd.ms-powerpoint");
+    		put("pdf",  "application/pdf");
+    		put("swf",  "application/x-shockwave-flash");
+    		put("zip",  "application/x-zip-compressed");
+    		put("gzip", "application/gzip");
+    		put("woff", "application/x-woff");
+    		put("svg",  "image/svg+xml");
+    	}
+    };
+    
     private String meta = null;
     
     public final static String protocol = "HTTP/1.1";

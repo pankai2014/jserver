@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.kaipan.www.socket.core.IMessageProcessor;
-import org.kaipan.www.socket.core.Log;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.WriteProxy;
@@ -54,7 +53,7 @@ public class HttpMessageProcessor implements IMessageProcessor
                 message.writeToMessage(response.getHeader().getBytes(config.charset()));
                 socket.closeAfterWriting = true;
                 
-                Log.write("response: \n" + new String(message.sharedArray, message.offset, message.length));
+                //Log.write("response: \n" + new String(message.sharedArray, message.offset, message.length));
             } 
             catch (UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
@@ -90,6 +89,7 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    
 	    response.setHttpStatus(200);
 	    response.setHeader("Content-Length", length.toString());
+	    response.setHeader("Content-Type", HttpResponse.HTTP_MIMES_TYPE.get(Utils.getFileExt(request.path)));
 	    
 	    try {
 			message.writeToMessage(response.getHeader().getBytes(config.charset()));
@@ -102,6 +102,8 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    
 	    socket.closeAfterWriting = true;
 	    writeProxy.enqueue(message);
+	    
+	    //Log.write("response: \n" + new String(message.sharedArray, message.offset, message.length));
 	}
 	
 	public void doDynamicRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
