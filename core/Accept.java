@@ -15,15 +15,16 @@ public class Accept implements Runnable
     @Override
     public void run()
     {
-        // TODO Auto-generated method stub
-        Lock lock = server.getLock();
-        lock.lock();
-        
-        try {
-            server.accept();
-        }
-        finally {
-            lock.unlock();
+        while ( true ) {
+        	Lock lock = server.getLock();
+            lock.lock();
+            
+            try {
+                server.accept();
+            }
+            finally {
+                lock.unlock();
+            }
         }
     }
 }

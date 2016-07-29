@@ -70,6 +70,9 @@ public class SocketProcessor
     {
         try {
             SocketChannel channel = socket.getSocketChannel();
+            
+            if ( ! channel.isOpen()) return;
+            
             channel.configureBlocking(false);
             SelectionKey  readKey = channel.register(readSelector, SelectionKey.OP_READ);
             
@@ -169,7 +172,7 @@ public class SocketProcessor
             		for ( Message message : fullMessages ) {
             			message.socketId = socket.getSocketId();
             			
-            			messageProcessor.process(message, writeProxy);
+            			messageProcessor.process(socket, message, writeProxy);
             		}
             	}
             	fullMessages.clear();
@@ -236,7 +239,13 @@ public class SocketProcessor
 					e.printStackTrace();
 				}
         		
-        		if ( messageWriter.isEmpty() ) {
+        		
+        		if  ( socket.closeAfterWriting == true ) {
+        			close(socket);
+        			
+        			Log.write("close client, socketId = " + socket.getSocketId());
+        		}
+        		else if ( messageWriter.isEmpty() ) {
         			nonEmptyToEmptySockets.add(socket);
         		}
         	}
@@ -245,6 +254,26 @@ public class SocketProcessor
         }
         
       selectedKeys.clear();
+    }
+    
+    private void close(Socket socket) 
+    {
+    	SocketChannel channel = socket.getSocketChannel();
+		SelectionKey readKey  = channel.keyFor(this.readSelector);
+		readKey.attach(null);
+		readKey.cancel();
+		
+		SelectionKey writeKey = channel.keyFor(this.writeSelector);
+		writeKey.attach(null);
+		writeKey.cancel();
+		
+		try {
+			channel.close();
+		} 
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     private void registerNonEmptySockets() throws ClosedChannelException 
@@ -261,6 +290,7 @@ public class SocketProcessor
         for ( Socket socket : nonEmptyToEmptySockets ) {
             SelectionKey writeKey = socket.getSocketChannel().keyFor(this.writeSelector);	// unregister from write selector
 
+            writeKey.attach(null);
             writeKey.cancel();
         }
         

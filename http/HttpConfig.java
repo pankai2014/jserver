@@ -4,8 +4,6 @@ import java.util.Properties;
 
 import org.kaipan.www.socket.core.IConfig;
 
-import com.sun.corba.se.spi.activation.Server;
-
 public class HttpConfig extends IConfig
 {
     private String root;

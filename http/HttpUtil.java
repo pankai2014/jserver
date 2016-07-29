@@ -22,7 +22,8 @@ public class HttpUtil
 	    
 	public static boolean prepare(byte[] src, int offset, int length, HttpHeader metaData) 
 	{
-		int endOfHeader = findNextLineBreak(src, offset, length);
+		int endIndex    = offset + length;
+		int endOfHeader = findNextLineBreak(src, offset, endIndex);
 		
 		if ( endOfHeader == -1 ) return false;
 		resolveHttpMethod(src, offset, metaData);
@@ -33,7 +34,7 @@ public class HttpUtil
 		    // whether endOfHeader has reached the position of "\r\n\r\n"
 		    metaData.endOfHeader = endOfHeader + 2;
 		    
-			if (  metaData.endOfHeader < length ) { 
+			if (  metaData.endOfHeader <= endIndex ) { 
 				if ( src[endOfHeader + 1] == '\r' 
 						&& src[ metaData.endOfHeader] == '\n' ) {
 				    headerComplete = true;
@@ -44,7 +45,7 @@ public class HttpUtil
 			int prevEndOfHeader = endOfHeader + 1;
 			
 			//metaData.headerBreakPos.add(new Integer(endOfHeader));
-			endOfHeader = findNextLineBreak(src, prevEndOfHeader,  length);
+			endOfHeader = findNextLineBreak(src, prevEndOfHeader,  endIndex);
 			
 	        if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST
 	                && matches(src, prevEndOfHeader, CONTENT_LENGTH) ) {

@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import org.kaipan.www.socket.core.IMessageProcessor;
 import org.kaipan.www.socket.core.Log;
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.WriteProxy;
 import org.kaipan.www.socket.util.Utils;
 
@@ -19,20 +20,20 @@ public class HttpMessageProcessor implements IMessageProcessor
 	}
 	
 	@Override
-	public void process(Message message, WriteProxy writeProxy) 
+	public void process(Socket socket, Message message, WriteProxy writeProxy) 
 	{
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
         if ( config.staticExt().contains(Utils.getFileExt(request.path)) ) {
-            doStaticRequest(request, writeProxy);
+            doStaticRequest(socket, request, writeProxy);
             return;
         }
         
-        doDynamicRequest(request, writeProxy);
+        doDynamicRequest(socket, request, writeProxy);
 	}
 	
-	public void doStaticRequest(HttpRequest request, WriteProxy writeProxy) 
+	public void doStaticRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
 	{
 	    Message    message    = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
@@ -47,8 +48,9 @@ public class HttpMessageProcessor implements IMessageProcessor
 	        
             try {
                 message.writeToMessage(response.getHeader().getBytes(config.charset()));
+                socket.closeAfterWriting = true;
                 
-                Log.write("server response: \n" + new String(message.sharedArray, message.offset, message.length));
+                Log.write("response: \n" + new String(message.sharedArray, message.offset, message.length));
             } 
             catch (UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
@@ -59,7 +61,7 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    writeProxy.enqueue(message);
 	}
 	
-	public void doDynamicRequest(HttpRequest request, WriteProxy writeProxy) 
+	public void doDynamicRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
 	{
 		
 	}

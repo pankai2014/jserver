@@ -43,6 +43,8 @@ public class MessageWriter
                 this.messageInProgress = null;
                 //todo unregister from selector
             }
+            
+            this.bytesWritten = 0;
         }
         else {
         	// maybe byteBuffer.length less than (this.messageInProgress.length - this.bytesWritten)

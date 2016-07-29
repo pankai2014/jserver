@@ -45,7 +45,6 @@ public class HttpMessageReader implements IMessageReader
         byteBuffer.flip();
         
         // TODO Reading data exceeds 1M
-        nextMessage.socketId = socket.getSocketId();
         nextMessage.writeToMessage(byteBuffer);
         
         // body isn't complete
@@ -70,6 +69,7 @@ public class HttpMessageReader implements IMessageReader
         
         HttpHeader metaData   = (HttpHeader)nextMessage.metaData;
         buffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, nextMessage.offset, nextMessage.length, metaData);
+        //System.out.println(new String(nextMessage.sharedArray, nextMessage.offset, nextMessage.length) );
         
         Log.write("head completed yet ? : " + buffer.headerComplete);
         
