@@ -11,6 +11,8 @@ public class HttpConfig extends IConfig
     private String charset    = null;
     private String static_ext = null;
     
+    private int post_maxsize;
+    
     public HttpConfig() 
     {
         
@@ -46,12 +48,16 @@ public class HttpConfig extends IConfig
             }  
         }
         
-        if ( property.getProperty("server.charset") != null ) {
-            this.charset = property.getProperty("server.charset");
-        }
-        
         if ( property.getProperty("server.static_ext") != null ) {
             this.static_ext = property.getProperty("server.static_ext");
+        }
+        
+        if ( property.getProperty("server.post_maxsize") != null ) {
+            this.post_maxsize = Integer.parseInt(property.getProperty("server.post_maxsize", "4194304"));
+        }
+        
+        if ( property.getProperty("server.charset") != null ) {
+            this.charset = property.getProperty("server.charset");
         }
     }
     
@@ -60,13 +66,18 @@ public class HttpConfig extends IConfig
         return root;
     }
     
-    public String charset() 
-    {
-        return charset;
-    }
-    
     public String staticExt() 
     {
         return static_ext;
+    }
+    
+    public int postMaxSize() 
+    {
+        return post_maxsize;
+    }
+    
+    public String charset() 
+    {
+        return charset;
     }
 }
