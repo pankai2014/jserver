@@ -65,6 +65,11 @@ public class Socket
     	this.socketId = socketId;
     }
     
+    public void setSocketChannel(SocketChannel sockChannel) 
+    {
+    	this.socketChannel = sockChannel;
+    }
+    
     public void setMessageReader(IMessageReader messageReader) 
     {
     	this.messageReader = messageReader;

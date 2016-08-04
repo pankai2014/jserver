@@ -19,7 +19,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class SocketProcessor
 {
 	private Queue<Socket>  inSocketQueue   		= new ArrayBlockingQueue<Socket>(1024);
-    private Queue<Message> outboundMessageQueue = new LinkedList<>();   //todo use a better / faster queue.
+    private Queue<Message> outboundMessageQueue = new LinkedList<>();   //todo use a better / faster queue, thread not safe
     
     private Map<Long, Socket> socketMap         = new HashMap<>();
     
@@ -239,7 +239,6 @@ public class SocketProcessor
 					e.printStackTrace();
 				}
         		
-        		
         		if  ( socket.closeAfterWriting == true ) {
         			close(socket);
         			
@@ -338,7 +337,7 @@ public class SocketProcessor
             executeCycle();
             
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } 
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block

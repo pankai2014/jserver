@@ -4,16 +4,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 
 public class Client
 {
-    private String host = null;
-    
-    private int port;
-    private int connectTimeOut = 5;
-    
-    private Socket client = null;
-    
     public final static int VERSION           = 1;
     
     public final static int BEGIN_REQUEST     = 1;
@@ -32,6 +26,16 @@ public class Client
     public final static int ROLE_RESPONDER    = 1;
     public final static int ROLE_AUTHORIZER   = 2;
     public final static int ROLE_FILTER       = 3;
+    
+    private String host = null;
+    
+    private int port;
+    private int connectTimeOut   = 5000;
+    private int readWriteTimeOut = 5000;
+    
+    private boolean keepAlive = false;
+    
+    private Socket client = null;
     
     public Client(String host, int port) 
     {
@@ -57,13 +61,11 @@ public class Client
     {
         int requestId = 1;
         
-        //buildPacket(Client.BEGIN_REQUEST, , requestId);
+        buildPacket(requestId);
     }
     
-    public void buidPacket(int type, byte[] content, int requestId) 
+    public void buildPacket(int requestId) 
     {
-        int clen = content.length;
-        
-        
+    	
     }
 }
