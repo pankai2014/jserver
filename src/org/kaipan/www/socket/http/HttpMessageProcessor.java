@@ -100,6 +100,8 @@ public class HttpMessageProcessor implements IMessageProcessor
 			e1.printStackTrace();
 		}
 	    
+	    bytes = null;
+	    
 	    socket.closeAfterWriting = true;
 	    writeProxy.enqueue(message);
 	    
