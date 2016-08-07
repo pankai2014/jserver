@@ -28,12 +28,15 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
-        if ( config.staticExt().contains(Utils.getFileExt(request.path)) ) {
+        String ext  = Utils.getFileExt(request.path);
+        
+        if ( config.staticExt().contains(ext) ) {
             doStaticRequest(socket, request, writeProxy);
             return;
         }
-        
-        doDynamicRequest(socket, request, writeProxy);
+        else if ( config.dynamicExt().contains(ext) ) {
+        	doDynamicRequest(socket, request, writeProxy);
+        }
 	}
 	
 	public void doStaticRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
@@ -110,6 +113,11 @@ public class HttpMessageProcessor implements IMessageProcessor
 	
 	public void doDynamicRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
 	{
-		
+		Message    message    = writeProxy.getMessage();
+	    HttpResponse response = new HttpResponse();
+	    
+	    message.socketId    = request.socketId;
+	    
+	    String absolutePath = config.root() + request.path;
 	}
 }

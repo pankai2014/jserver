@@ -169,7 +169,6 @@ public class Client
     	     for ( Map.Entry<String, String> entry : params.entrySet() ) {
     	        buildNvpair(entry.getKey(), entry.getValue());
     	     }
-    	     
     	}
     	
     	readBytesBuffer.flip();
@@ -233,32 +232,38 @@ public class Client
     
     private int readPacket()
     {
-    	int clen   = 0;
-    	int length = 0;
+    	int totalBytesRead = 0;
     	
     	try {
+    		int bytesRead = 0;
+    		
             InputStream inStream       = client.getInputStream();
             BufferedInputStream  inBuf = new BufferedInputStream(inStream);
             
-            while ( (clen = inBuf.read(readBytes)) != -1 ) {
-            	length += clen;
+            bytesRead = inBuf.read(readBytes);
+            while ( bytesRead > 0 ) {
+            	totalBytesRead += bytesRead;
+            	
+            	bytesRead = inBuf.read(readBytes);
             }
             
-            client.close();
+            if ( bytesRead == -1 ) {
+            	client.close();
+            }
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     	
-    	return length;
+    	return totalBytesRead;
     }
     
-    public void waitForResponse(int requestId) 
+    public Message waitForResponse(int requestId) 
     {
-        int length = this.readPacket();
+        int totalBytesRead = this.readPacket();
         
-        for ( int i = 0; i < length; ) {
+        for ( int i = 0; i < totalBytesRead; ) {
         	int responseId     = ((readBytes[i + 2] << 8) & 0xFFFF) + ((readBytes[i + 3]) & 0xFF); 	// byte will be forced to transfer to int when calculating(!!!)
         	
         	if ( responseId != requestId ) continue;
@@ -290,12 +295,16 @@ public class Client
         writeBytesBuffer.flip();
         System.out.println(new String(writeBytesBuffer.array(), 0, writeBytesBuffer.remaining()));
         
+        message.length = 0;
+        message.writeToMessage(writeBytesBuffer);
         
         readBytesBuffer.clear();
         writeBytesBuffer.clear();
         
         readBytesBuffer  = null;
         writeBytesBuffer = null;
+        
+        return message;
     }
     
     public static void main(String[] args) 
