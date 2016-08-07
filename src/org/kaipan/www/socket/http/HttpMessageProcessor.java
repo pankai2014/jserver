@@ -6,11 +6,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.kaipan.www.socket.core.IMessageProcessor;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.WriteProxy;
+import org.kaipan.www.socket.fastcgi.Client;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpMessageProcessor implements IMessageProcessor
@@ -28,11 +31,10 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
-        String ext  = Utils.getFileExt(request.path);
+        String ext = Utils.getFileExt(request.path);
         
         if ( config.staticExt().contains(ext) ) {
             doStaticRequest(socket, request, writeProxy);
-            return;
         }
         else if ( config.dynamicExt().contains(ext) ) {
         	doDynamicRequest(socket, request, writeProxy);
@@ -44,7 +46,7 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    Message    message    = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
 	    
-	    message.socketId    = request.socketId;
+	    message.socketId    = request.socketId;		// must be set!!!
 	    
 	    String absolutePath = config.root() + request.path;
 	   
@@ -113,11 +115,71 @@ public class HttpMessageProcessor implements IMessageProcessor
 	
 	public void doDynamicRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
 	{
-		Message    message    = writeProxy.getMessage();
+		Message   message     = writeProxy.getMessage();
+		Message   nextMessage = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
 	    
-	    message.socketId    = request.socketId;
+	    nextMessage.socketId  = request.socketId;	// must be set!!!
 	    
-	    String absolutePath = config.root() + request.path;
+	    String absolutePath = config.fastcgiRoot() + request.path;
+	    
+	    Client fastCgiClient = new Client(config.fastcgiHost(), config.fastcgiPort());
+	    fastCgiClient.initialize(message);
+	    
+	    Map<String, String> params = new HashMap<>();
+        
+        params.put("GATEWAY_INTERFACE", "FastCGI/1.0");
+        params.put("REQUEST_METHOD", "GET");
+        
+        params.put("SCRIPT_FILENAME", absolutePath);
+        
+        params.put("SCRIPT_NAME", request.path);
+        params.put("QUERY_STRING", "");
+        
+        params.put("REQUEST_URI", request.path);
+        params.put("DOCUMENT_URI", request.path);
+        params.put("SERVER_SOFTWARE", "php/fcgiclient");
+        
+        params.put("REMOTE_ADDR", config.fastcgiHost());
+        params.put("REMOTE_PORT", config.fastcgiPort() + "");
+        
+        params.put("SERVER_ADDR", config.host());
+        params.put("SERVER_PORT", config.port() + "");
+        
+        params.put("SERVER_NAME", "Will");
+        params.put("SERVER_PROTOCOL", "HTTP/1.1");
+        
+        params.put("CONTENT_TYPE", "");
+        params.put("CONTENT_LENGTH", "0");
+	    
+        int requestId = fastCgiClient.request(params, null);
+        
+	    fastCgiClient.waitForResponse(requestId);
+	    
+	    response.setHttpStatus(200);
+	    
+	    int endOfHeader;
+	    while ( true ) {
+	    	endOfHeader= HttpUtil.findNextLineBreak(message.sharedArray, 0, message.length);
+	    	if ( endOfHeader != -1 ) break;
+	    }
+	    int LengthOfHeader = endOfHeader + 1;
+	    
+	    response.setHeader("Content-Length", (message.length - LengthOfHeader) + "");
+	    //response.setHeader("Content-Type", new String(message.sharedArray, 0, LengthOfHeader));
+	    
+	    try {
+	    	nextMessage.writeToMessage(response.getHeader().getBytes(config.charset()));
+	    	nextMessage.writeToMessage(message.sharedArray, message.offset + LengthOfHeader, message.length - LengthOfHeader);
+		} 
+	    catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	    
+	    //System.out.println(new String(nextMessage.sharedArray, nextMessage.offset, nextMessage.length));
+	    
+	    socket.closeAfterWriting = true;
+	    writeProxy.enqueue(nextMessage);
 	}
 }

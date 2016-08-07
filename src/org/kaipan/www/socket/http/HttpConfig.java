@@ -6,14 +6,17 @@ import org.kaipan.www.socket.core.IConfig;
 
 public class HttpConfig extends IConfig
 {
-    private String root;
+    private String root = "/";
     
     private String static_ext  = null;
     private String dynamic_ext = null;
+    private int    post_maxsize;
     
-    private int post_maxsize;
+    private String fastcgi_root = "/";
+    private String fastcgi_host = "127.0.0.1";
+    private int    fastcgi_port = 9000;
     
-    private String charset    = null;
+    private String charset = "UTF-8";
     
     public HttpConfig() 
     {
@@ -62,6 +65,18 @@ public class HttpConfig extends IConfig
             this.post_maxsize = Integer.parseInt(property.getProperty("server.post_maxsize", "4194304"));
         }
         
+        if ( property.getProperty("server.fastcgi_root") != null ) {
+            this.fastcgi_root = property.getProperty("server.fastcgi_root");
+        }
+        
+        if ( property.getProperty("server.fastcgi_bind") != null ) {
+            this.fastcgi_host = property.getProperty("server.fastcgi_bind");
+        }
+        
+        if ( property.getProperty("server.fastcgi_port") != null ) {
+            this.fastcgi_port = Integer.parseInt(property.getProperty("server.fastcgi_port"));
+        }
+        
         if ( property.getProperty("server.charset") != null ) {
             this.charset = property.getProperty("server.charset");
         }
@@ -80,6 +95,21 @@ public class HttpConfig extends IConfig
     public String dynamicExt() 
     {
         return dynamic_ext;
+    }
+    
+    public String fastcgiRoot() 
+    {
+    	return fastcgi_root;
+    }
+    
+    public String fastcgiHost() 
+    {
+    	return fastcgi_host;
+    }
+    
+    public int fastcgiPort() 
+    {
+    	return fastcgi_port;
     }
     
     public int postMaxSize() 

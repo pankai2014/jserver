@@ -45,9 +45,9 @@ public class Client
     private int connectTimeOut   = 5000;
     private int readWriteTimeOut = 5000;
     
-    private byte[]	   readBytes		= new byte[65535];	
-    private ByteBuffer readBytesBuffer  = ByteBuffer.wrap(readBytes);
-    private ByteBuffer writeBytesBuffer = ByteBuffer.allocate(65535);
+    public byte[]	   readBytes	   = new byte[65535];	
+    public ByteBuffer readBytesBuffer  = ByteBuffer.wrap(readBytes);
+    public ByteBuffer writeBytesBuffer = ByteBuffer.allocate(65535);
     
     private Socket  client  = null;
     private Message message = null;
@@ -85,19 +85,19 @@ public class Client
     public static int random() 
     {
         int min = 1;
-        int max = (1 << 16) - 1;    // 65535
+        int max = (1 << 16) - 1;    // 65535,  two byte
         
         Random random = new Random();
 
         return random.nextInt(max) % (max - min + 1) + min;
     }
     
-    public void request(Map<String, String> params, byte[] stdin) 
+    public int request(Map<String, String> params, byte[] stdin) 
     {
         connect();
         
         int requestId = random();
-        System.out.println("requestId: " + requestId);
+        //System.out.println("requestId: " + requestId);
         
         builStartPacket(requestId);
         
@@ -125,7 +125,7 @@ public class Client
             e.printStackTrace();
         }
         
-        waitForResponse(requestId);
+        return requestId;
     }
     
     private void addHeader(int requestId, int type, int clen) 
@@ -230,70 +230,116 @@ public class Client
         readBytesBuffer.put(value.getBytes());
     }
     
-    private int readPacket()
+    private Map<String, Integer> decodePacketHeader() 
     {
-    	int totalBytesRead = 0;
+    	Map<String, Integer> ret = new HashMap<>();
     	
-    	try {
-    		int bytesRead = 0;
-    		
-            InputStream inStream       = client.getInputStream();
-            BufferedInputStream  inBuf = new BufferedInputStream(inStream);
-            
-            bytesRead = inBuf.read(readBytes);
-            while ( bytesRead > 0 ) {
-            	totalBytesRead += bytesRead;
-            	
-            	bytesRead = inBuf.read(readBytes);
-            }
-            
-            if ( bytesRead == -1 ) {
-            	client.close();
-            }
-        } 
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    	int version 	   = ((readBytes[0] & 0xFF));
+    	int type    	   = ((readBytes[1] & 0xFF));
+
+    	int responseId     = ((readBytes[2] << 8) & 0xFFFF) + ((readBytes[3]) & 0xFF); 	// byte will be forced to transfer to int when calculating(!!!)
+    	int contentLength  = ((readBytes[4] << 8) & 0xFFFF) + ((readBytes[5]) & 0xFF); 	// bytes[2] & 0xFF, bytes[4] & 0xFF, (& 0xFF or & oxFFFF) must be set in last
+    	int paddingLength  = ((readBytes[6] & 0xFF));
+    	int reserved 	   = ((readBytes[7] & 0xFF));
     	
-    	return totalBytesRead;
+    	ret.put("Version", 		 version);
+    	ret.put("Type", 		 type);
+    	ret.put("ResponseId",    responseId);
+    	ret.put("ContentLength", contentLength);
+    	ret.put("PaddingLength", paddingLength);
+    	ret.put("Reserved", 	 reserved);
+    	
+    	//System.out.println(ret);
+    	return ret;
     }
     
-    public Message waitForResponse(int requestId) 
+    private int read(BufferedInputStream inBuf, int offset, int length) 
     {
-        int totalBytesRead = this.readPacket();
-        
-        for ( int i = 0; i < totalBytesRead; ) {
-        	int responseId     = ((readBytes[i + 2] << 8) & 0xFFFF) + ((readBytes[i + 3]) & 0xFF); 	// byte will be forced to transfer to int when calculating(!!!)
-        	
-        	if ( responseId != requestId ) continue;
-        	
-        	//int version 	   = ((readBytes[i] & 0xFF));
-        	int type    	   = ((readBytes[i + 1] & 0xFF));
-
-        	int contentLength  = ((readBytes[i + 4] << 8) & 0xFFFF) + ((readBytes[i + 5]) & 0xFF); 	// bytes[2] & 0xFF, bytes[4] & 0xFF, (& 0xFF or & oxFFFF) must be set in last
-        	int paddingLength  = ((readBytes[i + 6] & 0xFF));
-        	//int reserved 	   = ((readBytes[i + 7] & 0xFF));
-        	
-        	switch ( type ) {
-        		case STDOUT:
-        			writeBytesBuffer.put(readBytes, i + HEADER_LEN, contentLength);
-        			break;
-        		case GET_VALUES_RESULT:	
-        			break;
-        		case STDERR:
-        			break;
-        		case END_REQUEST:
-        		case UNKNOWN:	
-        			break;
-        	}
-        	
-        	i += HEADER_LEN + contentLength + paddingLength;
+    	int bytesRead = 0;
+    	
+    	while ( length > 0 ) {
+          	try {
+				bytesRead = inBuf.read(readBytes, offset, length);
+			} 
+          	catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+          	}
+          	
+            if ( bytesRead == -1 ) {
+            	try {
+					client.close();
+				} 
+            	catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	return -1;
+            }
+            length -=  bytesRead;
         }
+    	
+    	return length;
+    }
+    
+    private Map<String, Integer> readPacket(BufferedInputStream inBuf)
+    {
+    	Map<String, Integer> ret = null;
+    	
+		int bytesRead;
+		
+        bytesRead = read(inBuf, 0, HEADER_LEN);
+        if ( bytesRead == -1 ) return null;
         
-        //System.out.println(writeBytesBuffer);
+        ret = decodePacketHeader();
+        
+        int clen = ret.get("ContentLength").intValue();
+        bytesRead = read(inBuf, HEADER_LEN, clen);
+        if ( bytesRead == -1 ) return null;
+        
+        int plen  = ret.get("PaddingLength").intValue();
+        bytesRead = read(inBuf, HEADER_LEN + clen, plen);
+        if ( bytesRead == -1 ) return null;
+    	
+    	return ret;
+    }
+    
+    public void waitForResponse(int requestId) 
+    {
+    	InputStream inStream;
+    	BufferedInputStream inBufStream = null;
+		try {
+			inStream 	= client.getInputStream();
+			inBufStream = new BufferedInputStream(inStream);
+		} 
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+        start:
+    	do {
+    		Map<String, Integer> ret = readPacket(inBufStream);
+    		
+    		if ( ret == null ) break;
+    		
+    		switch ( ret.get("Type").intValue() ) {
+	    		case STDOUT:
+	    			writeBytesBuffer.put(readBytes, HEADER_LEN, ret.get("ContentLength").intValue());
+	    			readBytesBuffer.clear();
+	    			break;
+	    		case GET_VALUES_RESULT:	
+	    			break;
+	    		case STDERR:
+	    		case END_REQUEST:
+	    		case UNKNOWN:	
+	    			break start;
+    		}
+    		
+    	} while ( true );
+        
         writeBytesBuffer.flip();
-        System.out.println(new String(writeBytesBuffer.array(), 0, writeBytesBuffer.remaining()));
+        //System.out.println(new String(writeBytesBuffer.array(), 0, writeBytesBuffer.remaining()));
         
         message.length = 0;
         message.writeToMessage(writeBytesBuffer);
@@ -301,10 +347,15 @@ public class Client
         readBytesBuffer.clear();
         writeBytesBuffer.clear();
         
-        readBytesBuffer  = null;
-        writeBytesBuffer = null;
-        
-        return message;
+        //readBytesBuffer  = null;
+        //writeBytesBuffer = null;
+        try {
+			client.close();
+		} 
+        catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     public static void main(String[] args) 
@@ -340,6 +391,8 @@ public class Client
         params.put("CONTENT_TYPE", "");
         params.put("CONTENT_LENGTH", "0");
         
-        client.request(params, null);
+        int requestId = client.request(params, null);
+        
+        client.waitForResponse(requestId);
     }
 }
