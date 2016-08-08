@@ -3,7 +3,7 @@ I.  实现HTTP协议
 
 II. 实现FASTCGI协议
 
-#运行http服务器
+#运行HTTP服务器
 ##运行开发包下jar文件
 java -jar http-server-version-{version}.jar  <br />
 
