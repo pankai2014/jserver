@@ -1,7 +1,7 @@
 #JAVA服务器基于JAVA NIO
-I.  实现HTTP协议(服务器端已实现)
+I.  实现HTTP协议
 
-II. 实现FASTCGI协议(客户端已实现,可以调用PHP-FPM)
+II. 实现FASTCGI协议
 
 #运行http服务器
 ##运行开发包下jar文件
@@ -38,9 +38,9 @@ server.fastcgi_index = index.php                                &nbsp;&nbsp;&nbs
 server.charset = UTF-8
 
 # 待开发功能
-I. HTTP加密->HTTPS(未实现)
+I. HTTP加密->HTTPS
 
-II.实现WEBSOCKET(未实现)
+II.实现WEBSOCKET
 
 # 联系作者
 will&lt;pan.kai@icloud.com&gt;
