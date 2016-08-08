@@ -12,7 +12,7 @@ IV.实现WEBSOCKET(未实现)
 java -jar http-server-version-{version}.jar
 
 ##配置文件路径
-开发包下java-server.properties
+开发包下http-server.properties
 
 #HTTP服务器配置
 ## Web document root directory
