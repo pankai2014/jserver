@@ -19,8 +19,8 @@ java -jar http-server-version-{version}.jar
 server.root = /home/will/Develop/www          &nbsp;&nbsp;&nbsp;//静态目录
 
 ## HTTP port to listen on
-server.bind  = 0.0.0.0                        &nbsp;&nbsp;&nbsp;//服务器监IP　  
-server.port  = 8080                           &nbsp;&nbsp;&nbsp;//服务器监PORT  
+server.bind  = 0.0.0.0                        &nbsp;&nbsp;&nbsp;//服务器监听IP　  
+server.port  = 8080                           &nbsp;&nbsp;&nbsp;//服务器监听PORT  
 server.index = index.html                     &nbsp;&nbsp;&nbsp;//服务器访问默认静态文件 
 
 ## Web static file extension
@@ -33,8 +33,8 @@ server.dynamic_ext = php
 server.post_maxsize = 4194304
 
 server.fastcgi_root  = /home/will/Develop/projects/app/www      &nbsp;&nbsp;&nbsp;//动态脚本目录<br />
-server.fastcgi_bind  = 127.0.0.1                                <br />
-server.fastcgi_port  = 9000                                     <br />
+server.fastcgi_bind  = 127.0.0.1                                &nbsp;&nbsp;&nbsp;//PHP-FPM运行IP<br />
+server.fastcgi_port  = 9000                                     &nbsp;&nbsp;&nbsp;//PHP-FRM运行PORT<br />
 server.fastcgi_index = index.php                                &nbsp;&nbsp;&nbsp;//服务器访问默认动态文件<br/>
 
 ## Encoding
