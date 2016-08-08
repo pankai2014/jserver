@@ -5,7 +5,10 @@ II. 实现FASTCGI协议
 
 #运行http服务器
 ##运行开发包下jar文件
-java -jar http-server-version-{version}.jar
+java -jar http-server-version-{version}.jar  <br />
+
+##源码编译
+编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java
 
 ##配置文件路径
 开发包下http-server.properties
