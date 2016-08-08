@@ -18,6 +18,8 @@ server.index = index.html
 
 ## Web static file extension
 server.static_ext  = html,htm,xhtml,shtml,shtm,jpg,jpeg,png,gif,bmp,ico,js,css,bin,xml,tar,ppt,pdf,swf,zip,gzip,woff,svg
+
+## Web dynamic file extension
 server.dynamic_ext = php 
 
 ## Max post size, default 4M
