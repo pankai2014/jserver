@@ -3,10 +3,6 @@ I.  实现HTTP协议(服务器端已实现)
 
 II. 实现FASTCGI协议(客户端已实现,可以调用PHP-FPM)
 
-III. HTTP加密->HTTPS(未实现)
-
-IV.实现WEBSOCKET(未实现)
-
 #运行http服务器
 ##运行开发包下jar文件
 java -jar http-server-version-{version}.jar
@@ -40,6 +36,11 @@ server.fastcgi_index = index.php                                &nbsp;&nbsp;&nbs
 
 ## Encoding
 server.charset = UTF-8
+
+# 待开发功能
+I. HTTP加密->HTTPS(未实现)
+
+II.实现WEBSOCKET(未实现)
 
 # 联系作者
 will&lt;pan.kai@icloud.com&gt;
