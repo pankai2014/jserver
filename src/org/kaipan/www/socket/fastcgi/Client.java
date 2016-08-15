@@ -253,13 +253,13 @@ public class Client
     	return ret;
     }
     
-    private int read(BufferedInputStream inBuf, int offset, int length) 
+    private int read(BufferedInputStream is, int offset, int length) 
     {
     	int bytesRead = 0;
     	
     	while ( length > 0 ) {
           	try {
-				bytesRead = inBuf.read(readBytes, offset, length);
+				bytesRead = is.read(readBytes, offset, length);
 			} 
           	catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -282,23 +282,23 @@ public class Client
     	return length;
     }
     
-    private Map<String, Integer> readPacket(BufferedInputStream inBuf)
+    private Map<String, Integer> readPacket(BufferedInputStream is)
     {
     	Map<String, Integer> ret = null;
     	
 		int bytesRead;
 		
-        bytesRead = read(inBuf, 0, HEADER_LEN);
+        bytesRead = read(is, 0, HEADER_LEN);
         if ( bytesRead == -1 ) return null;
         
         ret = decodePacketHeader();
         
         int clen = ret.get("ContentLength").intValue();
-        bytesRead = read(inBuf, HEADER_LEN, clen);
+        bytesRead = read(is, HEADER_LEN, clen);
         if ( bytesRead == -1 ) return null;
         
         int plen  = ret.get("PaddingLength").intValue();
-        bytesRead = read(inBuf, HEADER_LEN + clen, plen);
+        bytesRead = read(is, HEADER_LEN + clen, plen);
         if ( bytesRead == -1 ) return null;
     	
     	return ret;

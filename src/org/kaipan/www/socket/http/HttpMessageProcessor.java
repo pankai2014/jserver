@@ -72,13 +72,13 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    Long length  = null;
 	    byte[] bytes = null;
 	    try {
-			FileInputStream in 	  	  = new FileInputStream(file);
-			BufferedInputStream inBuf = new BufferedInputStream(in);
+			FileInputStream in 	  = new FileInputStream(file);
+			BufferedInputStream is = new BufferedInputStream(in);
 			
 			length = file.length();
 			bytes  = new byte[length.intValue()];
 			
-			while ( inBuf.read(bytes) != -1 );
+			while ( is.read(bytes) != -1 );
 			
 			in.close();
 			
