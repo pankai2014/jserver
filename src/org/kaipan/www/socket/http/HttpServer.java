@@ -3,11 +3,11 @@ package org.kaipan.www.socket.http;
 import java.util.Properties;
 
 import org.kaipan.www.socket.core.MessageBuffer;
-import org.kaipan.www.socket.core.Server;
+import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.util.Utils;
 
-public class HttpServer extends Server
+public class HttpServer extends IServer
 {
     public HttpServer(HttpConfig config)
     {

@@ -8,7 +8,7 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class Server
+public abstract class IServer
 {	
     protected IConfig iconfig = null;
     
@@ -19,7 +19,7 @@ public abstract class Server
     
     private Lock lock = new ReentrantLock();
     
-    protected Server(IConfig iconfig)
+    protected IServer(IConfig iconfig)
     {
         this.iconfig = iconfig;
         

@@ -69,8 +69,8 @@ public class HttpConfig extends IConfig
             this.fastcgi_root = property.getProperty("server.fastcgi_root");
         }
         
-        if ( property.getProperty("server.fastcgi_bind") != null ) {
-            this.fastcgi_host = property.getProperty("server.fastcgi_bind");
+        if ( property.getProperty("server.fastcgi_host") != null ) {
+            this.fastcgi_host = property.getProperty("server.fastcgi_host");
         }
         
         if ( property.getProperty("server.fastcgi_port") != null ) {

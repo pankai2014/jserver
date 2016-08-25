@@ -12,13 +12,13 @@ import java.net.UnknownHostException;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocketFactory;
 
-public class SslClient 
+public class SslSocketClient 
 {
 	private Socket socket;
 	
 	public static final int HTTPS_PORT = 443;
 	
-	public SslClient(String hostname) 
+	public SslSocketClient(String hostname) 
 	{
 		SocketFactory factory = SSLSocketFactory.getDefault();
 		
@@ -77,7 +77,7 @@ public class SslClient
 			hostname = args[0];
 		}
 
-		SslClient client = new SslClient(hostname);
+		SslSocketClient client = new SslSocketClient(hostname);
 		client.request();
 	}
 }

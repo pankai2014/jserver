@@ -33,7 +33,7 @@ server.post_maxsize = 4194304
 
 ## FastCgi config
 server.fastcgi_root  = /home/will/Develop/projects/app/www      &nbsp;&nbsp;&nbsp;//动态脚本目录<br />
-server.fastcgi_bind  = 127.0.0.1                                &nbsp;&nbsp;&nbsp;//PHP-FPM运行IP<br />
+server.fastcgi_host  = 127.0.0.1                                &nbsp;&nbsp;&nbsp;//PHP-FPM运行IP<br />
 server.fastcgi_port  = 9000                                     &nbsp;&nbsp;&nbsp;//PHP-FRM运行PORT<br />
 server.fastcgi_index = index.php                                &nbsp;&nbsp;&nbsp;//服务器访问默认动态文件<br/>
 

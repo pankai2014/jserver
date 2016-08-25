@@ -5,9 +5,9 @@ import java.util.concurrent.locks.Lock;
 public class Accept implements Runnable
 {
 
-    private Server server = null;
+    private IServer server = null;
     
-    public Accept(Server server) 
+    public Accept(IServer server) 
     {
         this.server = server;
     }
