@@ -3,7 +3,9 @@ package org.kaipan.www.socket.test;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -14,6 +16,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -33,20 +37,22 @@ public class SslServer
     private static String[] protocols    = null;
     private static String[] cipherSuites = null;
     
-    private final ByteBuffer encryptedIn;
-    private final ByteBuffer encryptedOut;
-    private final ByteBuffer decryptedIn;
-    private final ByteBuffer decryptedOut;
+    private ByteBuffer encryptedIn;
+    private ByteBuffer encryptedOut;
+    private ByteBuffer decryptedIn;
+    private ByteBuffer decryptedOut;
     
     private volatile boolean taskPending = false;
     
-    private boolean singleThreaded = false;
+    private boolean singleThreaded = true;
+    
+    private Selector selector = null;
     
     private SocketChannel socketChannel;
     
     private void initalize() 
     {
-        protocols        = "SSLv3 TLSv1.2".split(" ");
+        protocols        = "SSLv3 TLSv1".split(" ");
         
         cipherSuites     = new String[14];
         cipherSuites[0]  = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256";
@@ -69,7 +75,12 @@ public class SslServer
     {
         initalize();
         
+        setupSSL();
+        
         try {
+            
+            selector = Selector.open();
+            
             ServerSocketChannel serverChannel = ServerSocketChannel.open();
             
             serverChannel.bind(new InetSocketAddress("127.0.0.1", 8080));
@@ -77,23 +88,28 @@ public class SslServer
             System.out.println("listen 127.0.0.1/8080...");
             
             socketChannel = serverChannel.accept();
+            
+            socketChannel.configureBlocking(false);
+            SelectionKey selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
+            
+            selectionKey.attach(socketChannel);
+            
+            if ( socketChannel.finishConnect() ) {
+                setupEngine();
+                
+                int appBufSize = engine.getSession().getApplicationBufferSize();
+                int netBufSize = engine.getSession().getPacketBufferSize();
+                
+                decryptedIn  = ByteBuffer.allocate(appBufSize);
+                decryptedOut = ByteBuffer.allocate(appBufSize);
+                encryptedIn  = ByteBuffer.allocate(netBufSize);
+                encryptedOut = ByteBuffer.allocate(netBufSize);
+            }
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        setupSSL();
-        
-        setupEngine();
-        
-        int appBufSize = engine.getSession().getApplicationBufferSize();
-        int netBufSize = engine.getSession().getPacketBufferSize();
-        
-        decryptedIn  = ByteBuffer.allocate(appBufSize);
-        decryptedOut = ByteBuffer.allocate(appBufSize);
-        encryptedIn  = ByteBuffer.allocate(netBufSize);
-        encryptedOut = ByteBuffer.allocate(netBufSize);
     }
     
     private void setupSSL()
@@ -193,17 +209,31 @@ public class SslServer
                 result = engine.unwrap(encryptedIn, decryptedIn);
                 
                 //decryptedIn.flip();
-                System.out.println(decryptedIn.position());
+                //System.out.println(decryptedIn.position());
                 //System.out.println(decryptedIn.limit());
                 //System.out.println(decryptedIn.capacity());
                 
-                encryptedIn.compact();
+                if ( result.getStatus() == SSLEngineResult.Status.OK ) {
+                    encryptedIn.compact();
+                }
                 break;
             case NEED_WRAP:
                 System.out.println("NEED_WRAP");
+                decryptedOut.flip();
+                result = engine.wrap(decryptedOut, encryptedOut);
+                decryptedOut.compact();
+                
+                if (result.getStatus() == SSLEngineResult.Status.CLOSED) {
+                    //count = flush();
+                } else {
+                    // flush without the try/catch,
+                    // letting any exceptions propagate.
+                    count = flush();
+                }
                 break;
             case FINISHED:
                 System.out.println("FINISHED");
+                return;
             case NOT_HANDSHAKING:
                 System.out.println("NOT_HANDSHAKING");
                 return;
@@ -212,10 +242,23 @@ public class SslServer
         switch ( result.getStatus() ) {
             case BUFFER_UNDERFLOW:
                 System.out.println("BUFFER_UNDERFLOW");
-                return;
+                int netSize = engine.getSession().getPacketBufferSize();
+                // Resize buffer if needed.
+                if (netSize > decryptedIn.capacity()) {
+                    //System.out.println("netSieze > decryptedIn.capacity()");
+                    
+                    ByteBuffer b = ByteBuffer.allocate(netSize);
+                    //encryptedIn.flip();
+                    b.put(encryptedIn);
+                    encryptedIn = b;
+                }
+      
+                // Obtain more inbound network data for src,
+                // then retry the operation.
+                break;
             case BUFFER_OVERFLOW:
                 System.out.println("BUFFER_OVERFLOW");
-                return;
+                break;
             case CLOSED:
                 System.out.println("CLOSED");
                 return;
@@ -226,6 +269,33 @@ public class SslServer
         
         processHandshake();
     }
+    
+    private int flush() 
+    {
+        // Selector temp = null;
+        encryptedOut.flip();
+        int remaining = encryptedOut.remaining();
+        System.out.println("Encrypted out remaining: " + remaining);
+        int countOut = 0;
+        int count = 0;
+        int retries = 0;
+        
+        while(encryptedOut.hasRemaining()){
+            try {
+                count = socketChannel.write(encryptedOut);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            countOut += count;
+            retries++;
+        }
+
+        encryptedOut.compact();
+        
+        return countOut;
+    }
+    
     private void runDelegatedTasks() 
     {
         boolean singleThreaded = true;
@@ -275,20 +345,91 @@ public class SslServer
         this.taskPending = taskPending;
     }
     
-    public void run() 
-    {
+    public void start() {
+        int times = 1;
+        while ( true ) {
+            try {
+                int count = selector.selectNow();
+                if ( count == 0 ) continue;
+                
+                Set<SelectionKey>     selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+                
+                while ( keyIterator.hasNext() ) {
+                    SelectionKey key = keyIterator.next();
+                    
+                    if ( key.isReadable() ) {
+                        // a channel is ready for reading
+                        //SocketChannel channel = (SocketChannel) key.attachment();
+                        
+                        processHandshake();
+                        System.out.println("select read: " + times + " times");
+                        keyIterator.remove();
+                        
+                        times++;
+                    } 
+                }
+                
+                selectedKeys.clear();
+                break;
+            } 
+            catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+       }
+        
+        ByteBuffer src = ByteBuffer.allocate(200);
+        
+        System.out.println("write: HTTP/1.1 200 OK");
+        src.put("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+        
+        src.flip();
+        
         try {
-            processHandshake();
-        } 
-        catch (IOException e) {
+            socketChannel.write(src);
+        } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
+    }
+    
+    public void run() 
+    {
+        
+        new Thread(new Runnable() {
+
+            @Override
+            public void run()
+            {
+                // TODO Auto-generated method stub
+                start();
+                
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+                
+                try {
+                    SelectionKey selectionKey = socketChannel.register(selector, SelectionKey.OP_READ);
+                    selectionKey.attach(socketChannel);
+                } catch (ClosedChannelException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+            
+            
+        }).start();;
+            
     }
     
     public static void main(String[] args) 
     {
-        SslServer server = new SslServer();
+        final SslServer server = new SslServer();
         
         server.run();
     }
