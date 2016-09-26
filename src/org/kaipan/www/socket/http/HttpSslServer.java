@@ -8,18 +8,18 @@ import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.util.Utils;
 
-public class HttpServer extends IServer
+public class HttpSslServer extends IServer
 {
-    public HttpServer(HttpConfig config)
+    public HttpSslServer(HttpSslConfig config)
     {
         super(config);
 
         createSocketProcessor(config);
     }
     
-    public HttpConfig getConfig() 
+    public HttpSslConfig getConfig() 
     {
-        return (HttpConfig)iconfig;
+        return (HttpSslConfig)iconfig;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class HttpServer extends IServer
         if ( path == null ) {
             String jarHome = Utils.getJarHome(config);
             
-            property = Utils.loadConfigFile(jarHome + "/http-server.properties");
+            property = Utils.loadConfigFile(jarHome + "/https-server.properties");
         }
         else {
             property = Utils.loadConfigFile(path);

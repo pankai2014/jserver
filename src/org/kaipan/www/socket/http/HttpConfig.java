@@ -6,17 +6,17 @@ import org.kaipan.www.socket.core.IConfig;
 
 public class HttpConfig extends IConfig
 {
-    private String root = "/";
+	protected String root = "/";
     
-    private String static_ext  = null;
-    private String dynamic_ext = null;
-    private int    post_maxsize;
+    protected String static_ext  = null;
+    protected String dynamic_ext = null;
+    protected int    post_maxsize;
     
-    private String fastcgi_root = "/";
-    private String fastcgi_host = "127.0.0.1";
-    private int    fastcgi_port = 9000;
+    protected String fastcgi_root = "/";
+    protected String fastcgi_host = "127.0.0.1";
+    protected int    fastcgi_port = 9000;
     
-    private String charset = "UTF-8";
+    protected String charset = "UTF-8";
     
     public HttpConfig() 
     {

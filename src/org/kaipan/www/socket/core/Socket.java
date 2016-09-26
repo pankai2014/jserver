@@ -4,9 +4,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import javax.net.ssl.SSLEngine;
+
 public class Socket
 {
 	private long socketId;
+	
+	private SSLEngine 		   sslEngine = null;
 	
     private IMessageReader messageReader = null;
     private MessageWriter  messageWriter = null;
@@ -65,6 +69,11 @@ public class Socket
     	this.socketId = socketId;
     }
     
+    public void setSslEngine(SSLEngine sslEngine) 
+    {
+    	this.sslEngine = sslEngine;
+    }
+    
     public void setSocketChannel(SocketChannel sockChannel) 
     {
     	this.socketChannel = sockChannel;
@@ -83,6 +92,11 @@ public class Socket
     public long getSocketId() 
     {
     	return socketId;
+    }
+    
+    public SSLEngine getSslEngine() 
+    {
+    	return sslEngine;
     }
 
     public IMessageReader getMessageReader() 

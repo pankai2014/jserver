@@ -18,6 +18,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class SocketProcessor
 {
+	private IConfig iconfig = null;
+	
 	private Queue<Socket>  inSocketQueue   		= new ArrayBlockingQueue<Socket>(1024);
     private Queue<Message> outboundMessageQueue = new LinkedList<>();   //todo use a better / faster queue, thread not safe
     
@@ -41,16 +43,10 @@ public class SocketProcessor
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
     
-    public SocketProcessor(IMessageReaderFactory messageReaderFactory, MessageBuffer readMessageBuffer, MessageBuffer writeMessageBuffer, IMessageProcessor messageProcessor) 
-    {
-    	this.messageReaderFactory = messageReaderFactory;
+    public SocketProcessor(IConfig config) 
+    {   
+    	this.iconfig = config;
     	
-        this.readMessageBuffer    = readMessageBuffer;
-        this.writeMessageBuffer   = writeMessageBuffer;
-        this.writeProxy           = new WriteProxy(this.writeMessageBuffer, this.outboundMessageQueue);
-        
-        this.messageProcessor 	  = messageProcessor;
-        
         try {
             this.readSelector  = Selector.open();
             this.writeSelector = Selector.open();
@@ -59,6 +55,17 @@ public class SocketProcessor
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    
+    public void init(IMessageReaderFactory messageReaderFactory, MessageBuffer readMessageBuffer, MessageBuffer writeMessageBuffer, IMessageProcessor messageProcessor) 
+    {
+    	this.readMessageBuffer    = readMessageBuffer;
+        this.writeMessageBuffer   = writeMessageBuffer;
+        
+    	this.messageReaderFactory = messageReaderFactory;
+    	this.messageProcessor 	  = messageProcessor;
+    	
+    	this.writeProxy        	  = new WriteProxy(this.writeMessageBuffer, this.outboundMessageQueue);
     }
     
     public void enSocketQueue(Socket socket) 
@@ -71,7 +78,7 @@ public class SocketProcessor
         try {
             SocketChannel channel = socket.getSocketChannel();
             
-            if ( ! channel.isOpen()) return;
+            if ( ! channel.isOpen() ) return;
             
             channel.configureBlocking(false);
             SelectionKey  readKey = channel.register(readSelector, SelectionKey.OP_READ);
@@ -113,6 +120,10 @@ public class SocketProcessor
     		messageReader.initialize(readMessageBuffer);
     		
     		inSocket.setMessageReader(messageReader);
+    		
+    		if ( iconfig.sslMode() ) {
+    			
+    		}
     		
     		socketMap.put(this.nextSocketId, inSocket);
     		
@@ -239,7 +250,7 @@ public class SocketProcessor
 					e.printStackTrace();
 				}
         		
-        		if  ( socket.closeAfterWriting == true ) {
+        		if ( socket.closeAfterWriting == true ) {
         			close(socket);
         			
         			Log.write("close client, socketId = " + socket.getSocketId());

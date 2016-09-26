@@ -77,5 +77,5 @@ public abstract class IServer
     	return lock;
     }
     
-    protected abstract void createSocketProcessor();
+    protected abstract void createSocketProcessor(IConfig iconfig);
 }
