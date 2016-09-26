@@ -25,7 +25,7 @@ public class HttpServer extends IServer
     @Override
     protected void createSocketProcessor(IConfig config)
     {
-        this.socketProcessor = new SocketProcessor(config);
+        this.socketProcessor = new SocketProcessor(getConfig());
         this.socketProcessor.init(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
     }
     

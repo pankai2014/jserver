@@ -16,6 +16,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.kaipan.www.socket.https.HttpSslConfig;
+
 public class SocketProcessor
 {
 	private IConfig iconfig = null;
@@ -121,8 +123,10 @@ public class SocketProcessor
     		
     		inSocket.setMessageReader(messageReader);
     		
-    		if ( iconfig.sslMode() ) {
-    			
+    		if ( iconfig instanceof HttpSslConfig ) {
+    			if ( ((HttpSslConfig) iconfig).sslMode() ) {
+    				
+    			}
     		}
     		
     		socketMap.put(this.nextSocketId, inSocket);
