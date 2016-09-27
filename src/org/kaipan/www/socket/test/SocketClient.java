@@ -8,14 +8,14 @@ import java.nio.channels.SocketChannel;
 
 import org.kaipan.www.socket.util.StringUtil;
 
-public class Client
+public class SocketClient
 {
     private String IP = "127.0.0.1";
     private int port  = 8080;
     
     private int SO_RCVBUF = 65535;
     
-    public Client() 
+    public SocketClient() 
     {
         try {
             SocketChannel client = SocketChannel.open();
@@ -84,7 +84,7 @@ public class Client
     
     public static void main(String[] args) 
     {
-        new Client();
+        new SocketClient();
     }
 }
 

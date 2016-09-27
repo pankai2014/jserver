@@ -16,10 +16,14 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.kaipan.www.socket.ssl.Ssl;
+import org.kaipan.www.socket.ssl.SslConfig;
 import org.kaipan.www.socket.https.HttpSslConfig;
 
 public class SocketProcessor
 {
+    private Ssl ssl = null;
+    
 	private IConfig iconfig = null;
 	
 	private Queue<Socket>  inSocketQueue   		= new ArrayBlockingQueue<Socket>(1024);
@@ -123,9 +127,19 @@ public class SocketProcessor
     		
     		inSocket.setMessageReader(messageReader);
     		
-    		if ( iconfig instanceof HttpSslConfig ) {
-    			if ( ((HttpSslConfig) iconfig).sslMode() ) {
-    				
+    		// TLS/SSL protocol
+    		if ( iconfig instanceof SslConfig ) {
+    		    HttpSslConfig SslConfig = (HttpSslConfig) iconfig;
+    		  
+    			if ( SslConfig.sslMode() ) {
+    			    if ( ssl == null ) {
+                        this.ssl = new Ssl(SslConfig.sslProtocol());
+                        this.ssl.init(SslConfig.sslServerCertsFile(), SslConfig.sslTrustsCertsFile(), 
+                                SslConfig.sslKeystorePassword(), SslConfig.sslKeyPassword());
+                    }
+    			    else {
+    			        
+    			    }
     			}
     		}
     		
