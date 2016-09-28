@@ -47,8 +47,8 @@ public class HttpSslServer extends IServer
         else {
             property = Utils.loadConfigFile(path);
             if ( property == null ) {
-                System.out.println("Usage: java -jar java-nio-http-server-{version}.jar "
-                        + "\"path to file http-server.properties\"");
+                System.out.println("Usage: java -jar java-nio-https-server-{version}.jar "
+                        + "\"path to file https-server.properties\"");
                 return;
             }
         }

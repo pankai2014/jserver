@@ -24,6 +24,11 @@ public class HttpSslConfig extends HttpConfig implements SslConfig
     public HttpSslConfig(Properties property) 
     {
         load(property);
+    }
+    
+    public void load(Properties property) 
+    {
+        super.load(property);
         
         if ( property.getProperty("server.ssl_mode_open") != null ) {
             this.ssl_mode_open = Boolean.valueOf(property.getProperty("server.ssl_mode_open")).booleanValue();

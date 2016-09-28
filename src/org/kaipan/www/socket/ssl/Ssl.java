@@ -3,6 +3,7 @@ package org.kaipan.www.socket.ssl;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -26,7 +27,12 @@ public class Ssl
 {
     private String protocol = "TLSv1.2";
     
-	private SSLContext context;
+	private SSLContext context     = null;;
+	
+	private ByteBuffer myAppData   = null;
+	private ByteBuffer myNetData   = null;
+	private ByteBuffer peerAppData = null;
+	private ByteBuffer peerNetData = null;
 	
 	public Ssl() 
 	{
@@ -53,6 +59,8 @@ public class Ssl
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
+        SSLSession dummySession = context.createSSLEngine().getSession();
 	}
 	
 	public void setProtocol(String protocol) 

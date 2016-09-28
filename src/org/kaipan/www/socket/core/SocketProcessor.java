@@ -134,6 +134,7 @@ public class SocketProcessor
     			if ( SslConfig.sslMode() ) {
     			    if ( ssl == null ) {
                         this.ssl = new Ssl(SslConfig.sslProtocol());
+                        
                         this.ssl.init(SslConfig.sslServerCertsFile(), SslConfig.sslTrustsCertsFile(), 
                                 SslConfig.sslKeystorePassword(), SslConfig.sslKeyPassword());
                     }
