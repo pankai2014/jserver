@@ -16,9 +16,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import javax.net.ssl.SSLEngine;
+
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
-import org.kaipan.www.socket.https.HttpSslConfig;
 
 public class SocketProcessor
 {
@@ -114,44 +115,64 @@ public class SocketProcessor
     
     public void takeNewInSocket() 
     {
-    	Socket inSocket = inSocketQueue.poll();
+    	Socket socket = inSocketQueue.poll();
     	
-    	while ( inSocket != null ) {
+    	while ( socket != null ) {
     		this.nextSocketId++;
     		
-    		inSocket.setSocketId(this.nextSocketId);
-    		inSocket.setMessageWriter(new MessageWriter());
+    		Log.write("client connected, socketId = " + this.nextSocketId);
+    		
+    		socket.setSocketId(this.nextSocketId);
+    		socket.setMessageWriter(new MessageWriter());
     		
     		IMessageReader messageReader = messageReaderFactory.createMessageReader();
     		messageReader.initialize(readMessageBuffer);
     		
-    		inSocket.setMessageReader(messageReader);
+    		socket.setMessageReader(messageReader);
     		
     		// TLS/SSL protocol
     		if ( iconfig instanceof SslConfig ) {
-    		    HttpSslConfig SslConfig = (HttpSslConfig) iconfig;
+    		    
+    		    SslConfig SslConfig = (SslConfig) iconfig;
     		  
     			if ( SslConfig.sslMode() ) {
+    			    SocketChannel socketChannel = socket.getSocketChannel();
+    			    
+    			    try {
+                        socketChannel.configureBlocking(false);
+                    } 
+    			    catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+    			    
     			    if ( ssl == null ) {
                         this.ssl = new Ssl(SslConfig.sslProtocol());
                         
-                        this.ssl.init(SslConfig.sslServerCertsFile(), SslConfig.sslTrustsCertsFile(), 
+                        ssl.init(SslConfig.sslServerCertsFile(), SslConfig.sslTrustsCertsFile(), 
                                 SslConfig.sslKeystorePassword(), SslConfig.sslKeyPassword());
                     }
-    			    else {
+    			   
+    			    SSLEngine sslEngine = ssl.createSslEngine();
+    			    socket.setSslEngine(sslEngine);
+    			    
+    			    if ( ssl.doHandShake(socketChannel, sslEngine) ) {
     			        
+    			    }
+    			    else {
+    			        close(socket);
+    			        
+    			        Log.write("client closed due to handshake failure, socketId = " + socket.getSocketId());
     			    }
     			}
     		}
     		
-    		socketMap.put(this.nextSocketId, inSocket);
+    		socketMap.put(this.nextSocketId, socket);
     		
-    		registerRead(inSocket);
+    		registerRead(socket);
     		
     		// not thrown exception when queue is empty
-    		inSocket = inSocketQueue.poll();
-    		
-    		Log.write("client connected, socketId = " + this.nextSocketId);
+    		socket = inSocketQueue.poll();
     	}
     }
     
@@ -205,6 +226,7 @@ public class SocketProcessor
             			messageProcessor.process(socket, message, writeProxy);
             		}
             	}
+            	
             	fullMessages.clear();
             	
             	/**
