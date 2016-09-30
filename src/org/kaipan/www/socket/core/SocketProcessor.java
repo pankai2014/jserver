@@ -16,10 +16,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import javax.net.ssl.SSLEngine;
-
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
+import org.kaipan.www.socket.ssl.SslEngine;
 
 public class SocketProcessor
 {
@@ -120,7 +119,7 @@ public class SocketProcessor
     	while ( socket != null ) {
     		this.nextSocketId++;
     		
-    		Log.write("client connected, socketId = " + this.nextSocketId);
+    		Log.write("client connected, socket id = " + this.nextSocketId);
     		
     		socket.setSocketId(this.nextSocketId);
     		socket.setMessageWriter(new MessageWriter());
@@ -153,16 +152,16 @@ public class SocketProcessor
                                 SslConfig.sslKeystorePassword(), SslConfig.sslKeyPassword());
                     }
     			   
-    			    SSLEngine sslEngine = ssl.createSslEngine();
+    			    SslEngine sslEngine = new SslEngine(ssl.createSslEngine());
     			    socket.setSslEngine(sslEngine);
     			    
-    			    if ( ssl.doHandShake(socketChannel, sslEngine) ) {
+    			    if ( sslEngine.doHandShake(socket) ) {
     			        
     			    }
     			    else {
     			        close(socket);
     			        
-    			        Log.write("client closed due to handshake failure, socketId = " + socket.getSocketId());
+    			        Log.write("client closed due to handshake failure, socket id = " + socket.getSocketId());
     			    }
     			}
     		}
@@ -214,7 +213,7 @@ public class SocketProcessor
                         e.printStackTrace();
                     }
                     
-                    Log.write("client closed, socketId = " + socket.getSocketId());
+                    Log.write("client closed, socket id = " + socket.getSocketId());
                 }
             	
             	List<Message> fullMessages = messageReader.getMessages();
