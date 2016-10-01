@@ -153,15 +153,16 @@ public class SocketProcessor
                     }
     			   
     			    SslEngine sslEngine = new SslEngine(ssl.createSslEngine());
+    			    
+    			    sslEngine.myAppData	  = writeByteBuffer;
+    			    sslEngine.peerAppData = readByteBuffer;
+    			    		
     			    socket.setSslEngine(sslEngine);
     			    
-    			    if ( sslEngine.doHandShake(socket) ) {
-    			        
-    			    }
-    			    else {
-    			        close(socket);
-    			        
-    			        Log.write("client closed due to handshake failure, socket id = " + socket.getSocketId());
+    			    if ( ! sslEngine.doHandShake(socket) ) {
+    			    	close(socket);
+    			    	
+    			    	Log.write("client closed due to handshake failure, socket id = " + socket.getSocketId());
     			    }
     			}
     		}
@@ -293,7 +294,7 @@ public class SocketProcessor
         		if ( socket.closeAfterWriting == true ) {
         			close(socket);
         			
-        			Log.write("close client, socketId = " + socket.getSocketId());
+        			Log.write("close client, socket id = " + socket.getSocketId());
         		}
         		else if ( messageWriter.isEmpty() ) {
         			nonEmptyToEmptySockets.add(socket);
@@ -316,6 +317,11 @@ public class SocketProcessor
 		SelectionKey writeKey = channel.keyFor(this.writeSelector);
 		writeKey.attach(null);
 		writeKey.cancel();
+		
+		SslEngine ssl = socket.getSslEngine();
+		if ( ssl != null ) {
+			ssl.handleEndOfStream(socket);
+		}
 		
 		try {
 			channel.close();

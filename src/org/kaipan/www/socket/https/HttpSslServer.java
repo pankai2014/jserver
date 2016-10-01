@@ -7,7 +7,6 @@ import org.kaipan.www.socket.core.IConfig;
 import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.http.HttpMessageProcessor;
-import org.kaipan.www.socket.http.HttpMessageReaderFactory;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpSslServer extends IServer
@@ -28,7 +27,7 @@ public class HttpSslServer extends IServer
     protected void createSocketProcessor(IConfig config)
     {
         this.socketProcessor = new SocketProcessor(getConfig());
-        this.socketProcessor.init(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
+        this.socketProcessor.init(new HttpsMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
     }
     
     public static void main(String[] args) 

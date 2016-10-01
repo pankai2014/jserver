@@ -5,6 +5,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kaipan.www.socket.ssl.SslEngine;
+
 public class MessageWriter
 {
 	private List<Message> writeQueue  = new ArrayList<>();
@@ -31,7 +33,14 @@ public class MessageWriter
         byteBuffer.put(this.messageInProgress.sharedArray, this.messageInProgress.offset + this.bytesWritten, this.messageInProgress.length - this.bytesWritten);
         byteBuffer.flip();
 
-        this.bytesWritten += socket.write(byteBuffer);
+        SslEngine sslEngine = socket.getSslEngine();
+        if ( sslEngine == null ) {
+        	this.bytesWritten += socket.write(byteBuffer);
+        }
+        else {
+        	this.bytesWritten += sslEngine.write(socket);
+        } 
+        
         byteBuffer.clear();
 
         // byteBuffer.length(1024 * 1024 KB = 1MB) more than the (this.messageInProgress.length - this.bytesWritten)

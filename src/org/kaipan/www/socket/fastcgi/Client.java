@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.kaipan.www.socket.core.Message;
-import org.kaipan.www.socket.core.MessageBuffer;
 
 /**
  * Factcgi client class

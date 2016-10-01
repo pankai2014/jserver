@@ -2,7 +2,6 @@ package org.kaipan.www.socket.ssl;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SocketChannel;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -13,14 +12,19 @@ import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import org.kaipan.www.socket.core.Log;
 import org.kaipan.www.socket.core.Socket;
 
+/**
+ * SslEngine class
+ * 
+ * @author will<pan.kai@icloud.com>
+ */
 public class SslEngine
 {
     private SSLEngine  sslEngine   = null;
     
-    private ByteBuffer myAppData   = null;
-    private ByteBuffer myNetData   = null;
-    private ByteBuffer peerAppData = null;
-    private ByteBuffer peerNetData = null;
+    public ByteBuffer myAppData   = null;
+    public ByteBuffer myNetData   = null;
+    public ByteBuffer peerNetData = null;
+    public ByteBuffer peerAppData = null;
     
     public SslEngine() 
     {
@@ -39,13 +43,14 @@ public class SslEngine
         SSLSession sslSession = sslEngine.getSession();
         
         /**
-         * peerNetData------>peerAppData
-         * myNetData <-------myAppData  
+         * peerNetData ------> peerAppData
+         * myNetData  <------- myAppData  
          */
-        myAppData   = ByteBuffer.allocate(sslSession.getApplicationBufferSize());
-        myNetData   = ByteBuffer.allocate(sslSession.getPacketBufferSize());
-        peerAppData = ByteBuffer.allocate(sslSession.getApplicationBufferSize());
-        peerNetData = ByteBuffer.allocate(sslSession.getPacketBufferSize());
+        myAppData 	= myAppData   == null ? ByteBuffer.allocate(sslSession.getApplicationBufferSize()) : myAppData;
+        myNetData 	= myNetData   == null ? ByteBuffer.allocate(sslSession.getPacketBufferSize()) 	   : myNetData;
+        
+        peerAppData = peerAppData == null ? ByteBuffer.allocate(sslSession.getApplicationBufferSize()) : peerAppData;
+        peerNetData = peerNetData == null ? ByteBuffer.allocate(sslSession.getPacketBufferSize()) 	   : peerNetData;
         
         /**
          * No new connections can be created, but any existing connection remains valid until it is closed.
@@ -237,12 +242,15 @@ public class SslEngine
         return true;
     }
     
-    public void read(Socket socket) 
+    public int read(Socket socket) 
     {
         peerNetData.clear();
+        peerAppData.clear();
+        
+        int bytesRead = 0;
         
         try {
-            socket.read(peerNetData);
+        	bytesRead = socket.read(peerNetData);
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
@@ -263,6 +271,7 @@ public class SslEngine
                 
                 switch ( result.getStatus() ) {
                     case OK:
+                    	//System.out.println(new String(peerAppData.array(), 0, peerAppData.position()));
                         break;
                     case BUFFER_OVERFLOW:
                         peerAppData = Ssl.enlargeApplicationBuffer(sslEngine, peerAppData);
@@ -285,16 +294,79 @@ public class SslEngine
                 e.printStackTrace();
             }
         }
+        
+        return bytesRead;
+    }
+    
+    public int write(Socket socket) 
+    {
+    	int bytesWrite = myAppData.remaining();
+    	
+    	myNetData.clear();
+    	
+    	SSLEngineResult result;
+    	
+    	while ( myAppData.hasRemaining() ) {
+    		try {
+				result = sslEngine.wrap(myAppData, myNetData);
+				
+				switch ( result.getStatus() ) {
+				 	case OK:
+		                myNetData.flip();
+		                while ( myNetData.hasRemaining() ) {
+		                    try {
+								socket.write(myNetData);
+							} 
+		                    catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+		                }
+		                
+		                return bytesWrite;
+		            case BUFFER_OVERFLOW:
+		                myNetData = Ssl.enlargePacketBuffer(sslEngine, myNetData);
+		                
+		                break;
+		            case BUFFER_UNDERFLOW:
+		            	
+		                throw new SSLException("buffer underflow occured after a wrap. i don't think we should ever get here");
+		            case CLOSED:
+		                closeConnection(socket);
+		                
+		                break;
+		            default:
+		                throw new IllegalStateException("invalid ssl status: " + result.getStatus());
+				}
+			} 
+    		catch (SSLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+    	
+    	return -1;
     }
     
     private void closeConnection(Socket socket) 
     {
+        sslEngine.closeOutbound();
         
+        doHandShake(socket);
     }
     
-    private void handleEndOfStream(Socket socket) 
+    public void handleEndOfStream(Socket socket) 
     {
+        try {
+			sslEngine.closeInbound();
+		} 
+        catch (SSLException e) {
+        	//e.printStackTrace();
+        	
+			Log.write("this engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream");
+		}
         
+        closeConnection(socket);
     }
     
     public SSLEngine getSslEngine() 
