@@ -1,7 +1,7 @@
 #JAVA服务器基于JAVA NIO
 I.  已实现HTTP协议
 
-II. 已实现HTTPS 
+II. 已实现HTTPS协议 
 
 III.已实现FASTCGI协议(Client端)
 
