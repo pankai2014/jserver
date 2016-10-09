@@ -152,10 +152,8 @@ public class SocketProcessor
                                 SslConfig.sslKeystorePassword(), SslConfig.sslKeyPassword());
                     }
     			   
-    			    SslEngine sslEngine = new SslEngine(ssl.createSslEngine());
-    			    
-    			    sslEngine.myAppData	  = writeByteBuffer;
-    			    sslEngine.peerAppData = readByteBuffer;
+    			    SslEngine sslEngine = new SslEngine(ssl.createSslEngine());   
+    			    sslEngine.init(readByteBuffer, writeByteBuffer);
     			    		
     			    socket.setSslEngine(sslEngine);
     			    
@@ -202,17 +200,7 @@ public class SocketProcessor
             	boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
             	
                 if ( ! notEndOfStreamReached ) {
-                    socketMap.remove(socket.getSocketId());
-                    key.attach(null);
-                    key.cancel();
-                    
-                    try {
-                        key.channel().close();
-                    } 
-                    catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+                    close(socket);
                     
                     Log.write("client closed, socket id = " + socket.getSocketId());
                 }
@@ -236,16 +224,6 @@ public class SocketProcessor
                  */
                 keyIterator.remove();
             } 
-        }
-        
-        /**
-         * delete all of the elements from this collection, 
-         *      same as above!!!
-         */
-        selectedKeys.clear();
-        
-        for ( Map.Entry<Long, Socket> entry : socketMap.entrySet() ) {
-            this.registerRead(entry.getValue());
         }
     }
     
@@ -309,15 +287,21 @@ public class SocketProcessor
     
     private void close(Socket socket) 
     {
+        SelectionKey key;
     	SocketChannel channel = socket.getSocketChannel();
-		SelectionKey readKey  = channel.keyFor(this.readSelector);
-		readKey.attach(null);
-		readKey.cancel();
 		
-		SelectionKey writeKey = channel.keyFor(this.writeSelector);
-		writeKey.attach(null);
-		writeKey.cancel();
+    	key = channel.keyFor(this.readSelector);
+		if ( key != null ) {
+		    key.attach(null);
+		    key.cancel();
+		}
 		
+		key = channel.keyFor(this.writeSelector);
+		if ( key != null ) {
+		    key.attach(null);
+		    key.cancel();
+		}
+
 		SslEngine ssl = socket.getSslEngine();
 		if ( ssl != null ) {
 			ssl.handleEndOfStream(socket);
@@ -330,6 +314,8 @@ public class SocketProcessor
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		socketMap.remove(socket.getSocketId());
     }
     
     private void registerNonEmptySockets() throws ClosedChannelException 

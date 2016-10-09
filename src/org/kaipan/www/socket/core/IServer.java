@@ -3,10 +3,12 @@ package org.kaipan.www.socket.core;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Iterator;
+import java.util.Set;
 
 public abstract class IServer
 {	
@@ -14,10 +16,6 @@ public abstract class IServer
     
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel serverChannel = null;
-
-    protected static final int acceptThreadSize = 10;
-    
-    private Lock lock = new ReentrantLock();
     
     protected IServer(IConfig iconfig)
     {
@@ -64,17 +62,51 @@ public abstract class IServer
     }
     
     public void start()
-    {
-        for ( int i = 0; i < acceptThreadSize; i++ ) {
-        	new Thread(new Accept(this)).start();
-        }
+    {   
+        new Thread(new Runnable() {
+            @Override
+            public void run()
+            {
+                Selector acceptSelect = null;
+                try {
+                    acceptSelect = Selector.open();
+                    serverChannel.configureBlocking(false);
+                    
+                    serverChannel.register(acceptSelect, SelectionKey.OP_ACCEPT);
+                } 
+                catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                
+                while ( true ) {
+                    try {
+                        int connect = acceptSelect.select();
+                        if ( connect == 0 ) return;
+                        
+                        Set<SelectionKey>     selectedKeys = acceptSelect.selectedKeys();
+                        Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+                        
+                        while ( keyIterator.hasNext() ) {
+                            SelectionKey key = keyIterator.next();
+                            
+                            if ( key.isAcceptable() ) {
+                                accept();
+                            }
+                        }
+                        
+                        keyIterator.remove();
+                    } 
+                    catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } 
+                }
+            }
+            
+        }).start();
         
         socketProcessor.run();
-    }
-    
-    public Lock getLock() 
-    {
-    	return lock;
     }
     
     protected abstract void createSocketProcessor(IConfig iconfig);

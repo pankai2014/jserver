@@ -70,7 +70,7 @@ public class HttpMessageReader implements IMessageReader
         HttpHeader metaData   = (HttpHeader)nextMessage.metaData;
         buffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, nextMessage.offset, nextMessage.length, metaData);
         
-        Log.write("head completed yet ? : " + buffer.headerComplete);
+        Log.write("head completed yet ? : " + buffer.headerComplete + ", socket id = " + socket.getSocketId());
         
         // header was still unfinished
         if ( ! buffer.headerComplete ) {
@@ -113,7 +113,7 @@ public class HttpMessageReader implements IMessageReader
             buffer.expectContentLength = endIndex - realIndex;
         }
         
-        Log.write("body completed yet ? : " + buffer.bodycomplete);
+        Log.write("body completed yet ? : " + buffer.bodycomplete + ", socket id = " + socket.getSocketId());
 
         byteBuffer.clear();
         return true;

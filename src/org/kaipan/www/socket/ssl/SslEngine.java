@@ -34,11 +34,9 @@ public class SslEngine
     public SslEngine(SSLEngine sslEngine) 
     {
         this.sslEngine  = sslEngine;
-        
-        init(sslEngine);
     }
     
-    private void init(SSLEngine sslEngine) 
+    public void init(ByteBuffer peerAppData, ByteBuffer myAppData) 
     {
         SSLSession sslSession = sslEngine.getSession();
         
@@ -46,11 +44,11 @@ public class SslEngine
          * peerNetData ------> peerAppData
          * myNetData  <------- myAppData  
          */
-        myAppData 	= myAppData   == null ? ByteBuffer.allocate(sslSession.getApplicationBufferSize()) : myAppData;
-        myNetData 	= myNetData   == null ? ByteBuffer.allocate(sslSession.getPacketBufferSize()) 	   : myNetData;
+        this.myAppData 	 = myAppData   == null ? ByteBuffer.allocate(sslSession.getApplicationBufferSize()) : myAppData;
+        this.myNetData 	 = myNetData   == null ? ByteBuffer.allocate(sslSession.getPacketBufferSize()) 	    : myNetData;
         
-        peerAppData = peerAppData == null ? ByteBuffer.allocate(sslSession.getApplicationBufferSize()) : peerAppData;
-        peerNetData = peerNetData == null ? ByteBuffer.allocate(sslSession.getPacketBufferSize()) 	   : peerNetData;
+        this.peerAppData = peerAppData == null ? ByteBuffer.allocate(sslSession.getApplicationBufferSize()) : peerAppData;
+        this.peerNetData = peerNetData == null ? ByteBuffer.allocate(sslSession.getPacketBufferSize()) 	    : peerNetData;
         
         /**
          * No new connections can be created, but any existing connection remains valid until it is closed.
@@ -80,7 +78,13 @@ public class SslEngine
                                 return false;
                             }
                             
-                            sslEngine.closeInbound();
+                            try {
+                                sslEngine.closeInbound();
+                            } 
+                            catch (SSLException e) {
+                                Log.write("this engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream");
+                            }
+                            
                             sslEngine.closeOutbound();
                             
                             handshakeStatus = sslEngine.getHandshakeStatus();
