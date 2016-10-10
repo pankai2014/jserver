@@ -10,7 +10,7 @@ III.已实现FASTCGI协议(Client端)
 java -jar http-server-version-{version}.jar  <br />
 
 ##源码编译
-http:  编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java
+http:  编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java <br />
 https: 编译源码并运行src/org/kaipan/www/socket/https/HttpsServer.java
 
 ##配置文件路径
