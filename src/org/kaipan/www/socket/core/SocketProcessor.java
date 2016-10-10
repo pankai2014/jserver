@@ -178,8 +178,30 @@ public class SocketProcessor
     	}
     }
     
+    public void readFromSockets(Socket socket) 
+    {
+        IMessageReader messageReader  = socket.getMessageReader();
+        boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
+        
+        if ( ! notEndOfStreamReached ) {
+            close(socket);
+            
+            Log.write("client closed, socket id = " + socket.getSocketId());
+        }
+        
+        List<Message> fullMessages = messageReader.getMessages();
+        
+        if ( fullMessages.size() > 0 ) {
+            for ( Message message : fullMessages ) {
+                message.socketId = socket.getSocketId();
+                
+                messageProcessor.process(socket, message, writeProxy);
+            }
+        }
+    }
+    
     public void readFromSockets() 
-    {      
+    { 
        try {
            int readyChannels = readSelector.selectNow();
            
@@ -382,11 +404,11 @@ public class SocketProcessor
 
     public void run() 
     {          
-        while ( true ) {
+        while( true ) {
             executeCycle();
             
             try {
-                Thread.sleep(10);
+                Thread.sleep(1, 0);
             } 
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block
