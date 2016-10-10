@@ -26,8 +26,8 @@ public class HttpSslServer extends IServer
     @Override
     protected void createSocketProcessor(IConfig config)
     {
-        this.socketProcessor = new SocketProcessor(getConfig());
-        this.socketProcessor.init(new HttpsMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
+        this.processor = new SocketProcessor(getConfig());
+        this.processor.init(new HttpsMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
     }
     
     public static void main(String[] args) 

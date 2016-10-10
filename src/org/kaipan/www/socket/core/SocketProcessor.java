@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
@@ -48,6 +50,8 @@ public class SocketProcessor
     
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
+    
+    private ExecutorService cachedThreadPool = Executors.newCachedThreadPool(); 
     
     public SocketProcessor(IConfig config) 
     {   
@@ -175,56 +179,58 @@ public class SocketProcessor
     }
     
     public void readFromSockets() 
-    {
-        try {
-            int readyChannels = readSelector.selectNow();
-            
-            if ( readyChannels == 0 ) return;
-        } 
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        Set<SelectionKey>     selectedKeys = readSelector.selectedKeys();
-        Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
-        
-        while ( keyIterator.hasNext() ) {
-            SelectionKey key = keyIterator.next();
-            
-            if ( key.isReadable() ) {
-                // a channel is ready for reading
-            	Socket socket = (Socket) key.attachment();
-            	
-            	IMessageReader messageReader  = socket.getMessageReader();
-            	boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
-            	
-                if ( ! notEndOfStreamReached ) {
-                    close(socket);
-                    
-                    Log.write("client closed, socket id = " + socket.getSocketId());
-                }
-            	
-            	List<Message> fullMessages = messageReader.getMessages();
-            	
-            	if ( fullMessages.size() > 0 ) {
-            		for ( Message message : fullMessages ) {
-            			message.socketId = socket.getSocketId();
-            			
-            			messageProcessor.process(socket, message, writeProxy);
-            		}
-            	}
-            	
-            	fullMessages.clear();
-            	
-            	/**
-                 *  remove iteration just crossed elements,  
-                 *      why do this operation, key.isReadable() is always true?
-                 *      keyIterator is invalid?
-                 */
-                keyIterator.remove();
-            } 
-        }
+    {      
+       try {
+           int readyChannels = readSelector.selectNow();
+           
+           if ( readyChannels == 0 ) return;
+       } 
+       catch (IOException e) {
+           // TODO Auto-generated catch block
+           e.printStackTrace();
+       }
+       
+       Set<SelectionKey>     selectedKeys = readSelector.selectedKeys();
+       Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+       
+       while ( keyIterator.hasNext() ) {
+           SelectionKey key = keyIterator.next();
+           
+           if ( key.isReadable() ) {
+               // a channel is ready for reading
+               Socket socket = (Socket) key.attachment();
+               
+               IMessageReader messageReader  = socket.getMessageReader();
+               boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
+               
+               if ( ! notEndOfStreamReached ) {
+                   close(socket);
+                   
+                   Log.write("client closed, socket id = " + socket.getSocketId());
+               }
+               
+               List<Message> fullMessages = messageReader.getMessages();
+               
+               if ( fullMessages.size() > 0 ) {
+                   for ( Message message : fullMessages ) {
+                       message.socketId = socket.getSocketId();
+                       
+                       messageProcessor.process(socket, message, writeProxy);
+                   }
+               }
+               
+               fullMessages.clear();
+               
+               /**
+                *  remove iteration just crossed elements,  
+                *      why do this operation, key.isReadable() is always true?
+                *      keyIterator is invalid?
+                */
+               keyIterator.remove();
+           } 
+       }
+       
+       selectedKeys.clear();
     }
     
     public void writeToSockets() 
@@ -369,13 +375,13 @@ public class SocketProcessor
     
     public void executeCycle() 
     {
-    	takeNewInSocket();
+        takeNewInSocket();
         readFromSockets();
         writeToSockets();
     }
 
     public void run() 
-    {
+    {          
         while ( true ) {
             executeCycle();
             
@@ -387,5 +393,20 @@ public class SocketProcessor
                 e.printStackTrace();
             }
         }
+    }
+    
+    public Selector getReadSelector() 
+    {
+        return this.readSelector;
+    }
+    
+    public Selector getWriteSelector() 
+    {
+        return this.writeSelector;
+    }
+    
+    public ExecutorService getCachedThreadPool() 
+    {
+        return this.cachedThreadPool;
     }
 }

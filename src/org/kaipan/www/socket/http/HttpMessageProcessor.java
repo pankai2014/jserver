@@ -158,19 +158,19 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    
 	    response.setHttpStatus(200);
 	    
-	    int endOfHeader = 0, loc = 0;
+	    int endOfHeader = 0, loc = message.offset;
 	    while ( true ) {
-	        loc = HttpUtil.findNextLineBreak(message.sharedArray, loc, message.length);
-	    	
+	        loc = HttpUtil.findNextLineBreak(message.sharedArray, loc, loc + message.length);
+	        
 	    	if ( loc != -1 ) {
 	    	    endOfHeader = loc;
 	    	    loc += 1; continue;
 	    	}
-	    	
+
 	    	break;
 	    }
 	   
-	    int LengthOfHeader = endOfHeader + 1;
+	    int LengthOfHeader = (endOfHeader - message.offset) + 1;
 	    
 	    response.setHeader("Content-Length", (message.length - LengthOfHeader) + "");
 	    //response.setHeader("Content-Type", new String(message.sharedArray, 0, LengthOfHeader));
