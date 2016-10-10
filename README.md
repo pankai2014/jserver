@@ -5,15 +5,17 @@ II. 已实现HTTPS协议
 
 III.已实现FASTCGI协议(Client端)
 
-#运行HTTP服务器
+#运行HTTP/HTTPS服务器
 ##运行开发包下jar文件
 java -jar http-server-version-{version}.jar  <br />
 
 ##源码编译
-编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java
+http:  编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java
+https: 编译源码并运行src/org/kaipan/www/socket/https/HttpsServer.java
 
 ##配置文件路径
-开发包下http-server.properties
+http:  开发包下http-server.properties
+https: 开发包下https-server.properties
 
 #HTTP服务器配置
 ## Web document root directory
