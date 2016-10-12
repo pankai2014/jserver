@@ -7,14 +7,15 @@ III.已实现FASTCGI协议(Client端)
 
 #运行HTTP/HTTPS服务器
 ##运行开发包下jar文件
-java -jar http-server-version-{version}.jar  <br />
+java -jar http-server-version-{version}.jar ./http-server.properties  <br />
+java -jar https-server-version-{version}.jar ./https-server.properties
 
 ##源码编译
 http:  编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java <br />
 https: 编译源码并运行src/org/kaipan/www/socket/https/HttpsServer.java
 
 ##配置文件路径
-http:  开发包下http-server.properties
+http:  开发包下http-server.properties <br />
 https: 开发包下https-server.properties
 
 #HTTP服务器配置
