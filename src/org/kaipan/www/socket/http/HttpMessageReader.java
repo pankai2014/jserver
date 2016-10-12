@@ -22,7 +22,6 @@ public class HttpMessageReader implements IMessageReader
 	@Override
 	public void initialize(MessageBuffer readMessageBuffer) 
 	{
-		// TODO Auto-generated method stub
 		this.messageBuffer = readMessageBuffer;
 		this.nextMessage   = messageBuffer.getMessage();
 		
@@ -32,7 +31,6 @@ public class HttpMessageReader implements IMessageReader
     @Override
     public boolean read(Socket socket, ByteBuffer byteBuffer)
     {
-        // TODO Auto-generated method stub        
         try {
             socket.read(byteBuffer);
         } 
@@ -122,7 +120,6 @@ public class HttpMessageReader implements IMessageReader
 	@Override
 	public List<Message> getMessages() 
 	{
-		// TODO Auto-generated method stub
 		return completeMessages;
 	}
 }
