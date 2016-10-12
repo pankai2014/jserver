@@ -18,7 +18,7 @@ https: 编译源码并运行src/org/kaipan/www/socket/https/HttpsServer.java
 http:  开发包下http-server.properties <br />
 https: 开发包下https-server.properties
 
-#HTTP服务器配置
+#HTTP/HTTPS服务器配置
 ## Web document root directory
 server.root = /home/will/Develop/www          &nbsp;&nbsp;&nbsp;//静态目录
 
