@@ -280,7 +280,8 @@ public class Client
 				}
             	return -1;
             }
-            length -=  bytesRead;
+            
+            length -= bytesRead;
         }
     	
     	return length;
