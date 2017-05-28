@@ -3,7 +3,6 @@ package org.kaipan.www.socket.test;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
 import org.kaipan.www.socket.util.StringUtil;

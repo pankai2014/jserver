@@ -26,7 +26,8 @@ public class HttpSslConfig extends HttpConfig implements SslConfig
         load(property);
     }
     
-    public void load(Properties property) 
+    @Override
+	public void load(Properties property) 
     {
         super.load(property);
         
@@ -55,32 +56,38 @@ public class HttpSslConfig extends HttpConfig implements SslConfig
         }
     }
     
-    public boolean sslMode() 
+    @Override
+	public boolean sslMode() 
     {
     	return ssl_mode_open;
     }
     
-    public String sslProtocol() 
+    @Override
+	public String sslProtocol() 
     {
     	return ssl_protocol;
     }
     
-    public String sslServerCertsFile() 
+    @Override
+	public String sslServerCertsFile() 
     {
         return ssl_server_certs_file;
     }
     
-    public String sslTrustsCertsFile() 
+    @Override
+	public String sslTrustsCertsFile() 
     {
         return ssl_trusts_certs_file;
     }
     
-    public String sslKeystorePassword() 
+    @Override
+	public String sslKeystorePassword() 
     {
         return ssl_key_store_password;
     }
     
-    public String sslKeyPassword() 
+    @Override
+	public String sslKeyPassword() 
     {
         return ssl_key_password;
     }
