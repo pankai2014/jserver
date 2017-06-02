@@ -30,9 +30,9 @@ public class HttpConfig extends IConfig
     
     public void load(Properties property) 
     {
-        if ( property.getProperty("server.host") != null )
+        if ( property.getProperty("server.bind") != null )
         {
-            this.host(property.getProperty("server.host"));
+            this.host(property.getProperty("server.bind"));
         }
         
         if ( property.getProperty("server.port") != null )

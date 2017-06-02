@@ -48,5 +48,5 @@ public abstract class IServer
         processor.run();
     }
     
-    protected abstract void createSocketProcessor(IConfig iconfig);
+    protected abstract void createSocketProcessor();
 }

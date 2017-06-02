@@ -18,6 +18,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
 import org.kaipan.www.socket.ssl.SslEngine;
@@ -51,7 +52,9 @@ public class SocketProcessor
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
     
-    private ExecutorService cachedThreadPool = Executors.newCachedThreadPool(); 
+    private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+    
+    private Map<String, IController> controllerMap = new HashMap<>();
     
     public SocketProcessor(IConfig config) 
     {   
@@ -195,7 +198,7 @@ public class SocketProcessor
             for ( Message message : fullMessages ) {
                 message.socketId = socket.getSocketId();
                 
-                messageProcessor.process(socket, message, writeProxy);
+                messageProcessor.process(socket, message, writeProxy, controllerMap);
             }
         }
     }
@@ -237,7 +240,7 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       messageProcessor.process(socket, message, writeProxy);
+                       messageProcessor.process(socket, message, writeProxy, controllerMap);
                    }
                }
                
@@ -430,5 +433,10 @@ public class SocketProcessor
     public ExecutorService getCachedThreadPool() 
     {
         return this.cachedThreadPool;
+    }
+    
+    public void addControllerMap(String name, IController controller) 
+    {
+    	controllerMap.put(name, controller);
     }
 }

@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.core.IMessageProcessor;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.Socket;
@@ -26,12 +27,17 @@ public class HttpMessageProcessor implements IMessageProcessor
 	}
 	
 	@Override
-	public void process(Socket socket, Message message, WriteProxy writeProxy) 
+	public void process(Socket socket, Message message, WriteProxy writeProxy, Map<String, IController> controllerMap) 
 	{
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
         String ext = Utils.getFileExt(request.path);
+        
+        if ( ext == null ) {
+        	doMapRequest(socket, request, writeProxy, controllerMap);
+        	return;
+        }
         
         if ( config.staticExt().contains(ext) ) {
             doStaticRequest(socket, request, writeProxy);
@@ -188,5 +194,39 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    
 	    socket.closeAfterWriting = true;
 	    writeProxy.enqueue(nextMessage);
+	}
+	
+	public void doMapRequest(Socket socket, HttpRequest request, WriteProxy writeProxy, Map<String, IController> controllerMap) 
+	{
+		Message    message    = writeProxy.getMessage();
+	    HttpResponse response = new HttpResponse();
+	    
+	    message.socketId = request.socketId;		// must be set!!!
+	    
+	    String body;
+	    if ( controllerMap.containsKey(request.path) ) {
+	    	IController controller = controllerMap.get(request.path);
+	    	body = controller.run(request);
+	    }
+	    else {
+	    	body = "Oops, Something is wrong while processing the request " + request.path;
+	    }
+	    
+	    Integer length = body.length();
+	    
+		response.setHttpStatus(200);
+		response.setHeader("Content-Length", length.toString());
+		
+		try {
+		 	message.writeToMessage(response.getHeader().getBytes(config.charset()));
+		 	message.writeToMessage(body.getBytes());
+		} 
+	    catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		socket.closeAfterWriting = true;
+	    writeProxy.enqueue(message);
 	}
 }

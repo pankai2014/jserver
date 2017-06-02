@@ -2,8 +2,8 @@ package org.kaipan.www.socket.http;
 
 import java.util.Properties;
 
+import org.kaipan.www.socket.controller.ToutiaoController;
 import org.kaipan.www.socket.core.MessageBuffer;
-import org.kaipan.www.socket.core.IConfig;
 import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.util.Utils;
@@ -14,7 +14,7 @@ public class HttpServer extends IServer
     {
         super(config);
 
-        createSocketProcessor(config);
+        createSocketProcessor();
     }
     
     public HttpConfig getConfig() 
@@ -23,10 +23,11 @@ public class HttpServer extends IServer
     }
 
     @Override
-    protected void createSocketProcessor(IConfig config)
+    protected void createSocketProcessor()
     {
         this.processor = new SocketProcessor(getConfig());
         this.processor.init(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
+        this.processor.addControllerMap("/toutiao", new ToutiaoController());
     }
     
     public static void main(String[] args) 
