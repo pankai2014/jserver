@@ -88,7 +88,9 @@ public class Message
     {
         int startIndexOfPartialMessage = message.offset + endIndex;
         int lengthOfPartialMessage     = (message.offset + message.length) - endIndex;
-
-        System.arraycopy(message.sharedArray, startIndexOfPartialMessage, this.sharedArray, this.offset, lengthOfPartialMessage);
+        
+        if ( lengthOfPartialMessage > 0 ) {
+        	System.arraycopy(message.sharedArray, startIndexOfPartialMessage, this.sharedArray, this.offset, lengthOfPartialMessage);
+        }
     }
 }
