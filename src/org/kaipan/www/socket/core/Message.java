@@ -90,6 +90,10 @@ public class Message
         int lengthOfPartialMessage     = (message.offset + message.length) - endIndex;
         
         if ( lengthOfPartialMessage > 0 ) {
+        	System.out.println(message.offset);
+        	System.out.println(message.length);
+        	System.out.println(endIndex);
+        	
         	System.arraycopy(message.sharedArray, startIndexOfPartialMessage, this.sharedArray, this.offset, lengthOfPartialMessage);
         }
     }

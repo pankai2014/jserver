@@ -55,7 +55,7 @@ public class HttpMessageReader implements IMessageReader
                 
                 Message message  = messageBuffer.getMessage();
                 message.metaData = new HttpHeader();
-                message.writePartialMessageToMessage(nextMessage, length);
+                message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
                 
                 completeMessages.add(nextMessage);
                 nextMessage = message;
