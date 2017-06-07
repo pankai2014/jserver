@@ -1,5 +1,6 @@
 package org.kaipan.www.socket.https;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,20 +26,24 @@ public class HttpsMessageReader implements IMessageReader
 	@Override
 	public void initialize(MessageBuffer readMessageBuffer) 
 	{
-		this.messageBuffer = readMessageBuffer;
-		this.nextMessage   = messageBuffer.getMessage();
-		
-		this.nextMessage.metaData = new HttpHeader();
+		this.messageBuffer = readMessageBuffer;				
 	}
 	
     @Override
     public boolean read(Socket socket, ByteBuffer byteBuffer)
     {
-    	SslEngine sslEngine = socket.getSslEngine();
-    	if ( sslEngine == null ) return false;
+    	if ( nextMessage == null ) {
+    		this.nextMessage 		  = messageBuffer.getMessage();
+    		this.nextMessage.metaData = new HttpHeader();
+    	}
     	
-    	sslEngine.read(socket);
-    	
+        try {
+            socket.read(byteBuffer);
+        } 
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         if ( socket.endOfStreamReached == true ) return false;
 
         byteBuffer.flip();
@@ -49,17 +54,25 @@ public class HttpsMessageReader implements IMessageReader
         // body isn't complete
         if ( buffer.headerComplete == true 
                 && buffer.bodycomplete == false ) {
-            if ( buffer.expectContentLength <= nextMessage.length - buffer.prevBodyEndIndex ) {
+        	int realContentLength = nextMessage.length - buffer.prevBodyEndIndex;
+        	
+            if ( buffer.expectContentLength <= realContentLength ) {
                 buffer.bodycomplete = true;
                 
-                int length       = buffer.prevBodyEndIndex + buffer.expectContentLength;
-                
-                Message message  = messageBuffer.getMessage();
-                message.metaData = new HttpHeader();
-                message.writePartialMessageToMessage(nextMessage, length);
-                
                 completeMessages.add(nextMessage);
-                nextMessage = message;
+                
+                if ( realContentLength > buffer.expectContentLength ) {
+                	 int length       = buffer.prevBodyEndIndex + buffer.expectContentLength;
+                     
+                     Message message  = messageBuffer.getMessage();
+                     message.metaData = new HttpHeader();
+                     message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
+                     
+                     nextMessage = message;
+                }
+                else {
+                	nextMessage = null;
+                }
             }
             
             byteBuffer.clear();
@@ -96,15 +109,20 @@ public class HttpsMessageReader implements IMessageReader
         int endIndex  = metaData.bodyEndIndex;
         int realIndex = nextMessage.offset + nextMessage.length;
         if ( endIndex <= realIndex ) { 
-            
-            Message message  = messageBuffer.getMessage();
-            message.metaData = new HttpHeader();
-            
-            buffer.bodycomplete        = true;
-            message.writePartialMessageToMessage(nextMessage, endIndex);
+            buffer.bodycomplete = true;
             
             completeMessages.add(nextMessage);
-            nextMessage = message;
+            
+            if ( realIndex > endIndex ) {
+            	Message message  = messageBuffer.getMessage();
+                message.metaData = new HttpHeader();
+            	
+            	message.writePartialMessageToMessage(nextMessage, endIndex - nextMessage.offset);
+            	nextMessage = message;
+            }
+            else {
+            	nextMessage = null;
+            }
         }
         else {
             buffer.bodycomplete        = false;

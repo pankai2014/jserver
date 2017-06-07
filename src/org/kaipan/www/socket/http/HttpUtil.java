@@ -193,7 +193,7 @@ public class HttpUtil
     {
         HttpRequest request = new HttpRequest();
         
-        String   Str         = new String(message.sharedArray, message.offset, metaData.endOfHeader);
+        String   Str         = new String(message.sharedArray, message.offset, metaData.endOfHeader - message.offset);
         String[] headerlines = Str.split(HTTP_HEADER_SPLIT);
         
         if ( headerlines.length > 0 ) {

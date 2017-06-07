@@ -22,15 +22,17 @@ public class HttpMessageReader implements IMessageReader
 	@Override
 	public void initialize(MessageBuffer readMessageBuffer) 
 	{
-		this.messageBuffer = readMessageBuffer;
-		this.nextMessage   = messageBuffer.getMessage();
-		
-		this.nextMessage.metaData = new HttpHeader();
+		this.messageBuffer = readMessageBuffer;				
 	}
 	
     @Override
     public boolean read(Socket socket, ByteBuffer byteBuffer)
     {
+    	if ( nextMessage == null ) {
+    		this.nextMessage 		  = messageBuffer.getMessage();
+    		this.nextMessage.metaData = new HttpHeader();
+    	}
+    	
         try {
             socket.read(byteBuffer);
         } 
@@ -48,17 +50,25 @@ public class HttpMessageReader implements IMessageReader
         // body isn't complete
         if ( buffer.headerComplete == true 
                 && buffer.bodycomplete == false ) {
-            if ( buffer.expectContentLength <= nextMessage.length - buffer.prevBodyEndIndex ) {
+        	int realContentLength = nextMessage.length - buffer.prevBodyEndIndex;
+        	
+            if ( buffer.expectContentLength <= realContentLength ) {
                 buffer.bodycomplete = true;
                 
-                int length       = buffer.prevBodyEndIndex + buffer.expectContentLength;
-                
-                Message message  = messageBuffer.getMessage();
-                message.metaData = new HttpHeader();
-                message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
-                
                 completeMessages.add(nextMessage);
-                nextMessage = message;
+                
+                if ( realContentLength > buffer.expectContentLength ) {
+                	 int length       = buffer.prevBodyEndIndex + buffer.expectContentLength;
+                     
+                     Message message  = messageBuffer.getMessage();
+                     message.metaData = new HttpHeader();
+                     message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
+                     
+                     nextMessage = message;
+                }
+                else {
+                	nextMessage = null;
+                }
             }
             
             byteBuffer.clear();
@@ -95,15 +105,20 @@ public class HttpMessageReader implements IMessageReader
         int endIndex  = metaData.bodyEndIndex;
         int realIndex = nextMessage.offset + nextMessage.length;
         if ( endIndex <= realIndex ) { 
-            
-            Message message  = messageBuffer.getMessage();
-            message.metaData = new HttpHeader();
-            
             buffer.bodycomplete = true;
-            message.writePartialMessageToMessage(nextMessage, endIndex - nextMessage.offset);
             
             completeMessages.add(nextMessage);
-            nextMessage = message;
+            
+            if ( realIndex > endIndex ) {
+            	Message message  = messageBuffer.getMessage();
+                message.metaData = new HttpHeader();
+            	
+            	message.writePartialMessageToMessage(nextMessage, endIndex - nextMessage.offset);
+            	nextMessage = message;
+            }
+            else {
+            	nextMessage = null;
+            }
         }
         else {
             buffer.bodycomplete        = false;

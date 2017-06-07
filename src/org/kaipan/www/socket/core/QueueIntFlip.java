@@ -123,11 +123,11 @@ public class QueueIntFlip
     public int take() 
     {
         if ( ! flipped ) {
-            if ( readPos < writePos ) {
-                return elements[readPos++];
-            } 
+        	if ( readPos >= writePos ) {
+        		readPos = 0;
+        	}
             
-            return -1;
+        	return elements[readPos++];
         } 
         else {
             if ( readPos == capacity ) {
