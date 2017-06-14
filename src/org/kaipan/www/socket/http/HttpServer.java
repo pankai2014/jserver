@@ -46,7 +46,7 @@ public class HttpServer extends IServer
         else {
             property = Utils.loadConfigFile(path);
             if ( property == null ) {
-                System.out.println("Usage: java -jar java-nio-http-server-{version}.jar "
+                System.out.println("Usage: java -jar http-server-{version}.jar "
                         + "\"path to file http-server.properties\"");
                 return;
             }

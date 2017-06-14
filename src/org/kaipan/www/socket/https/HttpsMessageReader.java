@@ -1,12 +1,10 @@
 package org.kaipan.www.socket.https;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.kaipan.www.socket.core.IMessageReader;
-import org.kaipan.www.socket.core.Log;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.Socket;
@@ -26,7 +24,7 @@ public class HttpsMessageReader implements IMessageReader
 	@Override
 	public void initialize(MessageBuffer readMessageBuffer) 
 	{
-		this.messageBuffer = readMessageBuffer;				
+		this.messageBuffer = readMessageBuffer;
 	}
 	
     @Override
@@ -37,13 +35,11 @@ public class HttpsMessageReader implements IMessageReader
     		this.nextMessage.metaData = new HttpHeader();
     	}
     	
-        try {
-            socket.read(byteBuffer);
-        } 
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    	SslEngine sslEngine = socket.getSslEngine();
+    	if ( sslEngine == null ) return false;
+    	
+    	sslEngine.read(socket);
+    	
         if ( socket.endOfStreamReached == true ) return false;
 
         byteBuffer.flip();
@@ -81,8 +77,6 @@ public class HttpsMessageReader implements IMessageReader
         
         HttpHeader metaData   = (HttpHeader)nextMessage.metaData;
         buffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, nextMessage.offset, nextMessage.length, metaData);
-        
-        Log.write("head completed yet ? : " + buffer.headerComplete + ", socket id = " + socket.getSocketId());
         
         // header was still unfinished
         if ( ! buffer.headerComplete ) {
@@ -129,8 +123,6 @@ public class HttpsMessageReader implements IMessageReader
             buffer.prevBodyEndIndex    = endIndex;
             buffer.expectContentLength = endIndex - realIndex;
         }
-        
-        Log.write("body completed yet ? : " + buffer.bodycomplete + ", socket id = " + socket.getSocketId());
 
         byteBuffer.clear();
         return true;

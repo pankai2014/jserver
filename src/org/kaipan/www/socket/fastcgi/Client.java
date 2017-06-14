@@ -101,7 +101,6 @@ public class Client
         connect();
         
         int requestId = random();
-        //System.out.println("requestId: " + requestId);
         
         builStartPacket(requestId);
         
@@ -253,7 +252,6 @@ public class Client
     	ret.put("PaddingLength", paddingLength);
     	ret.put("Reserved", 	 reserved);
     	
-    	//System.out.println(ret);
     	return ret;
     }
     
@@ -344,7 +342,6 @@ public class Client
     	} while ( true );
         
         writeBytesBuffer.flip();
-        //System.out.println(new String(writeBytesBuffer.array(), 0, writeBytesBuffer.remaining()));
         
         message.length = 0;
         message.writeToMessage(writeBytesBuffer);
@@ -352,8 +349,6 @@ public class Client
         readBytesBuffer.clear();
         writeBytesBuffer.clear();
         
-        //readBytesBuffer  = null;
-        //writeBytesBuffer = null;
         try {
 			client.close();
 		} 

@@ -25,7 +25,6 @@ public class WsMessageReader implements IMessageReader
     @Override
     public boolean read(Socket socket, ByteBuffer byteBuffer)
     {
-        
         return false;
     }
 
