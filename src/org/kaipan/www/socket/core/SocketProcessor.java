@@ -30,7 +30,7 @@ public class SocketProcessor
 	private IConfig iconfig = null;
 	
 	private Queue<Socket>  inSocketQueue   		= new ArrayBlockingQueue<Socket>(1024);
-    private Queue<Message> outboundMessageQueue = new LinkedList<>();   //todo use a better / faster queue, thread not safe
+    private Queue<Message> outboundMessageQueue = new LinkedList<>();  //todo use a better / faster queue, thread not safe
     
     private Map<Long, Socket> socketMap         = new HashMap<>();
     
@@ -47,7 +47,7 @@ public class SocketProcessor
     private IMessageReaderFactory messageReaderFactory = null;
     private WriteProxy			  writeProxy		   = null;	
     
-    private long nextSocketId = 16 * 1024; //start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
+    private long nextSocketId = 16 * 1024; 	//start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
     
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();

@@ -19,12 +19,15 @@ public class WsMessageReader implements IMessageReader
     public void initialize(MessageBuffer readMessageBuffer)
     {
         this.messageBuffer = readMessageBuffer;
-        this.nextMessage   = messageBuffer.getMessage();
     }
 
     @Override
     public boolean read(Socket socket, ByteBuffer byteBuffer)
     {
+    	if ( nextMessage == null ) {
+    		this.nextMessage = messageBuffer.getMessage();
+    	}
+    	
         return false;
     }
 

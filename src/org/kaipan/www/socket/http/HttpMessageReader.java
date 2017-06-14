@@ -25,29 +25,9 @@ public class HttpMessageReader implements IMessageReader
 		this.messageBuffer = readMessageBuffer;				
 	}
 	
-    @Override
-    public boolean read(Socket socket, ByteBuffer byteBuffer)
-    {
-    	if ( nextMessage == null ) {
-    		this.nextMessage 		  = messageBuffer.getMessage();
-    		this.nextMessage.metaData = new HttpHeader();
-    	}
-    	
-        try {
-            socket.read(byteBuffer);
-        } 
-        catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if ( socket.endOfStreamReached == true ) return false;
-
-        byteBuffer.flip();
-        
-        // TODO Reading data exceeds 1M
-        nextMessage.writeToMessage(byteBuffer);
-        
-        // body isn't complete
+	public static boolean operate(MessageBuffer messageBuffer, Message nextMessage, HttpMessageReaderBuffer buffer, List<Message> completeMessages) 
+	{
+		// body isn't complete
         if ( buffer.headerComplete == true 
                 && buffer.bodycomplete == false ) {
         	int realContentLength = nextMessage.length - buffer.prevBodyEndIndex;
@@ -71,31 +51,27 @@ public class HttpMessageReader implements IMessageReader
                 }
             }
             
-            byteBuffer.clear();
             return true;
         }
         
         HttpHeader metaData   = (HttpHeader)nextMessage.metaData;
         buffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, nextMessage.offset, nextMessage.length, metaData);
         
-        Log.write("head completed yet ? : " + buffer.headerComplete + ", socket id = " + socket.getSocketId());
+        Log.write("head completed yet ? : " + buffer.headerComplete);
         
         // header was still unfinished
         if ( ! buffer.headerComplete ) {
             if ( nextMessage.length > HttpUtil.HTTP_HEAD_MAXLEN ) {
                 // TODO Write log, header is too large
-                byteBuffer.clear();
                 return false;
             }
             
-            byteBuffer.clear();
         	return true;
         }
         else {
             int headerLength = metaData.endOfHeader - nextMessage.offset;
             if ( headerLength > HttpUtil.HTTP_HEAD_MAXLEN ) {
                 // TODO Write log, header is too large
-                byteBuffer.clear();
                 return false;
             }
             
@@ -126,10 +102,35 @@ public class HttpMessageReader implements IMessageReader
             buffer.expectContentLength = endIndex - realIndex;
         }
         
-        Log.write("body completed yet ? : " + buffer.bodycomplete + ", socket id = " + socket.getSocketId());
-
-        byteBuffer.clear();
+        Log.write("body completed yet ? : " + buffer.bodycomplete);
+        
         return true;
+	}
+	
+    @Override
+    public boolean read(Socket socket, ByteBuffer byteBuffer)
+    {
+    	if ( nextMessage == null ) {
+    		this.nextMessage 		  = messageBuffer.getMessage();
+    		this.nextMessage.metaData = new HttpHeader();
+    	}
+    	
+        try {
+            socket.read(byteBuffer);
+        } 
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if ( socket.endOfStreamReached == true ) return false;
+
+        byteBuffer.flip();
+        
+        // TODO Reading data exceeds 1M
+        nextMessage.writeToMessage(byteBuffer);
+        byteBuffer.clear();
+        
+        return operate(messageBuffer, nextMessage, buffer, completeMessages);
     }
 
 	@Override

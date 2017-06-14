@@ -85,7 +85,7 @@ public class HttpUtil
         int valueEndIndex   = index;
         boolean endOfValueFound = false;
 
-        while ( index < endIndex && !endOfValueFound ) {
+        while ( index < endIndex && ! endOfValueFound ) {
             switch( src[index] ) {
                 case '0' : ;
                 case '1' : ;
