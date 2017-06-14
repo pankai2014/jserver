@@ -122,6 +122,7 @@ public class HttpMessageReader implements IMessageReader
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        
         if ( socket.endOfStreamReached == true ) return false;
 
         byteBuffer.flip();
