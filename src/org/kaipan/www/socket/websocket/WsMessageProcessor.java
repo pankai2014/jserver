@@ -5,7 +5,6 @@ import java.util.Map;
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.core.IMessageProcessor;
 import org.kaipan.www.socket.core.Message;
-import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.WriteProxy;
 
 public class WsMessageProcessor implements IMessageProcessor
@@ -18,7 +17,7 @@ public class WsMessageProcessor implements IMessageProcessor
 	}
 
 	@Override
-	public void process(Socket socket, Message message, WriteProxy writeProxy, Map<String, IController> map)
+	public void process(Message message, WriteProxy writeProxy, Map<String, IController> map)
 	{
 		
 	}

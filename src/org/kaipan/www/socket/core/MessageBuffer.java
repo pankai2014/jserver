@@ -44,13 +44,13 @@ public class MessageBuffer
         }
     }
 
-    public Message getMessage() 
+    public synchronized Message getMessage() 
     {
         int nextFreeSmallBlock = this.smallMessageBufferFreeBlocks.take();
 
         if ( nextFreeSmallBlock == -1 ) return null;
 
-        Message message = new Message(this);       //todo get from Message pool - caps memory usage.
+        Message message = new Message(this); //todo get from Message pool - caps memory usage.
 
         message.sharedArray = this.smallMessageBuffer;
         message.capacity    = CAPACITY_SMALL;
@@ -60,7 +60,7 @@ public class MessageBuffer
         return message;
     }
 
-    public boolean expandMessage(Message message)
+    public synchronized boolean expandMessage(Message message)
     {
         if ( message.capacity == CAPACITY_SMALL) {
             return moveMessage(message, this.smallMessageBufferFreeBlocks, this.mediumMessageBufferFreeBlocks, this.mediumMessageBuffer, CAPACITY_MEDIUM);
@@ -76,7 +76,7 @@ public class MessageBuffer
         }
     }
 
-    private boolean moveMessage(Message message, QueueIntFlip srcBlockQueue, QueueIntFlip destBlockQueue, byte[] dest, int newCapacity) 
+    private synchronized boolean moveMessage(Message message, QueueIntFlip srcBlockQueue, QueueIntFlip destBlockQueue, byte[] dest, int newCapacity) 
     {
         int nextFreeBlock = destBlockQueue.take();
         if ( nextFreeBlock == -1 ) return false;

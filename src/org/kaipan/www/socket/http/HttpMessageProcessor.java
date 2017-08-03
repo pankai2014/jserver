@@ -12,7 +12,6 @@ import java.util.Map;
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.core.IMessageProcessor;
 import org.kaipan.www.socket.core.Message;
-import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.WriteProxy;
 import org.kaipan.www.socket.fastcgi.Client;
 import org.kaipan.www.socket.util.Utils;
@@ -27,7 +26,7 @@ public class HttpMessageProcessor implements IMessageProcessor
 	}
 	
 	@Override
-	public void process(Socket socket, Message message, WriteProxy writeProxy, Map<String, IController> controllerMap) 
+	public void process(Message message, WriteProxy writeProxy, Map<String, IController> controllerMap) 
 	{
 	    HttpHeader metaData = (HttpHeader)message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
@@ -35,19 +34,19 @@ public class HttpMessageProcessor implements IMessageProcessor
         String ext = Utils.getFileExt(request.path);
         
         if ( ext == null ) {
-        	doMapRequest(socket, request, writeProxy, controllerMap);
+        	doMapRequest(request, writeProxy, controllerMap);
         	return;
         }
         
         if ( config.staticExt().contains(ext) ) {
-            doStaticRequest(socket, request, writeProxy);
+            doStaticRequest(request, writeProxy);
         }
         else if ( config.dynamicExt().contains(ext) ) {
-        	doDynamicRequest(socket, request, writeProxy);
+        	doDynamicRequest(request, writeProxy);
         }
 	}
 	
-	public void doStaticRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
+	public void doStaticRequest(HttpRequest request, WriteProxy writeProxy) 
 	{
 	    Message    message    = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
@@ -62,9 +61,6 @@ public class HttpMessageProcessor implements IMessageProcessor
 	        
             try {
                 message.writeToMessage(response.getHeader().getBytes(config.charset()));
-                socket.closeAfterWriting = true;
-                
-                //Log.write("response: \n" + new String(message.sharedArray, message.offset, message.length));
             } 
             catch (UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
@@ -111,15 +107,10 @@ public class HttpMessageProcessor implements IMessageProcessor
 			e1.printStackTrace();
 		}
 	    
-	    bytes = null;
-	    
-	    socket.closeAfterWriting = true;
 	    writeProxy.enqueue(message);
-	    
-	    //Log.write("response: \n" + new String(message.sharedArray, message.offset, message.length));
 	}
 	
-	public void doDynamicRequest(Socket socket, HttpRequest request, WriteProxy writeProxy) 
+	public void doDynamicRequest(HttpRequest request, WriteProxy writeProxy) 
 	{
 		Message   message     = writeProxy.getMessage();
 		Message   nextMessage = writeProxy.getMessage();
@@ -190,13 +181,10 @@ public class HttpMessageProcessor implements IMessageProcessor
 			e1.printStackTrace();
 		}
 	    
-	    //System.out.println(new String(nextMessage.sharedArray, nextMessage.offset, nextMessage.length));
-	    
-	    socket.closeAfterWriting = true;
 	    writeProxy.enqueue(nextMessage);
 	}
 	
-	public void doMapRequest(Socket socket, HttpRequest request, WriteProxy writeProxy, Map<String, IController> controllerMap) 
+	public void doMapRequest(HttpRequest request, WriteProxy writeProxy, Map<String, IController> controllerMap) 
 	{
 		Message    message    = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
@@ -226,7 +214,6 @@ public class HttpMessageProcessor implements IMessageProcessor
 			e1.printStackTrace();
 		}
 		
-		socket.closeAfterWriting = true;
 	    writeProxy.enqueue(message);
 	}
 }

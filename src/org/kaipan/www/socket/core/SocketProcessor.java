@@ -9,7 +9,6 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -17,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.ssl.Ssl;
@@ -30,7 +30,12 @@ public class SocketProcessor
 	private IConfig iconfig = null;
 	
 	private Queue<Socket>  inSocketQueue   		= new ArrayBlockingQueue<Socket>(1024);
-    private Queue<Message> outboundMessageQueue = new LinkedList<>();  //todo use a better / faster queue, thread not safe
+	
+	/**
+	 * use a better / faster queue
+	 *     you could use new LinkedList<>(), but thread not safe
+	 */
+	private Queue<Message> outboundMessageQueue = new LinkedBlockingQueue<Message>(10000);
     
     private Map<Long, Socket> socketMap         = new HashMap<>();
     
@@ -47,7 +52,10 @@ public class SocketProcessor
     private IMessageReaderFactory messageReaderFactory = null;
     private WriteProxy			  writeProxy		   = null;	
     
-    private long nextSocketId = 16 * 1024; 	//start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
+    /**
+     * start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
+     */
+    private long nextSocketId = 16 * 1024;
     
     private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
     private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
@@ -70,7 +78,8 @@ public class SocketProcessor
         }
     }
     
-    public void init(IMessageReaderFactory messageReaderFactory, MessageBuffer readMessageBuffer, MessageBuffer writeMessageBuffer, IMessageProcessor messageProcessor) 
+    public void init(IMessageReaderFactory messageReaderFactory, MessageBuffer readMessageBuffer, 
+    		MessageBuffer writeMessageBuffer, IMessageProcessor messageProcessor) 
     {
     	this.readMessageBuffer    = readMessageBuffer;
         this.writeMessageBuffer   = writeMessageBuffer;
@@ -94,7 +103,7 @@ public class SocketProcessor
             if ( ! channel.isOpen() ) return;
             
             channel.configureBlocking(false);
-            SelectionKey  readKey = channel.register(readSelector, SelectionKey.OP_READ);
+            SelectionKey readKey = channel.register(readSelector, SelectionKey.OP_READ);
             
             readKey.attach(socket);
         } 
@@ -138,7 +147,6 @@ public class SocketProcessor
     		
     		// TLS/SSL protocol
     		if ( iconfig instanceof SslConfig ) {
-    		    
     		    SslConfig SslConfig = (SslConfig) iconfig;
     		  
     			if ( SslConfig.sslMode() ) {
@@ -181,28 +189,6 @@ public class SocketProcessor
     	}
     }
     
-    public void readFromSockets(Socket socket) 
-    {
-        IMessageReader messageReader  = socket.getMessageReader();
-        boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
-        
-        if ( ! notEndOfStreamReached ) {
-            close(socket);
-            
-            Log.write("client closed, socket id = " + socket.getSocketId());
-        }
-        
-        List<Message> fullMessages = messageReader.getMessages();
-        
-        if ( fullMessages.size() > 0 ) {
-            for ( Message message : fullMessages ) {
-                message.socketId = socket.getSocketId();
-                
-                messageProcessor.process(socket, message, writeProxy, controllerMap);
-            }
-        }
-    }
-    
     public void readFromSockets() 
     { 
        try {
@@ -240,16 +226,16 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       messageProcessor.process(socket, message, writeProxy, controllerMap);
+                       messageProcessor.process(message, writeProxy, controllerMap);
+                       socket.closeAfterWriting = true;
                    }
                }
                
                fullMessages.clear();
                
-               /**
-                *  remove iteration just crossed elements,  
-                *      why do this operation, key.isReadable() is always true?
-                *      keyIterator is invalid?
+               /*
+                * remove iteration just crossed elements,  
+                *     why do this operation, key.isReadable() is always true? keyIterator is invalid?     
                 */
                keyIterator.remove();
            } 
@@ -361,7 +347,8 @@ public class SocketProcessor
     private void cancelEmptySockets() 
     {
         for ( Socket socket : nonEmptyToEmptySockets ) {
-            SelectionKey writeKey = socket.getSocketChannel().keyFor(this.writeSelector);	// unregister from write selector
+        	// unregister from write selector
+            SelectionKey writeKey = socket.getSocketChannel().keyFor(this.writeSelector);	
 
             writeKey.attach(null);
             writeKey.cancel();
@@ -383,8 +370,11 @@ public class SocketProcessor
     			if ( messageWriter.isEmpty() ) {
     				messageWriter.enqueue(outMessage);
     				
-    				nonEmptyToEmptySockets.remove(socket); //remove the operation of canceling write 
-                    emptyToNonEmptySockets.add(socket);    //register write operation, not necessary if removed from nonEmptyToEmptySockets in prev. statement.
+    				// remove the operation of canceling write
+    				nonEmptyToEmptySockets.remove(socket); 
+    				
+    				// register write operation, not necessary if removed from nonEmptyToEmptySockets in prev. statement.
+                    emptyToNonEmptySockets.add(socket);   
     			}
     			else {
     				messageWriter.enqueue(outMessage);
