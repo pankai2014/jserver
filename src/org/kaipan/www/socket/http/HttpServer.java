@@ -3,6 +3,7 @@ package org.kaipan.www.socket.http;
 import java.util.Properties;
 
 import org.kaipan.www.socket.controller.ToutiaoController;
+import org.kaipan.www.socket.core.Log;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
@@ -46,7 +47,7 @@ public class HttpServer extends IServer
         else {
             property = Utils.loadConfigFile(path);
             if ( property == null ) {
-                System.out.println("Usage: java -jar http-server-{version}.jar "
+                Log.write("Usage: java -jar http-server-{version}.jar "
                         + "\"path to file http-server.properties\"");
                 return;
             }

@@ -6,4 +6,9 @@ public class Log
     {
         System.out.println(str);
     }
+    
+    public static void write(String str, int level) 
+    {
+        System.out.println(str);
+    }
 }

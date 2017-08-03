@@ -78,7 +78,9 @@ public class HttpResponse
     
     public void setHttpStatus(int code) 
     {
-    	this.meta = protocol + " " + HTTP_HEADER_CODE.get(code) + "\r\n";
+    	String[] meta = {protocol, " ", HTTP_HEADER_CODE.get(code), "\r\n"};
+    	
+    	this.meta = String.join("", meta);
     }
     
     public void setHeader(String key, String value) 
@@ -95,14 +97,19 @@ public class HttpResponse
     		this.setHeader("Content-Type", "text/html; charset=utf-8");
     	}
     	
-    	String out = this.meta;
+    	StringBuilder stringBuilder = new StringBuilder();
+    	stringBuilder.append(this.meta);
+    	
     	for ( Map.Entry<String, String> entry : headers.entrySet() ) {
-    		out += entry.getKey() + ": " + entry.getValue() + "\r\n"; 
+    		stringBuilder.append(entry.getKey());
+    		stringBuilder.append(":");
+    		stringBuilder.append(entry.getValue());
+    		stringBuilder.append("\r\n");
         }
     	
-    	out += "\r\n";
+    	stringBuilder.append("\r\n");
     	
-    	return out;
+    	return stringBuilder.toString();
     }
 }
 

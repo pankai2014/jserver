@@ -411,7 +411,7 @@ public class SocketProcessor
             executeCycle();
             
             try {
-                Thread.sleep(5, 0);
+                Thread.sleep(1, 0);
             } 
             catch (InterruptedException e) {
                 // TODO Auto-generated catch block
