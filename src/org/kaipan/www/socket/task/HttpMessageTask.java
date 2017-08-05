@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.http;
+package org.kaipan.www.socket.task;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -9,41 +9,34 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.controller.IController;
-import org.kaipan.www.socket.core.IMessageProcessor;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.WriteProxy;
-import org.kaipan.www.socket.fastcgi.Client;
+import org.kaipan.www.socket.protocol.http.HttpConfig;
+import org.kaipan.www.socket.protocol.http.HttpHeader;
+import org.kaipan.www.socket.protocol.http.HttpRequest;
+import org.kaipan.www.socket.protocol.http.HttpResponse;
+import org.kaipan.www.socket.protocol.http.HttpUtil;
 import org.kaipan.www.socket.util.Utils;
 
-public class HttpMessageProcessor implements IMessageProcessor
-{	
-    private HttpConfig config;
-    
-	public HttpMessageProcessor(HttpConfig config) 
-	{
-		this.config = config;
-	}
+public class HttpMessageTask implements Task
+{
+	private HttpConfig config;
 	
-	@Override
-	public void process(Message message, WriteProxy writeProxy, Map<String, IController> controllerMap) 
+	private Message    message;
+	private WriteProxy writeProxy;
+	
+	private Map<String, IController> controllerMap;
+	
+	public HttpMessageTask(HttpConfig config, Message message, WriteProxy writeProxy, Map<String, IController> controllerMap)
 	{
-	    HttpHeader metaData = (HttpHeader)message.metaData;
-        HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
-        
-        String ext = Utils.getFileExt(request.path);
-        
-        if ( ext == null ) {
-        	doMapRequest(request, writeProxy, controllerMap);
-        	return;
-        }
-        
-        if ( config.staticExt().contains(ext) ) {
-            doStaticRequest(request, writeProxy);
-        }
-        else if ( config.dynamicExt().contains(ext) ) {
-        	doDynamicRequest(request, writeProxy);
-        }
+		this.config 	= config;
+		
+		this.message 	= message;
+		this.writeProxy = writeProxy;
+		
+		this.controllerMap = controllerMap;
 	}
 	
 	public void doStaticRequest(HttpRequest request, WriteProxy writeProxy) 
@@ -74,7 +67,7 @@ public class HttpMessageProcessor implements IMessageProcessor
 	    Long length  = null;
 	    byte[] bytes = null;
 	    try {
-			FileInputStream in 	  = new FileInputStream(file);
+			FileInputStream in 	   = new FileInputStream(file);
 			BufferedInputStream is = new BufferedInputStream(in);
 			
 			length = file.length();
@@ -215,5 +208,26 @@ public class HttpMessageProcessor implements IMessageProcessor
 		}
 		
 	    writeProxy.enqueue(message);
+	}
+
+	@Override
+	public void run()
+	{
+		HttpHeader metaData = (HttpHeader)message.metaData;
+        HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
+        
+        String ext = Utils.getFileExt(request.path);
+        
+        if ( ext == null ) {
+        	doMapRequest(request, writeProxy, controllerMap);
+        	return;
+        }
+        
+        if ( config.staticExt().contains(ext) ) {
+            doStaticRequest(request, writeProxy);
+        }
+        else if ( config.dynamicExt().contains(ext) ) {
+        	doDynamicRequest(request, writeProxy);
+        }
 	}
 }

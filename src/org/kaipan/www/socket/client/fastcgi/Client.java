@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.fastcgi;
+package org.kaipan.www.socket.client.fastcgi;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -49,9 +49,9 @@ public class Client
     private int connectTimeOut   = 5000;
     private int readWriteTimeOut = 5000;
     
-    public byte[]	   readBytes	   = new byte[65535];	
-    public ByteBuffer readBytesBuffer  = ByteBuffer.wrap(readBytes);
-    public ByteBuffer writeBytesBuffer = ByteBuffer.allocate(65535);
+    private byte[]	   readBytes	    = new byte[65535];	
+    private ByteBuffer readBytesBuffer  = ByteBuffer.wrap(readBytes);
+    private ByteBuffer writeBytesBuffer = ByteBuffer.allocate(65535);
     
     private Socket  client  = null;
     private Message message = null;

@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.http;
+package org.kaipan.www.socket.protocol.http;
 
 import java.util.Map;
 import java.util.HashMap;

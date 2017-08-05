@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.https;
+package org.kaipan.www.socket.protocol.https;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -8,9 +8,9 @@ import org.kaipan.www.socket.core.IMessageReader;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.Socket;
-import org.kaipan.www.socket.http.HttpHeader;
-import org.kaipan.www.socket.http.HttpMessageReader;
-import org.kaipan.www.socket.http.HttpMessageReaderBuffer;
+import org.kaipan.www.socket.protocol.http.HttpHeader;
+import org.kaipan.www.socket.protocol.http.HttpMessageReader;
+import org.kaipan.www.socket.protocol.http.HttpMessageReaderBuffer;
 import org.kaipan.www.socket.ssl.SslEngine;
 
 public class HttpsMessageReader implements IMessageReader

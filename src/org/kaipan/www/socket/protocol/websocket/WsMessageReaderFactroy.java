@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.websocket;
+package org.kaipan.www.socket.protocol.websocket;
 
 import org.kaipan.www.socket.core.IMessageReader;
 import org.kaipan.www.socket.core.IMessageReaderFactory;

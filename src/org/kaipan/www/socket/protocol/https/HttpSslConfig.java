@@ -1,8 +1,8 @@
-package org.kaipan.www.socket.https;
+package org.kaipan.www.socket.protocol.https;
 
 import java.util.Properties;
 
-import org.kaipan.www.socket.http.HttpConfig;
+import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.ssl.SslConfig;
 
 public class HttpSslConfig extends HttpConfig implements SslConfig

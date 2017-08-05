@@ -5,19 +5,21 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
 
+import org.kaipan.www.socket.log.Logger;
+
 public abstract class IServer
 {	
     protected IConfig iconfig = null;
     
-    protected SocketProcessor   processor = null;
-    protected ServerSocketChannel channel = null;
+    protected SocketProcessor   socketProcessor = null;
+    protected ServerSocketChannel socketChannel = null;
     
     protected IServer(IConfig iconfig)
     {
         this.iconfig = iconfig;
         
         try {
-            this.channel = ServerSocketChannel.open();
+            this.socketChannel = ServerSocketChannel.open();
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
@@ -32,20 +34,20 @@ public abstract class IServer
     	SocketAddress address = new InetSocketAddress(ip, port);
         
         try {
-            channel.bind(address);
+        	socketChannel.bind(address);
 		} 
         catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         
-        Log.write("listen " + address + "...");
+        Logger.write("listen " + address + "...");
     }
     
     public void start()
     {   
-        processor.getCachedThreadPool().execute(new Accept(this));
-        processor.run();
+    	socketProcessor.getAcceptThreadPool().execute(new Accept(this));
+    	socketProcessor.run();
     }
     
     protected abstract void createSocketProcessor();

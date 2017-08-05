@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.http;
+package org.kaipan.www.socket.protocol.http;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.kaipan.www.socket.core.IMessageReader;
-import org.kaipan.www.socket.core.Log;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.Socket;
+import org.kaipan.www.socket.log.Logger;
 
 public class HttpMessageReader implements IMessageReader
 {
@@ -57,7 +57,7 @@ public class HttpMessageReader implements IMessageReader
         HttpHeader metaData   = (HttpHeader)nextMessage.metaData;
         buffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, nextMessage.offset, nextMessage.length, metaData);
         
-        Log.write("head completed yet ? : " + buffer.headerComplete);
+        Logger.write("head completed yet ? : " + buffer.headerComplete);
         
         // header was still unfinished
         if ( ! buffer.headerComplete ) {
@@ -102,7 +102,7 @@ public class HttpMessageReader implements IMessageReader
             buffer.expectContentLength = endIndex - realIndex;
         }
         
-        Log.write("body completed yet ? : " + buffer.bodycomplete);
+        Logger.write("body completed yet ? : " + buffer.bodycomplete);
         
         return true;
 	}

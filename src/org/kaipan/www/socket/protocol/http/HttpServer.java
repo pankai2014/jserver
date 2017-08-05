@@ -1,12 +1,11 @@
-package org.kaipan.www.socket.http;
+package org.kaipan.www.socket.protocol.http;
 
 import java.util.Properties;
 
 import org.kaipan.www.socket.controller.ToutiaoController;
-import org.kaipan.www.socket.core.Log;
-import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
+import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpServer extends IServer
@@ -26,9 +25,14 @@ public class HttpServer extends IServer
     @Override
     protected void createSocketProcessor()
     {
-        this.processor = new SocketProcessor(getConfig());
-        this.processor.init(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
-        this.processor.addControllerMap("/toutiao", new ToutiaoController());
+        //this.processor = new SocketProcessor(getConfig());
+        //this.processor.init(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer());
+        //this.processor.addControllerMap("/toutiao", new ToutiaoController());
+    	
+    	this.socketProcessor = SocketProcessor.custom()
+    		.setIConfig(getConfig())
+    		.setMessageReaderFactory(new HttpMessageReaderFactory())
+    		.build();
     }
     
     public static void main(String[] args) 
@@ -47,7 +51,7 @@ public class HttpServer extends IServer
         else {
             property = Utils.loadConfigFile(path);
             if ( property == null ) {
-                Log.write("Usage: java -jar http-server-{version}.jar "
+                Logger.write("Usage: java -jar http-server-{version}.jar "
                         + "\"path to file http-server.properties\"");
                 return;
             }

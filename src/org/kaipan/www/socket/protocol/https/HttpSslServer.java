@@ -1,11 +1,12 @@
-package org.kaipan.www.socket.https;
+package org.kaipan.www.socket.protocol.https;
 
 import java.util.Properties;
 
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.IServer;
 import org.kaipan.www.socket.core.SocketProcessor;
-import org.kaipan.www.socket.http.HttpMessageProcessor;
+import org.kaipan.www.socket.protocol.http.HttpMessageProcessor;
+import org.kaipan.www.socket.protocol.http.HttpMessageReaderFactory;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpSslServer extends IServer
@@ -25,8 +26,13 @@ public class HttpSslServer extends IServer
     @Override
     protected void createSocketProcessor()
     {
-        this.processor = new SocketProcessor(getConfig());
-        this.processor.init(new HttpsMessageReaderFactory(), new MessageBuffer(), new MessageBuffer(), new HttpMessageProcessor(getConfig()));
+        //this.processor = new SocketProcessor(getConfig());
+        //this.processor.init(new HttpsMessageReaderFactory(), new MessageBuffer(), new MessageBuffer());
+    	
+    	this.socketProcessor = SocketProcessor.custom()
+        		.setIConfig(getConfig())
+        		.setMessageReaderFactory(new HttpMessageReaderFactory())
+        		.build();
     }
     
     public static void main(String[] args) 

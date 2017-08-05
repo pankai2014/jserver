@@ -7,68 +7,98 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.kaipan.www.socket.controller.IController;
+import org.kaipan.www.socket.log.Logger;
+import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
 import org.kaipan.www.socket.ssl.SslEngine;
+import org.kaipan.www.socket.task.HttpMessageTask;
+import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.worker.MessageWorker;
 
 public class SocketProcessor
 {
-    private Ssl ssl = null;
+    private Ssl ssl;
     
-	private IConfig iconfig = null;
+	private IConfig iconfig;
 	
-	private Queue<Socket>  inSocketQueue   		= new ArrayBlockingQueue<Socket>(1024);
+	private Queue<Socket> inSocketQueue;
 	
 	/**
 	 * use a better / faster queue
 	 *     you could use new LinkedList<>(), but thread not safe
 	 */
-	private Queue<Message> outboundMessageQueue = new LinkedBlockingQueue<Message>(10000);
+	private Queue<Message> outboundMessageQueue;
     
-    private Map<Long, Socket> socketMap         = new HashMap<>();
+	private MessageWorker messageWorker;
+	
+    private Map<Long, Socket> socketMap;
     
-    private ByteBuffer readByteBuffer  = ByteBuffer.allocate(1024 * 1024 * 4);
-    private ByteBuffer writeByteBuffer = ByteBuffer.allocate(1024 * 1024 * 4);
+    private ByteBuffer readByteBuffer;
+    private ByteBuffer writeByteBuffer;
     
-    private Selector readSelector  = null;
-    private Selector writeSelector = null;
+    private Selector readSelector;
+    private Selector writeSelector;
     
-    private MessageBuffer readMessageBuffer	   = null;
-    private MessageBuffer writeMessageBuffer   = null;	
-    private IMessageProcessor messageProcessor = null;
+    private MessageBuffer readMessageBuffer;
+    private MessageBuffer writeMessageBuffer;	
     
-    private IMessageReaderFactory messageReaderFactory = null;
-    private WriteProxy			  writeProxy		   = null;	
+    private IMessageReaderFactory messageReaderFactory;
+    
+    private WriteProxy writeProxy;	
     
     /**
      * start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
      */
     private long nextSocketId = 16 * 1024;
     
-    private Set<Socket> emptyToNonEmptySockets = new HashSet<>();
-    private Set<Socket> nonEmptyToEmptySockets = new HashSet<>();
+    private Set<Socket> emptyToNonEmptySockets;
+    private Set<Socket> nonEmptyToEmptySockets;
     
-    private ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+    private ExecutorService acceptThreadPool;
     
     private Map<String, IController> controllerMap = new HashMap<>();
     
-    public SocketProcessor(IConfig config) 
-    {   
-    	this.iconfig = config;
+    public SocketProcessor(
+    		IConfig iconfig, 
+			Queue<Socket>  socketQueue,
+			Queue<Message> outboundMessageQueue,
+			MessageWorker messageWorker,
+			Map<Long, Socket> socketMap,
+			ByteBuffer readByteBuffer,
+			ByteBuffer writeByteBuffer,
+			IMessageReaderFactory messageReaderFactory,
+			Set<Socket> emptyToNonEmptySockets,
+			Set<Socket> nonEmptyToEmptySockets,
+			ExecutorService acceptThreadPool)
+    {
+    	this.iconfig = iconfig;
     	
-        try {
+    	this.inSocketQueue 		  = socketQueue;
+    	this.outboundMessageQueue = outboundMessageQueue;
+    	
+    	this.messageWorker = messageWorker;
+    	this.socketMap 	   = socketMap;
+    	
+    	this.readByteBuffer  = readByteBuffer;
+    	this.writeByteBuffer = writeByteBuffer;
+    	
+    	this.messageReaderFactory = messageReaderFactory;
+    	
+    	this.emptyToNonEmptySockets = emptyToNonEmptySockets;
+    	this.nonEmptyToEmptySockets = nonEmptyToEmptySockets;
+    	
+    	this.acceptThreadPool = acceptThreadPool;
+    	
+    	try {
             this.readSelector  = Selector.open();
             this.writeSelector = Selector.open();
         } 
@@ -76,18 +106,16 @@ public class SocketProcessor
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    	
+    	this.readMessageBuffer  = new MessageBuffer();
+    	this.writeMessageBuffer = new MessageBuffer();
+    	
+    	this.writeProxy = new WriteProxy(this.writeMessageBuffer, this.outboundMessageQueue);
     }
     
-    public void init(IMessageReaderFactory messageReaderFactory, MessageBuffer readMessageBuffer, 
-    		MessageBuffer writeMessageBuffer, IMessageProcessor messageProcessor) 
+    public static SocketProcessorBuilder custom() 
     {
-    	this.readMessageBuffer    = readMessageBuffer;
-        this.writeMessageBuffer   = writeMessageBuffer;
-        
-    	this.messageReaderFactory = messageReaderFactory;
-    	this.messageProcessor 	  = messageProcessor;
-    	
-    	this.writeProxy        	  = new WriteProxy(this.writeMessageBuffer, this.outboundMessageQueue);
+    	return new SocketProcessorBuilder();
     }
     
     public void enSocketQueue(Socket socket) 
@@ -95,15 +123,15 @@ public class SocketProcessor
     	inSocketQueue.add(socket);
     }
     
-    public void registerRead(Socket socket) 
+    private void registerRead(Socket socket) 
     {
         try {
-            SocketChannel channel = socket.getSocketChannel();
+            SocketChannel socketChannel = socket.getSocketChannel();
             
-            if ( ! channel.isOpen() ) return;
+            if ( ! socketChannel.isOpen() ) return;
             
-            channel.configureBlocking(false);
-            SelectionKey readKey = channel.register(readSelector, SelectionKey.OP_READ);
+            socketChannel.configureBlocking(false);
+            SelectionKey readKey = socketChannel.register(readSelector, SelectionKey.OP_READ);
             
             readKey.attach(socket);
         } 
@@ -113,12 +141,12 @@ public class SocketProcessor
         }
     }
     
-    public void registerWrite(Socket socket) 
+    private void registerWrite(Socket socket) 
     {
         try {
-            SocketChannel channel = socket.getSocketChannel();
-            channel.configureBlocking(false);
-            SelectionKey writeKey = channel.register(writeSelector, SelectionKey.OP_WRITE);
+            SocketChannel socketChannel = socket.getSocketChannel();
+            socketChannel.configureBlocking(false);
+            SelectionKey writeKey = socketChannel.register(writeSelector, SelectionKey.OP_WRITE);
             
             writeKey.attach(socket);
         } 
@@ -128,14 +156,14 @@ public class SocketProcessor
         }
     }
     
-    public void takeNewInSocket() 
+    private void takeNewInSocket() 
     {
     	Socket socket = inSocketQueue.poll();
     	
     	while ( socket != null ) {
     		this.nextSocketId++;
     		
-    		Log.write("client connected, socket id = " + this.nextSocketId);
+    		Logger.write("client connected, socket id = " + this.nextSocketId);
     		
     		socket.setSocketId(this.nextSocketId);
     		socket.setMessageWriter(new MessageWriter());
@@ -175,7 +203,7 @@ public class SocketProcessor
     			    if ( ! sslEngine.doHandShake(socket) ) {
     			    	close(socket);
     			    	
-    			    	Log.write("client closed due to handshake failure, socket id = " + socket.getSocketId());
+    			    	Logger.write("client closed due to handshake failure, socket id = " + socket.getSocketId());
     			    }
     			}
     		}
@@ -189,7 +217,17 @@ public class SocketProcessor
     	}
     }
     
-    public void readFromSockets() 
+    private Task getMessageTask(Message message) 
+    {
+    	if ( iconfig instanceof HttpConfig ) 
+    	{
+    		return new HttpMessageTask((HttpConfig) iconfig, message, writeProxy, controllerMap);
+    	}
+    	
+    	return null;
+    }
+    
+    private void readFromSockets() 
     { 
        try {
            int readyChannels = readSelector.selectNow();
@@ -217,7 +255,7 @@ public class SocketProcessor
                if ( ! notEndOfStreamReached ) {
                    close(socket);
                    
-                   Log.write("client closed, socket id = " + socket.getSocketId());
+                   Logger.write("client closed, socket id = " + socket.getSocketId());
                }
                
                List<Message> fullMessages = messageReader.getMessages();
@@ -226,7 +264,10 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       messageProcessor.process(message, writeProxy, controllerMap);
+                       Task task = getMessageTask(message);
+                       messageWorker.addTask(task);
+                       
+                       //messageProcessor.process(message, writeProxy, controllerMap);
                        socket.closeAfterWriting = true;
                    }
                }
@@ -244,7 +285,7 @@ public class SocketProcessor
        selectedKeys.clear();
     }
     
-    public void writeToSockets() 
+    private void writeToSockets() 
     {
     	takeNewOutboundMessages();
     	
@@ -272,10 +313,10 @@ public class SocketProcessor
         Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
         
         while ( keyIterator.hasNext() ) {
-        	SelectionKey key = keyIterator.next();
+        	SelectionKey selectedKey = keyIterator.next();
         	
-        	if ( key.isWritable() ) {
-        		Socket socket 				= (Socket) key.attachment();
+        	if ( selectedKey.isWritable() ) {
+        		Socket socket 				= (Socket) selectedKey.attachment();
         		MessageWriter messageWriter = socket.getMessageWriter();
         		
         		try {
@@ -289,7 +330,7 @@ public class SocketProcessor
         		if ( socket.closeAfterWriting == true ) {
         			close(socket);
         			
-        			Log.write("close client, socket id = " + socket.getSocketId());
+        			Logger.write("close client, socket id = " + socket.getSocketId());
         		}
         		else if ( messageWriter.isEmpty() ) {
         			nonEmptyToEmptySockets.add(socket);
@@ -304,28 +345,28 @@ public class SocketProcessor
     
     private void close(Socket socket) 
     {
-        SelectionKey key;
-    	SocketChannel channel = socket.getSocketChannel();
+        SelectionKey selectedKey;
+    	SocketChannel socketChannel = socket.getSocketChannel();
 		
-    	key = channel.keyFor(this.readSelector);
-		if ( key != null ) {
-		    key.attach(null);
-		    key.cancel();
+    	selectedKey = socketChannel.keyFor(this.readSelector);
+		if ( selectedKey != null ) {
+			selectedKey.attach(null);
+			selectedKey.cancel();
 		}
 		
-		key = channel.keyFor(this.writeSelector);
-		if ( key != null ) {
-		    key.attach(null);
-		    key.cancel();
+		selectedKey = socketChannel.keyFor(this.writeSelector);
+		if ( selectedKey != null ) {
+			selectedKey.attach(null);
+			selectedKey.cancel();
 		}
 
-		SslEngine ssl = socket.getSslEngine();
-		if ( ssl != null ) {
-			ssl.handleEndOfStream(socket);
+		SslEngine sslEngine = socket.getSslEngine();
+		if ( sslEngine != null ) {
+			sslEngine.handleEndOfStream(socket);
 		}
 		
 		try {
-			channel.close();
+			socketChannel.close();
 		} 
 		catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -357,7 +398,7 @@ public class SocketProcessor
         nonEmptyToEmptySockets.clear();
     }
     
-    public void takeNewOutboundMessages() 
+    private void takeNewOutboundMessages() 
     {
     	Message outMessage = outboundMessageQueue.poll();
     	
@@ -388,7 +429,7 @@ public class SocketProcessor
     	}
     }
     
-    public void executeCycle() 
+    private void executeCycle()
     {
         takeNewInSocket();
         readFromSockets();
@@ -396,7 +437,9 @@ public class SocketProcessor
     }
 
     public void run() 
-    {          
+    {
+    	messageWorker.start();
+    	
         while( true ) {
             executeCycle();
             
@@ -420,9 +463,9 @@ public class SocketProcessor
         return this.writeSelector;
     }
     
-    public ExecutorService getCachedThreadPool() 
+    public ExecutorService getAcceptThreadPool() 
     {
-        return this.cachedThreadPool;
+        return this.acceptThreadPool;
     }
     
     public void addControllerMap(String name, IController controller) 

@@ -1,6 +1,6 @@
-package org.kaipan.www.socket.core;
+package org.kaipan.www.socket.log;
 
-public class Log
+public class Logger
 {
     public static void write(String str) 
     {

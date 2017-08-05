@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.websocket;
+package org.kaipan.www.socket.protocol.websocket;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

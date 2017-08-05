@@ -9,7 +9,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
-import org.kaipan.www.socket.http.HttpRequest;
+import org.kaipan.www.socket.protocol.http.HttpRequest;
 
 public class ToutiaoController implements IController
 {

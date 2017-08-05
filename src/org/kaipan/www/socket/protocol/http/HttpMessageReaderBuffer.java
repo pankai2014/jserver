@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.http;
+package org.kaipan.www.socket.protocol.http;
 
 public class HttpMessageReaderBuffer
 {

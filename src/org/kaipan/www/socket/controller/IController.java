@@ -1,6 +1,6 @@
 package org.kaipan.www.socket.controller;
 
-import org.kaipan.www.socket.http.HttpRequest;
+import org.kaipan.www.socket.protocol.http.HttpRequest;
 
 public interface IController
 {

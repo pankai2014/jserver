@@ -1,4 +1,4 @@
-package org.kaipan.www.socket.http;
+package org.kaipan.www.socket.protocol.http;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;

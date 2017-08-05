@@ -1,10 +1,9 @@
-package org.kaipan.www.socket.websocket;
+package org.kaipan.www.socket.protocol.websocket;
 
 import java.util.Properties;
 
 import org.kaipan.www.socket.core.IConfig;
 import org.kaipan.www.socket.core.IServer;
-import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.util.Utils;
 
@@ -25,8 +24,10 @@ public class WebsocketServer extends IServer
 	@Override
 	public void createSocketProcessor()
 	{
-		this.processor = new SocketProcessor(getConfig());
-        this.processor.init(new WsMessageReaderFactroy(), new MessageBuffer(), new MessageBuffer(), new WsMessageProcessor(getConfig()));
+        this.socketProcessor = SocketProcessor.custom()
+        		.setIConfig(getConfig())
+        		.setMessageReaderFactory(new WsMessageReaderFactroy())
+        		.build();
 	}
 	
 	public static void main(String[] args)

@@ -3,9 +3,9 @@ package org.kaipan.www.socket.test;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
-import org.kaipan.www.socket.fastcgi.Client;
 
 public class FastcgiClient
 {

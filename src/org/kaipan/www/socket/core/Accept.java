@@ -11,6 +11,8 @@ public class Accept implements Runnable
 {
     IServer server = null;
     
+    private Object LOCK = new Object();
+    
     public Accept(IServer server) 
     {
         this.server = server;
@@ -22,9 +24,8 @@ public class Accept implements Runnable
         Selector acceptSelect = null;
         try {
             acceptSelect = Selector.open();
-            server.channel.configureBlocking(false);
-            
-            server.channel.register(acceptSelect, SelectionKey.OP_ACCEPT);
+            server.socketChannel.configureBlocking(false);
+            server.socketChannel.register(acceptSelect, SelectionKey.OP_ACCEPT);
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
@@ -44,10 +45,12 @@ public class Accept implements Runnable
                     
                     if ( key.isAcceptable() ) {
                         try {
-                            SocketChannel sockeChannel = server.channel.accept();
-                            
-                            Socket socket = new Socket(sockeChannel);
-                            server.processor.enSocketQueue(socket);
+                        	synchronized ( LOCK ) {
+                        		SocketChannel sockeChannel = server.socketChannel.accept();
+                        		
+                        		Socket socket = new Socket(sockeChannel);
+                                server.socketProcessor.enSocketQueue(socket);
+                        	}
                         } 
                         catch (IOException e) {
                             // TODO Auto-generated catch block
