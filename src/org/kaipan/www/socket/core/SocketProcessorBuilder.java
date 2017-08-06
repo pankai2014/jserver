@@ -11,12 +11,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.task.ITask;
+import org.kaipan.www.socket.task.ITaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
 
 public class SocketProcessorBuilder
 {
-	private IConfig iconfig;
+	private Config config;
 	
 	private Queue<Socket>  socketQueue;
 	private Queue<Message> outboundMessageQueue;
@@ -35,9 +36,11 @@ public class SocketProcessorBuilder
 	
 	private ExecutorService acceptThreadPool;
 	
-	public SocketProcessorBuilder setIConfig(IConfig iconfig) 
+	private ITaskFactory taskFactory;
+	
+	public SocketProcessorBuilder setIConfig(Config config) 
 	{
-		this.iconfig = iconfig;
+		this.config = config;
 		
 		return this;
 	}
@@ -112,13 +115,20 @@ public class SocketProcessorBuilder
 		return this;
 	}
 	
+	public SocketProcessorBuilder setTaskFactory(ITaskFactory taskFactory) 
+	{
+		this.taskFactory = taskFactory;
+		
+		return this;
+	}
+	
 	public SocketProcessor build()
 	{
 		if ( socketQueue == null ) 			  socketQueue = new ArrayBlockingQueue<Socket>(1024);
 		if ( outboundMessageQueue == null )   outboundMessageQueue = new LinkedBlockingQueue<Message>(10000);
 		
 		if ( messageWorker == null )		  messageWorker = new MessageWorker(2000, 100, 300, 6, 
-				new ArrayBlockingQueue<Runnable>(10000), new LinkedBlockingQueue<Task>(10000));
+				new ArrayBlockingQueue<Runnable>(10000), new LinkedBlockingQueue<ITask>(10000));
 		
 		if ( socketMap == null )			  socketMap = new HashMap<>();
 		
@@ -128,10 +138,10 @@ public class SocketProcessorBuilder
 		if ( emptyToNonEmptySockets == null ) emptyToNonEmptySockets = new HashSet<>();
 		if ( nonEmptyToEmptySockets == null ) nonEmptyToEmptySockets = new HashSet<>();
 		
-		if ( acceptThreadPool == null )		  acceptThreadPool = Executors.newFixedThreadPool(5); 
+		if ( acceptThreadPool == null )		  acceptThreadPool = Executors.newFixedThreadPool(5);
 		
 		return new SocketProcessor(
-				iconfig,
+				config,
 				socketQueue,
 				outboundMessageQueue,
 				messageWorker,
@@ -141,7 +151,8 @@ public class SocketProcessorBuilder
 				messageReaderFactory,
 				emptyToNonEmptySockets,
 				nonEmptyToEmptySockets,
-				acceptThreadPool
+				acceptThreadPool,
+				taskFactory
 		);
 	}
 }

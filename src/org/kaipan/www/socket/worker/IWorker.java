@@ -1,8 +1,8 @@
 package org.kaipan.www.socket.worker;
 
-import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.task.ITask;
 
-interface Worker
+public interface IWorker
 {
 	public static final int READY = 0;
 	public static final int RUNNING = 1;
@@ -21,7 +21,7 @@ interface Worker
 	 * 
 	 * @param	task
 	 */
-	public boolean addTask( Task task );
+	public boolean addTask( ITask task );
 	
 	/**
 	 * get the available thread of the current worker

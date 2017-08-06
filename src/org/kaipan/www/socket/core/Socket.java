@@ -17,7 +17,7 @@ public class Socket
     private SocketChannel  socketChannel = null;
     
     public boolean endOfStreamReached = false;
-    public boolean closeAfterWriting  = false;
+    public boolean closeAfterResponse = false;
     
     public Socket() 
     {

@@ -9,11 +9,11 @@ import java.util.Set;
 
 public class Accept implements Runnable
 {
-    IServer server = null;
+    Server server = null;
     
     private Object LOCK = new Object();
     
-    public Accept(IServer server) 
+    public Accept(Server server) 
     {
         this.server = server;
     }

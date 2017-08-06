@@ -21,14 +21,15 @@ import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
 import org.kaipan.www.socket.ssl.SslEngine;
 import org.kaipan.www.socket.task.HttpMessageTask;
-import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.task.ITask;
+import org.kaipan.www.socket.task.ITaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
 
 public class SocketProcessor
 {
     private Ssl ssl;
     
-	private IConfig iconfig;
+	private Config config;
 	
 	private Queue<Socket> inSocketQueue;
 	
@@ -55,10 +56,12 @@ public class SocketProcessor
     
     private WriteProxy writeProxy;	
     
+    private ITaskFactory taskFactory;
+    
     /**
      * start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
      */
-    private long nextSocketId = 16 * 1024;
+    private long nextSocketId;
     
     private Set<Socket> emptyToNonEmptySockets;
     private Set<Socket> nonEmptyToEmptySockets;
@@ -68,7 +71,7 @@ public class SocketProcessor
     private Map<String, IController> controllerMap = new HashMap<>();
     
     public SocketProcessor(
-    		IConfig iconfig, 
+    		Config config, 
 			Queue<Socket>  socketQueue,
 			Queue<Message> outboundMessageQueue,
 			MessageWorker messageWorker,
@@ -78,9 +81,10 @@ public class SocketProcessor
 			IMessageReaderFactory messageReaderFactory,
 			Set<Socket> emptyToNonEmptySockets,
 			Set<Socket> nonEmptyToEmptySockets,
-			ExecutorService acceptThreadPool)
+			ExecutorService acceptThreadPool,
+			ITaskFactory taskFactory)
     {
-    	this.iconfig = iconfig;
+    	this.config = config;
     	
     	this.inSocketQueue 		  = socketQueue;
     	this.outboundMessageQueue = outboundMessageQueue;
@@ -110,7 +114,10 @@ public class SocketProcessor
     	this.readMessageBuffer  = new MessageBuffer();
     	this.writeMessageBuffer = new MessageBuffer();
     	
-    	this.writeProxy = new WriteProxy(this.writeMessageBuffer, this.outboundMessageQueue);
+    	this.writeProxy  = new WriteProxy(this.writeMessageBuffer, this.outboundMessageQueue);
+    	this.taskFactory = taskFactory;
+    	
+    	this.nextSocketId = 16 * 1024;
     }
     
     public static SocketProcessorBuilder custom() 
@@ -174,8 +181,8 @@ public class SocketProcessor
     		socket.setMessageReader(messageReader);
     		
     		// TLS/SSL protocol
-    		if ( iconfig instanceof SslConfig ) {
-    		    SslConfig SslConfig = (SslConfig) iconfig;
+    		if ( config instanceof SslConfig ) {
+    		    SslConfig SslConfig = (SslConfig) config;
     		  
     			if ( SslConfig.sslMode() ) {
     			    SocketChannel socketChannel = socket.getSocketChannel();
@@ -217,16 +224,6 @@ public class SocketProcessor
     	}
     }
     
-    private Task getMessageTask(Message message) 
-    {
-    	if ( iconfig instanceof HttpConfig ) 
-    	{
-    		return new HttpMessageTask((HttpConfig) iconfig, message, writeProxy, controllerMap);
-    	}
-    	
-    	return null;
-    }
-    
     private void readFromSockets() 
     { 
        try {
@@ -264,11 +261,12 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       Task task = getMessageTask(message);
+                       //ITask task = getMessageTask(message);
+                       ITask task = taskFactory.createTask(this, message);
                        messageWorker.addTask(task);
                        
                        //messageProcessor.process(message, writeProxy, controllerMap);
-                       socket.closeAfterWriting = true;
+                       socket.closeAfterResponse = true;
                    }
                }
                
@@ -327,7 +325,7 @@ public class SocketProcessor
 					e.printStackTrace();
 				}
         		
-        		if ( socket.closeAfterWriting == true ) {
+        		if ( socket.closeAfterResponse == true ) {
         			close(socket);
         			
         			Logger.write("close client, socket id = " + socket.getSocketId());
@@ -453,19 +451,34 @@ public class SocketProcessor
         }
     }
     
-    public Selector getReadSelector() 
+    public Config getConfig() 
     {
-        return this.readSelector;
-    }
-    
-    public Selector getWriteSelector() 
-    {
-        return this.writeSelector;
+    	return config;
     }
     
     public ExecutorService getAcceptThreadPool() 
     {
-        return this.acceptThreadPool;
+        return acceptThreadPool;
+    }
+    
+    public Selector getReadSelector() 
+    {
+        return readSelector;
+    }
+    
+    public Selector getWriteSelector() 
+    {
+        return writeSelector;
+    }
+    
+    public WriteProxy getWriteProxy() 
+    {
+    	return writeProxy;
+    }
+    
+    public Map<String, IController> getControllerMap() 
+    {
+    	return controllerMap;
     }
     
     public void addControllerMap(String name, IController controller) 

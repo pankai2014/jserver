@@ -2,14 +2,14 @@ package org.kaipan.www.socket.protocol.websocket;
 
 import java.util.Properties;
 
-import org.kaipan.www.socket.core.IConfig;
-import org.kaipan.www.socket.core.IServer;
+import org.kaipan.www.socket.core.Config;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.util.Utils;
 
-public class WebsocketServer extends IServer
+public class WebsocketServer extends Server
 {
-	public WebsocketServer(IConfig iconfig)
+	public WebsocketServer(Config iconfig)
 	{
 		super(iconfig);
 		

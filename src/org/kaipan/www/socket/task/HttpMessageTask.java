@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.controller.IController;
+import org.kaipan.www.socket.core.Config;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.WriteProxy;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
@@ -20,7 +21,7 @@ import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
 import org.kaipan.www.socket.util.Utils;
 
-public class HttpMessageTask implements Task
+public class HttpMessageTask implements ITask
 {
 	private HttpConfig config;
 	
@@ -29,9 +30,10 @@ public class HttpMessageTask implements Task
 	
 	private Map<String, IController> controllerMap;
 	
-	public HttpMessageTask(HttpConfig config, Message message, WriteProxy writeProxy, Map<String, IController> controllerMap)
+	//public HttpMessageTask(IConfig iconfig, Message message, WriteProxy writeProxy, Map<String, IController> controllerMap)
+	public HttpMessageTask(Config config, Message message, WriteProxy writeProxy)
 	{
-		this.config 	= config;
+		this.config 	= (HttpConfig) config;
 		
 		this.message 	= message;
 		this.writeProxy = writeProxy;
@@ -95,9 +97,9 @@ public class HttpMessageTask implements Task
 			message.writeToMessage(response.getHeader().getBytes(config.charset()));
 			message.writeToMessage(bytes);
 		} 
-	    catch (UnsupportedEncodingException e1) {
+	    catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 	    
 	    writeProxy.enqueue(message);
@@ -169,9 +171,9 @@ public class HttpMessageTask implements Task
 	    	nextMessage.writeToMessage(response.getHeader().getBytes(config.charset()));
 	    	nextMessage.writeToMessage(message.sharedArray, message.offset + LengthOfHeader, message.length - LengthOfHeader);
 		} 
-	    catch (UnsupportedEncodingException e1) {
+	    catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 	    
 	    writeProxy.enqueue(nextMessage);
@@ -202,9 +204,9 @@ public class HttpMessageTask implements Task
 		 	message.writeToMessage(response.getHeader().getBytes(config.charset()));
 		 	message.writeToMessage(body.getBytes());
 		} 
-	    catch (UnsupportedEncodingException e1) {
+	    catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
 		
 	    writeProxy.enqueue(message);

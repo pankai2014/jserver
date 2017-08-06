@@ -2,9 +2,9 @@ package org.kaipan.www.socket.protocol.http;
 
 import java.util.Properties;
 
-import org.kaipan.www.socket.core.IConfig;
+import org.kaipan.www.socket.core.Config;
 
-public class HttpConfig extends IConfig
+public class HttpConfig extends Config
 {
 	protected String root = "/";
     

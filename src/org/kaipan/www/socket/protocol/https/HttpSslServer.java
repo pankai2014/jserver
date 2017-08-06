@@ -3,13 +3,13 @@ package org.kaipan.www.socket.protocol.https;
 import java.util.Properties;
 
 import org.kaipan.www.socket.core.MessageBuffer;
-import org.kaipan.www.socket.core.IServer;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.protocol.http.HttpMessageProcessor;
 import org.kaipan.www.socket.protocol.http.HttpMessageReaderFactory;
 import org.kaipan.www.socket.util.Utils;
 
-public class HttpSslServer extends IServer
+public class HttpSslServer extends Server
 {
     public HttpSslServer(HttpSslConfig config)
     {

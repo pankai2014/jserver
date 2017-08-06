@@ -1,6 +1,6 @@
 package org.kaipan.www.socket.core;
 
-public abstract class IConfig
+public abstract class Config
 {
     private String host = "0.0.0.0";
     

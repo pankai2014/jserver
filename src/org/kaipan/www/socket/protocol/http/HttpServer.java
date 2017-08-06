@@ -3,12 +3,14 @@ package org.kaipan.www.socket.protocol.http;
 import java.util.Properties;
 
 import org.kaipan.www.socket.controller.ToutiaoController;
-import org.kaipan.www.socket.core.IServer;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.log.Logger;
+import org.kaipan.www.socket.task.HttpMessageTask;
+import org.kaipan.www.socket.task.MessageTaskFactory;
 import org.kaipan.www.socket.util.Utils;
 
-public class HttpServer extends IServer
+public class HttpServer extends Server
 {
     public HttpServer(HttpConfig config)
     {
@@ -32,6 +34,7 @@ public class HttpServer extends IServer
     	this.socketProcessor = SocketProcessor.custom()
     		.setIConfig(getConfig())
     		.setMessageReaderFactory(new HttpMessageReaderFactory())
+    		.setTaskFactory(new MessageTaskFactory(HttpMessageTask.class))
     		.build();
     }
     

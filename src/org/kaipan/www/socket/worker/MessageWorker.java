@@ -4,14 +4,14 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.task.ITask;
 
-public class MessageWorker implements Worker
+public class MessageWorker implements IWorker
 {
 	/**
 	 * current running state of the worker 
 	 */
-	private volatile int state = Worker.READY;
+	private volatile int state = IWorker.READY;
 	private Object LOCK = new Object();
 	
 	/**
@@ -27,7 +27,7 @@ public class MessageWorker implements Worker
 	/**
 	 * task queue 
 	 */
-	private BlockingQueue<Task> taskQueue = null;
+	private BlockingQueue<ITask> taskQueue = null;
 	
 	/**
 	 * consumer thread 
@@ -59,7 +59,7 @@ public class MessageWorker implements Worker
 			int maxThreadSize,
 			int threadAliveSec,
 			BlockingQueue<Runnable> threadPoolQueue,
-			BlockingQueue<Task> taskQueue ) 
+			BlockingQueue<ITask> taskQueue ) 
 	{
 		this.busySleepMsec = busySleepMsec;
 		this.taskQueue = taskQueue;
@@ -74,7 +74,7 @@ public class MessageWorker implements Worker
 	}
 
 	/**
-	 * @see	Worker#getLeftTask() 
+	 * @see	IWorker#getLeftTask() 
 	 */
 	@Override
 	public int getLeftTask() 
@@ -83,16 +83,16 @@ public class MessageWorker implements Worker
 	}
 	
 	/**
-	 * @see	Worker#addTask(Runnable) 
+	 * @see	IWorker#addTask(Runnable) 
 	 */
 	@Override
-	public boolean addTask(Task task) 
+	public boolean addTask(ITask task) 
 	{
 		return taskQueue.offer(task);
 	}
 
 	/**
-	 * @see	Worker#getAvailableThread() 
+	 * @see	IWorker#getAvailableThread() 
 	 */
 	@Override
 	public int getAvailableThread() 
@@ -102,7 +102,7 @@ public class MessageWorker implements Worker
 	}
 
 	/**
-	 * @see	Worker#getWorkingThread() 
+	 * @see	IWorker#getWorkingThread() 
 	 */
 	@Override
 	public int getWorkingThread() 
@@ -111,7 +111,7 @@ public class MessageWorker implements Worker
 	}
 
 	/**
-	 * @see	Worker#couldHoldMore() 
+	 * @see	IWorker#couldHoldMore() 
 	 */
 	@Override
 	public boolean couldHoldMore() 
@@ -121,7 +121,7 @@ public class MessageWorker implements Worker
 	}
 
 	/**
-	 * @see	Worker#process(String) 
+	 * @see	IWorker#process(String) 
 	 */
 	@Override
 	public boolean process( Runnable task ) 
@@ -135,7 +135,7 @@ public class MessageWorker implements Worker
 	}
 	
 	/**
-	 * @see	Worker#start()
+	 * @see	IWorker#start()
 	 */
 	@Override
 	public void start()
@@ -146,10 +146,10 @@ public class MessageWorker implements Worker
 			{
 				while ( true ) {
 					//check and handler the stoped operation
-					if ( state == Worker.STOPED ) break;
+					if ( state == IWorker.STOPED ) break;
 					
 					//check and handler the the pause operation
-					if ( state == Worker.PAUSED ) {
+					if ( state == IWorker.PAUSED ) {
 						synchronized ( LOCK ) {
 							try {
 								LOCK.wait();
@@ -165,7 +165,7 @@ public class MessageWorker implements Worker
 						}
 						
 						//take a url from the task queue and process it
-						Task task = taskQueue.take();
+						ITask task = taskQueue.take();
 						process(task);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -187,27 +187,27 @@ public class MessageWorker implements Worker
 	@Override
 	public void pause() 
 	{
-		if ( state == Worker.PAUSED ) return;
-		state = Worker.PAUSED;
+		if ( state == IWorker.PAUSED ) return;
+		state = IWorker.PAUSED;
 	}
 
 	@Override
 	public void resume() 
 	{
-		if ( state == Worker.RUNNING ) return;
+		if ( state == IWorker.RUNNING ) return;
 		synchronized ( LOCK ) {
-			state = Worker.RUNNING;
+			state = IWorker.RUNNING;
 			LOCK.notify();
 		}
 	}
 
 	/**
-	 * @see	Worker#shutdown() 
+	 * @see	IWorker#shutdown() 
 	 */
 	@Override
 	public void shutdown() 
 	{
-		state = Worker.STOPED;
+		state = IWorker.STOPED;
 		taskQueue.clear();
 		threadPool.shutdown();
 		

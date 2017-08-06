@@ -7,14 +7,14 @@ import java.nio.channels.ServerSocketChannel;
 
 import org.kaipan.www.socket.log.Logger;
 
-public abstract class IServer
+public abstract class Server
 {	
-    protected IConfig iconfig = null;
+    protected Config iconfig = null;
     
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel socketChannel = null;
     
-    protected IServer(IConfig iconfig)
+    protected Server(Config iconfig)
     {
         this.iconfig = iconfig;
         
