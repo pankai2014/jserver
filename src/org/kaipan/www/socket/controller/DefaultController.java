@@ -6,6 +6,6 @@ public class DefaultController implements IController
 {	
 	public String run(HttpRequest request) 
 	{
-		return "welcome";
+		return "welcome, any quetions please contact with will<pan.kai@icloud.com>";
 	}
 }
