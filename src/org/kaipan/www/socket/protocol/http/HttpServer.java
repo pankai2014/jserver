@@ -2,10 +2,11 @@ package org.kaipan.www.socket.protocol.http;
 
 import java.util.Properties;
 
-import org.kaipan.www.socket.controller.ToutiaoController;
+import org.kaipan.www.socket.controller.DefaultController;
 import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.log.Logger;
+import org.kaipan.www.socket.router.DynamicRouter;
 import org.kaipan.www.socket.task.HttpMessageTask;
 import org.kaipan.www.socket.task.MessageTaskFactory;
 import org.kaipan.www.socket.util.Utils;
@@ -21,20 +22,20 @@ public class HttpServer extends Server
     
     public HttpConfig getConfig() 
     {
-        return (HttpConfig)iconfig;
+        return (HttpConfig) config;
     }
 
     @Override
     protected void createSocketProcessor()
     {
-        //this.processor = new SocketProcessor(getConfig());
-        //this.processor.init(new HttpMessageReaderFactory(), new MessageBuffer(), new MessageBuffer());
-        //this.processor.addControllerMap("/toutiao", new ToutiaoController());
+    	DynamicRouter router = new DynamicRouter();
+    	router.addMapping("/default", DefaultController.class);
     	
     	this.socketProcessor = SocketProcessor.custom()
-    		.setIConfig(getConfig())
+    		.setConfig(getConfig())
     		.setMessageReaderFactory(new HttpMessageReaderFactory())
     		.setTaskFactory(new MessageTaskFactory(HttpMessageTask.class))
+    		.setRouter(router)
     		.build();
     }
     

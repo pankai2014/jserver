@@ -9,14 +9,14 @@ import org.kaipan.www.socket.log.Logger;
 
 public abstract class Server
 {	
-    protected Config iconfig = null;
+    protected Config config = null;
     
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel socketChannel = null;
     
-    protected Server(Config iconfig)
+    protected Server(Config config)
     {
-        this.iconfig = iconfig;
+        this.config = config;
         
         try {
             this.socketChannel = ServerSocketChannel.open();
@@ -26,7 +26,7 @@ public abstract class Server
             e.printStackTrace();
         }
         
-        listen(iconfig.host(), iconfig.port());
+        listen(config.host(), config.port());
     }
     
     public void listen(String ip, int port) 

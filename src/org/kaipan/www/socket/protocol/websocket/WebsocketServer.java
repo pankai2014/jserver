@@ -18,14 +18,14 @@ public class WebsocketServer extends Server
 	
 	public WsConfig getConfig() 
 	{
-	    return (WsConfig)iconfig;
+	    return (WsConfig) config;
 	}
 
 	@Override
 	public void createSocketProcessor()
 	{
         this.socketProcessor = SocketProcessor.custom()
-        		.setIConfig(getConfig())
+        		.setConfig(getConfig())
         		.setMessageReaderFactory(new WsMessageReaderFactroy())
         		.build();
 	}

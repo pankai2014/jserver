@@ -2,11 +2,13 @@ package org.kaipan.www.socket.protocol.https;
 
 import java.util.Properties;
 
-import org.kaipan.www.socket.core.MessageBuffer;
+import org.kaipan.www.socket.controller.DefaultController;
 import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
-import org.kaipan.www.socket.protocol.http.HttpMessageProcessor;
 import org.kaipan.www.socket.protocol.http.HttpMessageReaderFactory;
+import org.kaipan.www.socket.router.DynamicRouter;
+import org.kaipan.www.socket.task.HttpMessageTask;
+import org.kaipan.www.socket.task.MessageTaskFactory;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpSslServer extends Server
@@ -20,19 +22,21 @@ public class HttpSslServer extends Server
     
     public HttpSslConfig getConfig() 
     {
-        return (HttpSslConfig)iconfig;
+        return (HttpSslConfig) config;
     }
 
     @Override
     protected void createSocketProcessor()
     {
-        //this.processor = new SocketProcessor(getConfig());
-        //this.processor.init(new HttpsMessageReaderFactory(), new MessageBuffer(), new MessageBuffer());
+    	DynamicRouter router = new DynamicRouter();
+    	router.addMapping("/default", DefaultController.class);
     	
     	this.socketProcessor = SocketProcessor.custom()
-        		.setIConfig(getConfig())
-        		.setMessageReaderFactory(new HttpMessageReaderFactory())
-        		.build();
+    		.setConfig(getConfig())
+    		.setMessageReaderFactory(new HttpMessageReaderFactory())
+    		.setTaskFactory(new MessageTaskFactory(HttpMessageTask.class))
+    		.setRouter(router)
+    		.build();
     }
     
     public static void main(String[] args) 

@@ -11,37 +11,36 @@ import java.util.Map;
 
 import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.controller.IController;
-import org.kaipan.www.socket.core.Config;
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.core.WriteProxy;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.protocol.http.HttpHeader;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
+import org.kaipan.www.socket.router.IRouter;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpMessageTask implements ITask
 {
 	private HttpConfig config;
 	
+	private IRouter router;
+	
 	private Message    message;
 	private WriteProxy writeProxy;
 	
-	private Map<String, IController> controllerMap;
-	
-	//public HttpMessageTask(IConfig iconfig, Message message, WriteProxy writeProxy, Map<String, IController> controllerMap)
-	public HttpMessageTask(Config config, Message message, WriteProxy writeProxy)
+	public HttpMessageTask(SocketProcessor socketProcessor, Message message)
 	{
-		this.config 	= (HttpConfig) config;
+		this.config 	= (HttpConfig) socketProcessor.getConfig();
+		this.router 	= socketProcessor.getRouter();
 		
 		this.message 	= message;
-		this.writeProxy = writeProxy;
-		
-		this.controllerMap = controllerMap;
+		this.writeProxy = socketProcessor.getWriteProxy();
 	}
 	
-	public void doStaticRequest(HttpRequest request, WriteProxy writeProxy) 
+	public void doStaticRequest(HttpRequest request) 
 	{
 	    Message    message    = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
@@ -81,11 +80,9 @@ public class HttpMessageTask implements ITask
 			
 		} 
 	    catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    
@@ -105,7 +102,7 @@ public class HttpMessageTask implements ITask
 	    writeProxy.enqueue(message);
 	}
 	
-	public void doDynamicRequest(HttpRequest request, WriteProxy writeProxy) 
+	public void doDynamicRequest(HttpRequest request) 
 	{
 		Message   message     = writeProxy.getMessage();
 		Message   nextMessage = writeProxy.getMessage();
@@ -179,19 +176,21 @@ public class HttpMessageTask implements ITask
 	    writeProxy.enqueue(nextMessage);
 	}
 	
-	public void doMapRequest(HttpRequest request, WriteProxy writeProxy, Map<String, IController> controllerMap) 
+	public void doMapRequest(HttpRequest request) 
 	{
 		Message    message    = writeProxy.getMessage();
 	    HttpResponse response = new HttpResponse();
 	    
 	    message.socketId = request.socketId;		// must be set!!!
 	    
-	    String body;
-	    if ( controllerMap.containsKey(request.path) ) {
-	    	IController controller = controllerMap.get(request.path);
+	    String body = null;
+	    
+	    IController controller = router.getController(request);
+	    if ( controller != null ) {
 	    	body = controller.run(request);
 	    }
-	    else {
+	
+	    if ( body == null ) {
 	    	body = "Oops, Something is wrong while processing the request " + request.path;
 	    }
 	    
@@ -221,15 +220,15 @@ public class HttpMessageTask implements ITask
         String ext = Utils.getFileExt(request.path);
         
         if ( ext == null ) {
-        	doMapRequest(request, writeProxy, controllerMap);
+        	doMapRequest(request);
         	return;
         }
         
         if ( config.staticExt().contains(ext) ) {
-            doStaticRequest(request, writeProxy);
+            doStaticRequest(request);
         }
         else if ( config.dynamicExt().contains(ext) ) {
-        	doDynamicRequest(request, writeProxy);
+        	doDynamicRequest(request);
         }
 	}
 }

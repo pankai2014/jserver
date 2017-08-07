@@ -16,11 +16,10 @@ import java.util.concurrent.ExecutorService;
 
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.log.Logger;
-import org.kaipan.www.socket.protocol.http.HttpConfig;
+import org.kaipan.www.socket.router.IRouter;
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
 import org.kaipan.www.socket.ssl.SslEngine;
-import org.kaipan.www.socket.task.HttpMessageTask;
 import org.kaipan.www.socket.task.ITask;
 import org.kaipan.www.socket.task.ITaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
@@ -30,6 +29,11 @@ public class SocketProcessor
     private Ssl ssl;
     
 	private Config config;
+	
+	/**
+	 * router for controller
+	 */
+	private IRouter router;
 	
 	private Queue<Socket> inSocketQueue;
 	
@@ -71,7 +75,8 @@ public class SocketProcessor
     private Map<String, IController> controllerMap = new HashMap<>();
     
     public SocketProcessor(
-    		Config config, 
+    		Config config,
+    		IRouter router,
 			Queue<Socket>  socketQueue,
 			Queue<Message> outboundMessageQueue,
 			MessageWorker messageWorker,
@@ -85,6 +90,7 @@ public class SocketProcessor
 			ITaskFactory taskFactory)
     {
     	this.config = config;
+    	this.router = router;
     	
     	this.inSocketQueue 		  = socketQueue;
     	this.outboundMessageQueue = outboundMessageQueue;
@@ -474,6 +480,11 @@ public class SocketProcessor
     public WriteProxy getWriteProxy() 
     {
     	return writeProxy;
+    }
+    
+    public IRouter getRouter() 
+    {
+    	return router;
     }
     
     public Map<String, IController> getControllerMap() 

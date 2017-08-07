@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.kaipan.www.socket.router.IRouter;
 import org.kaipan.www.socket.task.ITask;
 import org.kaipan.www.socket.task.ITaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
@@ -38,7 +39,9 @@ public class SocketProcessorBuilder
 	
 	private ITaskFactory taskFactory;
 	
-	public SocketProcessorBuilder setIConfig(Config config) 
+	private IRouter router;
+	
+	public SocketProcessorBuilder setConfig(Config config) 
 	{
 		this.config = config;
 		
@@ -122,6 +125,13 @@ public class SocketProcessorBuilder
 		return this;
 	}
 	
+	public SocketProcessorBuilder setRouter(IRouter router) 
+	{
+		this.router = router;
+		
+		return this;
+	}
+	
 	public SocketProcessor build()
 	{
 		if ( socketQueue == null ) 			  socketQueue = new ArrayBlockingQueue<Socket>(1024);
@@ -142,6 +152,7 @@ public class SocketProcessorBuilder
 		
 		return new SocketProcessor(
 				config,
+				router,
 				socketQueue,
 				outboundMessageQueue,
 				messageWorker,
