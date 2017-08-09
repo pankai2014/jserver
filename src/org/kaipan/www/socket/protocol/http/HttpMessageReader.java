@@ -9,58 +9,61 @@ import org.kaipan.www.socket.core.IMessageReader;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.Socket;
-import org.kaipan.www.socket.log.Logger;
 
 public class HttpMessageReader implements IMessageReader
 {
-	private MessageBuffer    messageBuffer = null;
-	private List<Message> completeMessages = new ArrayList<Message>();
-	private Message		  	   nextMessage = null;
+	protected MessageBuffer    messageBuffer = null;
+	protected List<Message> completeMessages = null;
+	protected Message		  	 nextMessage = null;
 	
-	private HttpMessageReaderBuffer buffer = new HttpMessageReaderBuffer();
+	protected HttpMessageReaderBuffer readBuffer = null;
+	
+	public HttpMessageReader()
+	{
+		readBuffer = new HttpMessageReaderBuffer();
+		
+		completeMessages = new ArrayList<Message>();
+	}
 	
 	@Override
-	public void initialize(MessageBuffer readMessageBuffer) 
+	public void initialize(MessageBuffer readMessageBuffer)
 	{
 		this.messageBuffer = readMessageBuffer;				
 	}
 	
-	public static boolean operate(MessageBuffer messageBuffer, Message nextMessage, HttpMessageReaderBuffer buffer, List<Message> completeMessages) 
+	private boolean operate()
 	{
 		// body isn't complete
-        if ( buffer.headerComplete == true 
-                && buffer.bodycomplete == false ) {
-        	int realContentLength = nextMessage.length - buffer.prevBodyEndIndex;
+        if ( readBuffer.headerComplete == true
+                && readBuffer.bodycomplete == false ) {
+        	int realContentLength = nextMessage.length - readBuffer.prevBodyEndIndex;
         	
-            if ( buffer.expectContentLength <= realContentLength ) {
-                buffer.bodycomplete = true;
+            if ( readBuffer.expectContentLength <= realContentLength ) {
+                readBuffer.bodycomplete = true;
                 
                 completeMessages.add(nextMessage);
+                nextMessage = null;
+            }
+            else {
+            	int length       = readBuffer.prevBodyEndIndex + readBuffer.expectContentLength;
                 
-                if ( realContentLength > buffer.expectContentLength ) {
-                	 int length       = buffer.prevBodyEndIndex + buffer.expectContentLength;
-                     
-                     Message message  = messageBuffer.getMessage();
-                     message.metaData = new HttpHeader();
-                     message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
-                     
-                     nextMessage = message;
-                }
-                else {
-                	nextMessage = null;
-                }
+                Message message  = messageBuffer.getMessage();
+                message.metaData = new HttpHeader();
+                message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
+                
+                nextMessage = message;
             }
             
             return true;
         }
         
-        HttpHeader metaData   = (HttpHeader)nextMessage.metaData;
-        buffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, nextMessage.offset, nextMessage.length, metaData);
+        HttpHeader metaData = (HttpHeader) nextMessage.metaData;
         
-        Logger.write("head completed yet ? : " + buffer.headerComplete);
+        readBuffer.headerComplete = HttpUtil.prepare(nextMessage.sharedArray, 
+        		nextMessage.offset, nextMessage.length, metaData);
         
         // header was still unfinished
-        if ( ! buffer.headerComplete ) {
+        if ( ! readBuffer.headerComplete ) {
             if ( nextMessage.length > HttpUtil.HTTP_HEAD_MAXLEN ) {
                 // TODO Write log, header is too large
                 return false;
@@ -75,13 +78,13 @@ public class HttpMessageReader implements IMessageReader
                 return false;
             }
             
-            buffer.headerComplete = true;
+            readBuffer.headerComplete = true;
         }
         
         int endIndex  = metaData.bodyEndIndex;
         int realIndex = nextMessage.offset + nextMessage.length;
-        if ( endIndex <= realIndex ) { 
-            buffer.bodycomplete = true;
+        if ( endIndex <= realIndex ) {
+        	readBuffer.bodycomplete = true;
             
             completeMessages.add(nextMessage);
             
@@ -97,12 +100,10 @@ public class HttpMessageReader implements IMessageReader
             }
         }
         else {
-            buffer.bodycomplete        = false;
-            buffer.prevBodyEndIndex    = endIndex;
-            buffer.expectContentLength = endIndex - realIndex;
+        	readBuffer.bodycomplete        = false;
+        	readBuffer.prevBodyEndIndex    = endIndex;
+        	readBuffer.expectContentLength = endIndex - realIndex;
         }
-        
-        Logger.write("body completed yet ? : " + buffer.bodycomplete);
         
         return true;
 	}
@@ -127,11 +128,16 @@ public class HttpMessageReader implements IMessageReader
 
         byteBuffer.flip();
         
-        // TODO Reading data exceeds 1M
+        // max reading data must be less than 4M
         nextMessage.writeToMessage(byteBuffer);
         byteBuffer.clear();
         
-        return operate(messageBuffer, nextMessage, buffer, completeMessages);
+        return operate();
+    }
+    
+    public HttpMessageReaderBuffer getReadBuffer() 
+    {
+    	return readBuffer;
     }
 
 	@Override

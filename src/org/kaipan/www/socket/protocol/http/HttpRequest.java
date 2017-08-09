@@ -12,14 +12,12 @@ public class HttpRequest
     public String protocol;
     
     public Map<String, String> headers = new HashMap<>();
-
     public Map<String, String> get     = new HashMap<>();
+    
     public byte[] post;
     public byte[] body;
     
     public byte[] file;
     public byte[] cookie;
     public byte[] session;
-    
-    public int expectLength = 0;
 }

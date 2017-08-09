@@ -13,36 +13,31 @@ import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.SocketProcessor;
-import org.kaipan.www.socket.core.WriteProxy;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.protocol.http.HttpHeader;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
-import org.kaipan.www.socket.router.IRouter;
 import org.kaipan.www.socket.util.Utils;
 
 public class HttpMessageTask implements ITask
 {
 	private HttpConfig config;
-	
-	private IRouter router;
-	
-	private Message    message;
-	private WriteProxy writeProxy;
+
+	private Message message;
+	private SocketProcessor socketProcessor;
 	
 	public HttpMessageTask(SocketProcessor socketProcessor, Message message)
 	{
-		this.config 	= (HttpConfig) socketProcessor.getConfig();
-		this.router 	= socketProcessor.getRouter();
+		this.config = (HttpConfig) socketProcessor.getConfig();
 		
-		this.message 	= message;
-		this.writeProxy = socketProcessor.getWriteProxy();
+		this.message = message;
+		this.socketProcessor = socketProcessor;
 	}
 	
 	public void doStaticRequest(HttpRequest request) 
 	{
-	    Message    message    = writeProxy.getMessage();
+	    Message    message    = socketProcessor.getWriteProxy().getMessage();
 	    HttpResponse response = new HttpResponse();
 	    
 	    message.socketId    = request.socketId;		// must be set!!!
@@ -61,7 +56,7 @@ public class HttpMessageTask implements ITask
                 e.printStackTrace();
             }
             
-            writeProxy.enqueue(message);
+            socketProcessor.getWriteProxy().enqueue(message);
             return;
 	    }
 	    
@@ -99,13 +94,14 @@ public class HttpMessageTask implements ITask
 			e.printStackTrace();
 		}
 	    
-	    writeProxy.enqueue(message);
+	    socketProcessor.getWriteProxy().enqueue(message);
 	}
 	
 	public void doDynamicRequest(HttpRequest request) 
 	{
-		Message   message     = writeProxy.getMessage();
-		Message   nextMessage = writeProxy.getMessage();
+		Message   message     = socketProcessor.getWriteProxy().getMessage();
+		Message   nextMessage = socketProcessor.getWriteProxy().getMessage();
+		
 	    HttpResponse response = new HttpResponse();
 	    
 	    nextMessage.socketId  = request.socketId;	// must be set!!!
@@ -166,26 +162,27 @@ public class HttpMessageTask implements ITask
 	    
 	    try {
 	    	nextMessage.writeToMessage(response.getHeader().getBytes(config.charset()));
-	    	nextMessage.writeToMessage(message.sharedArray, message.offset + LengthOfHeader, message.length - LengthOfHeader);
+	    	nextMessage.writeToMessage(message.sharedArray, 
+	    			message.offset + LengthOfHeader, message.length - LengthOfHeader);
 		} 
 	    catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	    
-	    writeProxy.enqueue(nextMessage);
+	    socketProcessor.getWriteProxy().enqueue(nextMessage);
 	}
 	
 	public void doMapRequest(HttpRequest request) 
 	{
-		Message    message    = writeProxy.getMessage();
+		Message    message    = socketProcessor.getWriteProxy().getMessage();
 	    HttpResponse response = new HttpResponse();
 	    
 	    message.socketId = request.socketId;		// must be set!!!
 	    
 	    String body = null;
 	    
-	    IController controller = router.getController(request);
+	    IController controller = socketProcessor.getRouter().getController(request);
 	    if ( controller != null ) {
 	    	body = controller.run(request);
 	    }
@@ -208,7 +205,7 @@ public class HttpMessageTask implements ITask
 			e.printStackTrace();
 		}
 		
-	    writeProxy.enqueue(message);
+		socketProcessor.getWriteProxy().enqueue(message);
 	}
 
 	@Override
@@ -218,6 +215,9 @@ public class HttpMessageTask implements ITask
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
         String ext = Utils.getFileExt(request.path);
+        
+        socketProcessor.getSocketMap()
+    		.get(request.socketId).closeAfterResponse = true;
         
         if ( ext == null ) {
         	doMapRequest(request);

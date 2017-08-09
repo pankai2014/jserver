@@ -6,7 +6,6 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.router.IRouter;
 import org.kaipan.www.socket.ssl.Ssl;
@@ -24,6 +22,11 @@ import org.kaipan.www.socket.task.ITask;
 import org.kaipan.www.socket.task.ITaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
 
+/**
+ * Socket core processor
+ * 
+ * @author will<pan.kai@icloud.com>
+ */
 public class SocketProcessor
 {
     private Ssl ssl;
@@ -71,8 +74,6 @@ public class SocketProcessor
     private Set<Socket> nonEmptyToEmptySockets;
     
     private ExecutorService acceptThreadPool;
-    
-    private Map<String, IController> controllerMap = new HashMap<>();
     
     public SocketProcessor(
     		Config config,
@@ -267,12 +268,8 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       //ITask task = getMessageTask(message);
                        ITask task = taskFactory.createTask(this, message);
                        messageWorker.addTask(task);
-                       
-                       //messageProcessor.process(message, writeProxy, controllerMap);
-                       socket.closeAfterResponse = true;
                    }
                }
                
@@ -280,7 +277,7 @@ public class SocketProcessor
                
                /*
                 * remove iteration just crossed elements,  
-                *     why do this operation, key.isReadable() is always true? keyIterator is invalid?     
+                *     to protect that key.isReadable() is always true    
                 */
                keyIterator.remove();
            } 
@@ -462,6 +459,11 @@ public class SocketProcessor
     	return config;
     }
     
+    public Map<Long, Socket> getSocketMap() 
+    {
+    	return socketMap;
+    }
+    
     public ExecutorService getAcceptThreadPool() 
     {
         return acceptThreadPool;
@@ -485,15 +487,5 @@ public class SocketProcessor
     public IRouter getRouter() 
     {
     	return router;
-    }
-    
-    public Map<String, IController> getControllerMap() 
-    {
-    	return controllerMap;
-    }
-    
-    public void addControllerMap(String name, IController controller) 
-    {
-    	controllerMap.put(name, controller);
     }
 }

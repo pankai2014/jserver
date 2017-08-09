@@ -8,7 +8,7 @@ public class HttpHeader
     public final static int HTTP_METHOD_HEAD   = 4;
     public final static int HTTP_METHOD_DELETE = 5;
 
-    public int httpMethod  	  = 0;
+    public int httpMethod     = 0;
     public int endOfHeader    = 0;
     
     public int contentLength  = 0;
