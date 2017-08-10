@@ -11,10 +11,11 @@ public class HttpRequest
     public String path;
     public String protocol;
     
-    public Map<String, String> headers = new HashMap<>();
-    public Map<String, String> get     = new HashMap<>();
+    public Map<String, String> header = new HashMap<>();
     
-    public byte[] post;
+    public Map<String, String> Get  = new HashMap<>();
+    public Map<String, String> Post = new HashMap<>();
+    
     public byte[] body;
     
     public byte[] file;

@@ -7,6 +7,11 @@ import org.kaipan.www.socket.protocol.http.HttpMessageReader;
 
 public class WsMessageReader extends HttpMessageReader
 {
+	public final static int NO_HANDSHAKE  = 0;
+	public final static int SHAKING_HANDS = 1;
+	
+	public final static int HANDSHAKE_COMPLETED = 2;
+	
 	private WsMessageReadBuffer readBuffer;
 	
 	public WsMessageReader()
@@ -21,7 +26,7 @@ public class WsMessageReader extends HttpMessageReader
 		boolean result = super.read(socket, byteBuffer);
 		
 		if ( super.readBuffer.headerComplete == true ) {
-			readBuffer.httpHandShaked = true;
+			readBuffer.httpHandShake = SHAKING_HANDS;
 		}
 		
 		return result;
@@ -29,12 +34,19 @@ public class WsMessageReader extends HttpMessageReader
 	
 	public boolean read(Socket socket, ByteBuffer byteBuffer) 
 	{
-		if ( readBuffer.httpHandShaked == false ) {
+		if ( readBuffer.httpHandShake == NO_HANDSHAKE ) {
 			if ( ! httpHandshake(socket, byteBuffer) ) {
 				return false;
 			}
 		}
 		
+		readBuffer.httpHandShake = HANDSHAKE_COMPLETED;
+		
 		return true;
+	}
+	
+	public WsMessageReadBuffer getReadBuffer() 
+	{
+		return readBuffer;
 	}
 }

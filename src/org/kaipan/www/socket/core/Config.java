@@ -4,10 +4,12 @@ public abstract class Config
 {
     private String host = "0.0.0.0";
     
-    private int port    = 80;
+    private int port = 80;
     
     private String  ssl_protocol  = "TLSv1.2";
     private boolean open_ssl_mode = false;
+    
+    private String charset = "UTF-8";
     
     public String host() 
     {
@@ -27,6 +29,16 @@ public abstract class Config
     public void port(int port)
     {
         this.port = port;
+    }
+    
+    public String charset() 
+    {
+    	return charset;
+    }
+    
+    public void charset(String charset) 
+    {
+    	this.charset = charset;
     }
     
     public boolean sslMode() 

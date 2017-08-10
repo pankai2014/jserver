@@ -134,11 +134,6 @@ public class HttpMessageReader implements IMessageReader
         
         return operate();
     }
-    
-    public HttpMessageReaderBuffer getReadBuffer() 
-    {
-    	return readBuffer;
-    }
 
 	@Override
 	public List<Message> getMessages() 

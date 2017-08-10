@@ -119,7 +119,7 @@ public class MessageWorkerBuilder
 		if ( threadAliveSecond == -1 )	threadAliveSecond = 6;
 		
 		if ( threadPoolQueue == null ) {
-			threadPoolQueue = new ArrayBlockingQueue<Runnable>(10000);
+			threadPoolQueue = new ArrayBlockingQueue<Runnable>(5000);
 		}
 		
 		if ( taskQueue == null ) {

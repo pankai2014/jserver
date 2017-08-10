@@ -13,11 +13,23 @@ public class WsConfig extends Config
 	
 	public WsConfig(Properties property) 
 	{
-		
+		load(property);
 	}
 	
 	public void load(Properties property) 
     {
-		
+		if ( property.getProperty("server.bind") != null )
+        {
+            this.host(property.getProperty("server.bind"));
+        }
+        
+        if ( property.getProperty("server.port") != null )
+        {
+            this.port(Integer.parseInt(property.getProperty("server.port")));
+        }
+        
+        if ( property.getProperty("server.charset") != null ) {
+            this.charset(property.getProperty("server.charset"));
+        }
     }
 }

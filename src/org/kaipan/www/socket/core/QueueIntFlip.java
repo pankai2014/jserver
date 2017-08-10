@@ -7,6 +7,7 @@ public class QueueIntFlip
     public int capacity = 0;
     public int writePos = 0;
     public int readPos  = 0;
+    
     public boolean flipped = false;
 
     public QueueIntFlip(int capacity) 

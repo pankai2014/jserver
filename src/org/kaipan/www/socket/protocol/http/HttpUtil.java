@@ -170,7 +170,7 @@ public class HttpUtil
         return true;
     }
     
-    public static int parseStr(String str, Map<String, String> get) 
+    public static int parseStr(String str, Map<String, String> Get) 
     {
         int loc = str.indexOf('?');
         if ( loc == -1 ) return -1;
@@ -182,7 +182,7 @@ public class HttpUtil
             String[] keyValue = queryLines[i].split("=", 2);
             
             if ( keyValue.length > 1 ) {
-                get.put(keyValue[0], keyValue[1]);
+            	Get.put(keyValue[0], keyValue[1]);
             }
         }
         
@@ -202,7 +202,7 @@ public class HttpUtil
             request.path       = meta[1];
             request.protocol   = meta[2];
             
-            int loc = parseStr(request.path, request.get);
+            int loc = parseStr(request.path, request.Get);
             if ( loc > 0 ) request.path = request.path.substring(0, loc); 
         }
         
@@ -210,11 +210,11 @@ public class HttpUtil
             String[] keyValue = headerlines[i].split(":", 2);
             
             if ( keyValue.length > 1 ) {
-                request.headers.put(keyValue[0], keyValue[1]);
+                request.header.put(keyValue[0], keyValue[1]);
                 continue;
             }
             
-            request.headers.put(keyValue[0], "");
+            request.header.put(keyValue[0], "");
         }
         
         if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST ) {

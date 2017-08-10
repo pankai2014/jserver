@@ -1,6 +1,15 @@
 package org.kaipan.www.socket.protocol.websocket;
 
 public class WsMessageReadBuffer
-{
-	public boolean httpHandShaked = false;
+{	
+	/**
+	 * handshake state
+	 * 
+	 * 0: no handshake
+	 * 
+	 * 1: shaking hands
+	 * 
+	 * 2; handshake completed
+	 */
+	public int httpHandShake = 0;
 }

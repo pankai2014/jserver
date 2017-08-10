@@ -5,6 +5,8 @@ import java.util.Properties;
 import org.kaipan.www.socket.core.Config;
 import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
+import org.kaipan.www.socket.task.MessageTaskFactory;
+import org.kaipan.www.socket.task.WsMessageTask;
 import org.kaipan.www.socket.util.Utils;
 
 public class WebsocketServer extends Server
@@ -27,6 +29,7 @@ public class WebsocketServer extends Server
         this.socketProcessor = SocketProcessor.custom()
         		.setConfig(getConfig())
         		.setMessageReaderFactory(new WsMessageReaderFactroy())
+        		.setTaskFactory(new MessageTaskFactory(WsMessageTask.class))
         		.build();
 	}
 	

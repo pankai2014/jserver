@@ -16,8 +16,6 @@ public class HttpConfig extends Config
     protected String fastcgi_host = "127.0.0.1";
     protected int    fastcgi_port = 9000;
     
-    protected String charset = "UTF-8";
-    
     public HttpConfig() 
     {
         
@@ -78,7 +76,7 @@ public class HttpConfig extends Config
         }
         
         if ( property.getProperty("server.charset") != null ) {
-            this.charset = property.getProperty("server.charset");
+            this.charset(property.getProperty("server.charset"));
         }
     }
     
@@ -115,10 +113,5 @@ public class HttpConfig extends Config
     public int postMaxSize() 
     {
         return post_maxsize;
-    }
-    
-    public String charset() 
-    {
-        return charset;
     }
 }

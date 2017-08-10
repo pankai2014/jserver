@@ -12,6 +12,7 @@ import java.util.Map;
 import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.protocol.http.HttpHeader;
@@ -24,12 +25,16 @@ public class HttpMessageTask implements ITask
 {
 	private HttpConfig config;
 
+	private Socket  socket;
 	private Message message;
+	
 	private SocketProcessor socketProcessor;
 	
-	public HttpMessageTask(SocketProcessor socketProcessor, Message message)
+	public HttpMessageTask(SocketProcessor socketProcessor, Socket socket, Message message)
 	{
 		this.config = (HttpConfig) socketProcessor.getConfig();
+		
+		this.socket = socket;
 		
 		this.message = message;
 		this.socketProcessor = socketProcessor;
@@ -184,7 +189,7 @@ public class HttpMessageTask implements ITask
 	    
 	    IController controller = socketProcessor.getRouter().getController(request);
 	    if ( controller != null ) {
-	    	body = controller.run(request);
+	    	body = controller.run(request, response);
 	    }
 	
 	    if ( body == null ) {
@@ -211,13 +216,12 @@ public class HttpMessageTask implements ITask
 	@Override
 	public void run()
 	{
-		HttpHeader metaData = (HttpHeader)message.metaData;
+		HttpHeader metaData = (HttpHeader) message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
         String ext = Utils.getFileExt(request.path);
         
-        socketProcessor.getSocketMap()
-    		.get(request.socketId).closeAfterResponse = true;
+        socket.closeAfterResponse = true;
         
         if ( ext == null ) {
         	doMapRequest(request);
