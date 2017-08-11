@@ -35,9 +35,9 @@ public class WsMessageReader extends HttpMessageReader
 	public boolean read(Socket socket, ByteBuffer byteBuffer) 
 	{
 		if ( readBuffer.httpHandShake == NO_HANDSHAKE ) {
-			if ( ! httpHandshake(socket, byteBuffer) ) {
-				return false;
-			}
+			httpHandshake(socket, byteBuffer);
+			
+			return true;
 		}
 		
 		readBuffer.httpHandShake = HANDSHAKE_COMPLETED;

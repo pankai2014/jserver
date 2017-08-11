@@ -12,7 +12,7 @@ public class SocketClient
     private String IP = "127.0.0.1";
     private int port  = 8080;
     
-    private int SO_RCVBUF = 65535;
+    //private int SO_RCVBUF = 65535;
     
     public SocketClient() 
     {

@@ -19,7 +19,7 @@ import org.kaipan.www.socket.protocol.http.HttpHeader;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
-import org.kaipan.www.socket.util.Utils;
+import org.kaipan.www.socket.util.Util;
 
 public class HttpMessageTask implements ITask
 {
@@ -34,9 +34,9 @@ public class HttpMessageTask implements ITask
 	{
 		this.config = (HttpConfig) socketProcessor.getConfig();
 		
-		this.socket = socket;
-		
+		this.socket  = socket;
 		this.message = message;
+		
 		this.socketProcessor = socketProcessor;
 	}
 	
@@ -44,8 +44,6 @@ public class HttpMessageTask implements ITask
 	{
 	    Message    message    = socketProcessor.getWriteProxy().getMessage();
 	    HttpResponse response = new HttpResponse();
-	    
-	    message.socketId    = request.socketId;		// must be set!!!
 	    
 	    String absolutePath = config.root() + request.path;
 	   
@@ -88,7 +86,7 @@ public class HttpMessageTask implements ITask
 	    
 	    response.setHttpStatus(200);
 	    response.setHeader("Content-Length", length.toString());
-	    response.setHeader("Content-Type", HttpResponse.HTTP_MIMES_TYPE.get(Utils.getFileExt(request.path)));
+	    response.setHeader("Content-Type", HttpResponse.HTTP_MIMES_TYPE.get(Util.getFileExt(request.path)));
 	    
 	    try {
 			message.writeToMessage(response.getHeader().getBytes(config.charset()));
@@ -99,6 +97,8 @@ public class HttpMessageTask implements ITask
 			e.printStackTrace();
 		}
 	    
+	    message.socketId = request.socketId;	// must be set!!!
+	    
 	    socketProcessor.getWriteProxy().enqueue(message);
 	}
 	
@@ -108,8 +108,6 @@ public class HttpMessageTask implements ITask
 		Message   nextMessage = socketProcessor.getWriteProxy().getMessage();
 		
 	    HttpResponse response = new HttpResponse();
-	    
-	    nextMessage.socketId  = request.socketId;	// must be set!!!
 	    
 	    String absolutePath = config.fastcgiRoot() + request.path;
 	    
@@ -163,7 +161,7 @@ public class HttpMessageTask implements ITask
 	    int LengthOfHeader = (endOfHeader - message.offset) + 1;
 	    
 	    response.setHeader("Content-Length", (message.length - LengthOfHeader) + "");
-	    //response.setHeader("Content-Type", new String(message.sharedArray, 0, LengthOfHeader));
+	    response.setHeader("Content-Type", HttpResponse.HTTP_MIMES_TYPE.get("html"));
 	    
 	    try {
 	    	nextMessage.writeToMessage(response.getHeader().getBytes(config.charset()));
@@ -175,6 +173,8 @@ public class HttpMessageTask implements ITask
 			e.printStackTrace();
 		}
 	    
+	    nextMessage.socketId = request.socketId;
+	    
 	    socketProcessor.getWriteProxy().enqueue(nextMessage);
 	}
 	
@@ -182,8 +182,6 @@ public class HttpMessageTask implements ITask
 	{
 		Message    message    = socketProcessor.getWriteProxy().getMessage();
 	    HttpResponse response = new HttpResponse();
-	    
-	    message.socketId = request.socketId;		// must be set!!!
 	    
 	    String body = null;
 	    
@@ -200,6 +198,7 @@ public class HttpMessageTask implements ITask
 	    
 		response.setHttpStatus(200);
 		response.setHeader("Content-Length", length.toString());
+		response.setHeader("Content-Type", HttpResponse.HTTP_MIMES_TYPE.get("html"));
 		
 		try {
 		 	message.writeToMessage(response.getHeader().getBytes(config.charset()));
@@ -210,6 +209,8 @@ public class HttpMessageTask implements ITask
 			e.printStackTrace();
 		}
 		
+		message.socketId = request.socketId;
+		
 		socketProcessor.getWriteProxy().enqueue(message);
 	}
 
@@ -219,7 +220,7 @@ public class HttpMessageTask implements ITask
 		HttpHeader metaData = (HttpHeader) message.metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
         
-        String ext = Utils.getFileExt(request.path);
+        String ext = Util.getFileExt(request.path);
         
         socket.closeAfterResponse = true;
         

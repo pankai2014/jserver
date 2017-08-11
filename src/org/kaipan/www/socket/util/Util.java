@@ -4,9 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
-public class Utils
+public class Util
 {
     /**
      * get the absolute parent path for the jar file. 
@@ -59,4 +61,41 @@ public class Utils
         
         return file.substring(loc + 1).toLowerCase();
     }
+    
+	public static String md5(String data) throws NoSuchAlgorithmException 
+    {
+    	MessageDigest md5 = MessageDigest.getInstance("MD5");   
+    	md5.update(data.getBytes()); 
+    	
+        byte[] bytes = md5.digest();
+        
+        StringBuilder stringBuilder = new StringBuilder();  
+        for ( int i = 0; i < bytes.length; i++ ) {
+	        int val = bytes[i] & 0xff;  
+	        if ( val < 16 ) {
+	        	stringBuilder.append(0);  
+	        } 
+	        else {  
+	        	stringBuilder.append(Integer.toHexString(val));  
+	        }
+        }
+        
+        return stringBuilder.toString();
+    }
+	
+	public static byte[] sha1(String data) throws NoSuchAlgorithmException 
+	{
+		MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+		sha1.update(data.getBytes());
+		
+		//byte[] bytes = sha1.digest();
+		
+//		StringBuilder stringBuilder = new StringBuilder();  
+//        for ( int i = 0; i < bytes.length; i++ ) {
+//        	stringBuilder.append(Integer.toHexString(bytes[i]));
+//        }
+//        
+//        return stringBuilder.toString();
+		return sha1.digest();
+	}
 }

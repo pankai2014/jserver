@@ -9,7 +9,7 @@ import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.router.DynamicRouter;
 import org.kaipan.www.socket.task.HttpMessageTask;
 import org.kaipan.www.socket.task.MessageTaskFactory;
-import org.kaipan.www.socket.util.Utils;
+import org.kaipan.www.socket.util.Util;
 
 public class HttpServer extends Server
 {
@@ -48,12 +48,12 @@ public class HttpServer extends Server
         
         Properties property = null;
         if ( path == null ) {
-            String jarHome = Utils.getJarHome(config);
+            String jarHome = Util.getJarHome(config);
             
-            property = Utils.loadConfigFile(jarHome + "/http-server.properties");
+            property = Util.loadConfigFile(jarHome + "/http-server.properties");
         }
         else {
-            property = Utils.loadConfigFile(path);
+            property = Util.loadConfigFile(path);
             if ( property == null ) {
                 Logger.write("Usage: java -jar http-server-{version}.jar "
                         + "\"path to file http-server.properties\"");

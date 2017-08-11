@@ -3,10 +3,9 @@ package org.kaipan.www.socket.task;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
-import org.kaipan.www.socket.protocol.http.HttpHeader;
-import org.kaipan.www.socket.protocol.http.HttpRequest;
-import org.kaipan.www.socket.protocol.http.HttpResponse;
-import org.kaipan.www.socket.protocol.http.HttpUtil;
+import org.kaipan.www.socket.protocol.websocket.HandshakeCompleted;
+import org.kaipan.www.socket.protocol.websocket.NoShakeHand;
+import org.kaipan.www.socket.protocol.websocket.ShakeHanding;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReadBuffer;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReader;
 
@@ -21,27 +20,8 @@ public class WsMessageTask implements ITask
 	{
 		this.socket  = socket;
 		this.message = message;
-	}
-	
-	private void shakingHands()
-	{
-		HttpHeader metaData = (HttpHeader) message.metaData;
-        HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
-        
-        Message message = socketProcessor.getWriteProxy().getMessage();
-        
-        HttpResponse reponse = new HttpResponse();
-        
-        reponse.setHttpStatus(101);
-        reponse.setHeader("Upgrade", "websocket");
-        reponse.setHeader("Connection", "Upgrade");
-        reponse.setHeader("Sec-WebSocket-Accept", "");
-        reponse.setHeader("Sec-WebSocket-Protocol", "chat");
-	}
-	
-	private void handshakeCompleted() 
-	{
 		
+		this.socketProcessor = socketProcessor;
 	}
 	
 	@Override
@@ -56,13 +36,24 @@ public class WsMessageTask implements ITask
 		 */
 		switch ( readBuffer.httpHandShake ) {
 			case WsMessageReader.NO_HANDSHAKE:
+				new NoShakeHand(this).run();
 				break;
 			case WsMessageReader.SHAKING_HANDS:
-				shakingHands();
+				new ShakeHanding(this).run();
 				break;
 			case WsMessageReader.HANDSHAKE_COMPLETED:
-				handshakeCompleted();
+				new HandshakeCompleted(this).run();
 				break;
 		}
+	}
+	
+	public SocketProcessor getSocketProcessor() 
+	{
+		return socketProcessor;
+	}
+	
+	public Message getMessage() 
+	{
+		return message;
 	}
 }

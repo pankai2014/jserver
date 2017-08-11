@@ -85,7 +85,7 @@ public class SslSocketServer
 	
 	public void start() 
 	{
-		SslSocketServer server = new SslSocketServer();
+		//SslSocketServer server = new SslSocketServer();
 		
 		SSLServerSocket serverSocket = SslSocketServer.getServeSocket();
 		System.out.println("在" + port + "端口等待连接...");

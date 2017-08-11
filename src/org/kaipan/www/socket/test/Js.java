@@ -10,8 +10,7 @@ public class Js
 
 		DefaultController controller = new DefaultController();
 		
-		//String result = controller.run("d96a0db9acbf4c8a8e444790da118dbd");
-		//System.out.println(result);
+		controller.run(null, null);
 	}
 
 }

@@ -9,7 +9,7 @@ import org.kaipan.www.socket.protocol.http.HttpMessageReaderFactory;
 import org.kaipan.www.socket.router.DynamicRouter;
 import org.kaipan.www.socket.task.HttpMessageTask;
 import org.kaipan.www.socket.task.MessageTaskFactory;
-import org.kaipan.www.socket.util.Utils;
+import org.kaipan.www.socket.util.Util;
 
 public class HttpSslServer extends Server
 {
@@ -48,12 +48,12 @@ public class HttpSslServer extends Server
         
         Properties property = null;
         if ( path == null ) {
-            String jarHome = Utils.getJarHome(config);
+            String jarHome = Util.getJarHome(config);
             
-            property = Utils.loadConfigFile(jarHome + "/https-server.properties");
+            property = Util.loadConfigFile(jarHome + "/https-server.properties");
         }
         else {
-            property = Utils.loadConfigFile(path);
+            property = Util.loadConfigFile(path);
             if ( property == null ) {
                 System.out.println("Usage: java -jar https-server-{version}.jar "
                         + "\"path to file https-server.properties\"");

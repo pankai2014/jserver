@@ -7,7 +7,7 @@ import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.task.MessageTaskFactory;
 import org.kaipan.www.socket.task.WsMessageTask;
-import org.kaipan.www.socket.util.Utils;
+import org.kaipan.www.socket.util.Util;
 
 public class WebsocketServer extends Server
 {
@@ -42,12 +42,12 @@ public class WebsocketServer extends Server
         
         Properties property = null;
         if ( path == null ) {
-            String jarHome = Utils.getJarHome(config);
+            String jarHome = Util.getJarHome(config);
             
-            property = Utils.loadConfigFile(jarHome + "/websocket-server.properties");
+            property = Util.loadConfigFile(jarHome + "/websocket-server.properties");
         }
         else {
-            property = Utils.loadConfigFile(path);
+            property = Util.loadConfigFile(path);
             if ( property == null ) {
                 System.out.println("Usage: java -jar websocket-server-{version}.jar "
                         + "\"path to file websocket-server.properties\"");

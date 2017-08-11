@@ -93,10 +93,6 @@ public class HttpResponse
     	if ( this.meta == null ) 					this.setHttpStatus(200);
     	if ( ! this.headers.containsKey("Server") ) this.setHeader("Server", SERVER_NAME);
     	
-    	if ( ! this.headers.containsKey("Content-Type")) {
-    		this.setHeader("Content-Type", "text/html; charset=utf-8");
-    	}
-    	
     	StringBuilder stringBuilder = new StringBuilder();
     	stringBuilder.append(this.meta);
     	
