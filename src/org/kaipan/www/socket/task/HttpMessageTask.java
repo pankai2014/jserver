@@ -12,6 +12,7 @@ import java.util.Map;
 import org.kaipan.www.socket.client.fastcgi.Client;
 import org.kaipan.www.socket.controller.IController;
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
@@ -23,21 +24,25 @@ import org.kaipan.www.socket.util.Util;
 
 public class HttpMessageTask implements ITask
 {
-	private HttpConfig config;
+	protected HttpConfig config;
 
 	private Socket  socket;
 	private Message message;
 	
 	private SocketProcessor socketProcessor;
 	
-	public HttpMessageTask(SocketProcessor socketProcessor, Socket socket, Message message)
+	public HttpMessageTask(Server server, Socket socket, Message message)
 	{
-		this.config = (HttpConfig) socketProcessor.getConfig();
+		/**
+		 * refactoring 
+		 *     encapsulate downcast(308)
+		 */
+		this.config = (HttpConfig) server.getConfig();
 		
 		this.socket  = socket;
 		this.message = message;
 		
-		this.socketProcessor = socketProcessor;
+		this.socketProcessor = server.getSocketProcessor();
 	}
 	
 	public void doStaticRequest(HttpRequest request) 

@@ -2,15 +2,15 @@ package org.kaipan.www.socket.protocol.websocket;
 
 import org.kaipan.www.socket.task.WsMessageTask;
 
-public class HandshakeCompleted implements IShakeHand
+public class ShakeHandCompleted implements IShakeHand
 {
-	public HandshakeCompleted(WsMessageTask task) 
+	public ShakeHandCompleted() 
 	{
 		
 	}
 	
 	@Override
-	public void run()
+	public void run(WsMessageTask task)
 	{
 		
 	}

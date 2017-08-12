@@ -1,5 +1,7 @@
 package org.kaipan.www.socket.core;
 
+import java.util.Properties;
+
 public abstract class Config
 {
     private String host = "0.0.0.0";
@@ -60,4 +62,6 @@ public abstract class Config
     {
     	this.ssl_protocol = ssl_protocol;
     }
+    
+    public abstract void load(Properties property);
 }

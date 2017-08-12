@@ -326,6 +326,10 @@ public class Client
     		
     		if ( ret == null ) break;
     		
+    		/**
+             * TODO optimize
+             * reconstructed signal, polymorphism should be used instead
+             */
     		switch ( ret.get("Type").intValue() ) {
 	    		case STDOUT:
 	    			writeBytesBuffer.put(readBytes, HEADER_LEN, ret.get("ContentLength").intValue());

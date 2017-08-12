@@ -87,15 +87,7 @@ public class Util
 	{
 		MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 		sha1.update(data.getBytes());
-		
-		//byte[] bytes = sha1.digest();
-		
-//		StringBuilder stringBuilder = new StringBuilder();  
-//        for ( int i = 0; i < bytes.length; i++ ) {
-//        	stringBuilder.append(Integer.toHexString(bytes[i]));
-//        }
-//        
-//        return stringBuilder.toString();
+
 		return sha1.digest();
 	}
 }

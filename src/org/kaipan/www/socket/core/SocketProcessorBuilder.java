@@ -18,7 +18,7 @@ import org.kaipan.www.socket.worker.MessageWorker;
 
 public class SocketProcessorBuilder
 {
-	private Config config;
+	private Server server;
 	
 	private Queue<Socket>  socketQueue;
 	private Queue<Message> outboundMessageQueue;
@@ -41,9 +41,9 @@ public class SocketProcessorBuilder
 	
 	private IRouter router;
 	
-	public SocketProcessorBuilder setConfig(Config config) 
+	public SocketProcessorBuilder setServer(Server server) 
 	{
-		this.config = config;
+		this.server = server;
 		
 		return this;
 	}
@@ -151,7 +151,7 @@ public class SocketProcessorBuilder
 		if ( acceptThreadPool == null )		  acceptThreadPool = Executors.newFixedThreadPool(5);
 		
 		return new SocketProcessor(
-				config,
+				server,
 				router,
 				socketQueue,
 				outboundMessageQueue,

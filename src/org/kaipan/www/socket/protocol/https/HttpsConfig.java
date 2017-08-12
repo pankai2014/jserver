@@ -5,7 +5,7 @@ import java.util.Properties;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.ssl.SslConfig;
 
-public class HttpSslConfig extends HttpConfig implements SslConfig
+public class HttpsConfig extends HttpConfig implements SslConfig
 {
     private boolean ssl_mode_open = true;
 	private String	ssl_protocol  = "TLSv1.2";
@@ -16,12 +16,12 @@ public class HttpSslConfig extends HttpConfig implements SslConfig
 	private String  ssl_key_store_password;
 	private String  ssl_key_password;
 	
-    public HttpSslConfig() 
+    public HttpsConfig() 
     {
         
     }
     
-    public HttpSslConfig(Properties property) 
+    public HttpsConfig(Properties property) 
     {
         load(property);
     }

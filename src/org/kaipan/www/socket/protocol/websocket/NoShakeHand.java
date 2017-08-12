@@ -4,13 +4,13 @@ import org.kaipan.www.socket.task.WsMessageTask;
 
 public class NoShakeHand implements IShakeHand
 {
-	public NoShakeHand(WsMessageTask task) 
+	public NoShakeHand() 
 	{
 		
 	}
 	
 	@Override
-	public void run()
+	public void run(WsMessageTask task)
 	{
 		
 	}

@@ -31,7 +31,7 @@ public class SocketProcessor
 {
     private Ssl ssl;
     
-	private Config config;
+	private Server server;
 	
 	/**
 	 * router for controller
@@ -76,7 +76,7 @@ public class SocketProcessor
     private ExecutorService acceptThreadPool;
     
     public SocketProcessor(
-    		Config config,
+    		Server server,
     		IRouter router,
 			Queue<Socket>  socketQueue,
 			Queue<Message> outboundMessageQueue,
@@ -90,7 +90,7 @@ public class SocketProcessor
 			ExecutorService acceptThreadPool,
 			ITaskFactory taskFactory)
     {
-    	this.config = config;
+    	this.server = server;
     	this.router = router;
     	
     	this.inSocketQueue 		  = socketQueue;
@@ -188,10 +188,10 @@ public class SocketProcessor
     		socket.setMessageReader(messageReader);
     		
     		// TLS/SSL protocol
-    		if ( config instanceof SslConfig ) {
-    		    SslConfig SslConfig = (SslConfig) config;
+    		if ( server.getConfig() instanceof SslConfig ) {
+    		    SslConfig sslConfig = (SslConfig) server.getConfig();
     		  
-    			if ( SslConfig.sslMode() ) {
+    			if ( sslConfig.sslMode() ) {
     			    SocketChannel socketChannel = socket.getSocketChannel();
     			    
     			    try {
@@ -203,10 +203,10 @@ public class SocketProcessor
                     }
     			    
     			    if ( ssl == null ) {
-                        this.ssl = new Ssl(SslConfig.sslProtocol());
+                        this.ssl = new Ssl(sslConfig.sslProtocol());
                         
-                        ssl.init(SslConfig.sslServerCertsFile(), SslConfig.sslTrustsCertsFile(), 
-                                SslConfig.sslKeystorePassword(), SslConfig.sslKeyPassword());
+                        ssl.init(sslConfig.sslServerCertsFile(), sslConfig.sslTrustsCertsFile(), 
+                        		sslConfig.sslKeystorePassword(), sslConfig.sslKeyPassword());
                     }
     			   
     			    SslEngine sslEngine = new SslEngine(ssl.createSslEngine());   
@@ -268,7 +268,8 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       ITask task = taskFactory.createTask(this, socket, message);
+                       //ITask task = taskFactory.createTask(this, socket, message);
+                       ITask task = taskFactory.createTask(server, socket, message);
                        messageWorker.addTask(task);
                    }
                }
@@ -454,9 +455,9 @@ public class SocketProcessor
         }
     }
     
-    public Config getConfig() 
+    public Server getServer() 
     {
-    	return config;
+    	return server;
     }
     
     public Map<Long, Socket> getSocketMap() 

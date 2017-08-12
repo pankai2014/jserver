@@ -1,10 +1,10 @@
 package org.kaipan.www.socket.task;
 
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
-import org.kaipan.www.socket.core.SocketProcessor;
 
 public interface ITaskFactory
 {
-	public ITask createTask(SocketProcessor socketProcessor, Socket socket, Message message);
+	public ITask createTask(Server server, Socket socket, Message message);
 }

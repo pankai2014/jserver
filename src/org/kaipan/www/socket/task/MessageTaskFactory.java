@@ -4,8 +4,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
-import org.kaipan.www.socket.core.SocketProcessor;
 
 public class MessageTaskFactory implements ITaskFactory
 {
@@ -22,13 +22,13 @@ public class MessageTaskFactory implements ITaskFactory
 	}
 	
 	@Override
-	public ITask createTask(SocketProcessor socketProcessor, Socket socket, Message message)
+	public ITask createTask(Server server, Socket socket, Message message)
 	{
 		ITask Task = null;
 		
 		try {
 			Class<?>[] classes = new Class[] {
-				SocketProcessor.class,
+				Server.class,
 				Socket.class,
 				Message.class
 			};
@@ -36,7 +36,7 @@ public class MessageTaskFactory implements ITaskFactory
 			Constructor<? extends ITask> constructor = TaskClass.getConstructor(classes);
 			
 			Object[] arguments = new Object[] {
-				socketProcessor,
+				server,
 				socket,
 				message
 			};

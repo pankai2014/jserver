@@ -19,11 +19,9 @@ public class ShakeHanding implements IShakeHand
 	
 	private static final int WEBSOCKET_VERSION = 13;
 	
-	private WsMessageTask task;
-	
-	public ShakeHanding(WsMessageTask task) 
+	public ShakeHanding() 
 	{
-		this.task = task;
+		
 	}
 	
 	private String secWebSocketAccept(String key) 
@@ -44,7 +42,7 @@ public class ShakeHanding implements IShakeHand
 	}
 	
 	@Override
-	public void run()
+	public void run(WsMessageTask task)
 	{
 		HttpHeader metaData = (HttpHeader) task.getMessage().metaData;
         HttpRequest request = HttpUtil.parseHttpRequest(task.getMessage(), metaData);
@@ -59,7 +57,7 @@ public class ShakeHanding implements IShakeHand
         response.setHeader("Sec-WebSocket-Accept",  secWebSocketAccept(request.header.get("Sec-WebSocket-Key").trim()));
         response.setHeader("Sec-WebSocket-Version", String.valueOf(WEBSOCKET_VERSION));
         
-        WsConfig config = (WsConfig) task.getSocketProcessor().getConfig();
+        WsConfig config = task.getWsConfig();
         
         try {
 			message.writeToMessage(response.getHeader().getBytes(config.charset()));

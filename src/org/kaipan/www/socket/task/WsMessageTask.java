@@ -1,27 +1,32 @@
 package org.kaipan.www.socket.task;
 
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
-import org.kaipan.www.socket.protocol.websocket.HandshakeCompleted;
-import org.kaipan.www.socket.protocol.websocket.NoShakeHand;
-import org.kaipan.www.socket.protocol.websocket.ShakeHanding;
+import org.kaipan.www.socket.protocol.websocket.ShakeHandFactory;
+import org.kaipan.www.socket.protocol.websocket.WsConfig;
+import org.kaipan.www.socket.protocol.websocket.IShakeHand;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReadBuffer;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReader;
 
 public class WsMessageTask implements ITask
 {
+	private WsConfig config;
+	
 	private Socket  socket;
 	private Message message;
 	
 	private SocketProcessor socketProcessor;
 	
-	public WsMessageTask(SocketProcessor socketProcessor, Socket socket, Message message) 
+	public WsMessageTask(Server server, Socket socket, Message message) 
 	{
+		this.config = (WsConfig) server.getConfig();
+		
 		this.socket  = socket;
 		this.message = message;
 		
-		this.socketProcessor = socketProcessor;
+		this.socketProcessor = server.getSocketProcessor();
 	}
 	
 	@Override
@@ -31,20 +36,16 @@ public class WsMessageTask implements ITask
 		WsMessageReadBuffer readBuffer = messageReader.getReadBuffer();
 		
 		/**
-		 * TODO optimize
-		 * reconstructed signal, polymorphism should be used instead
+		 * refactoring
+		 *     replace type code with class(218)
 		 */
-		switch ( readBuffer.httpHandShake ) {
-			case WsMessageReader.NO_HANDSHAKE:
-				new NoShakeHand(this).run();
-				break;
-			case WsMessageReader.SHAKING_HANDS:
-				new ShakeHanding(this).run();
-				break;
-			case WsMessageReader.HANDSHAKE_COMPLETED:
-				new HandshakeCompleted(this).run();
-				break;
-		}
+		IShakeHand processor = ShakeHandFactory.create(readBuffer.httpHandShake);
+		processor.run(this);
+	}
+	
+	public WsConfig getWsConfig () 
+	{
+		return config;
 	}
 	
 	public SocketProcessor getSocketProcessor() 

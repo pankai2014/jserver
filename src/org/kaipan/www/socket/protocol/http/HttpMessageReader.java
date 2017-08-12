@@ -31,31 +31,33 @@ public class HttpMessageReader implements IMessageReader
 		this.messageBuffer = readMessageBuffer;				
 	}
 	
-	private boolean operate()
+	private boolean onlyBodyNotCompleted() 
 	{
-		// body isn't complete
-        if ( readBuffer.headerComplete == true
+		if ( readBuffer.headerComplete == true
                 && readBuffer.bodycomplete == false ) {
         	int realContentLength = nextMessage.length - readBuffer.prevBodyEndIndex;
         	
+        	/**
+        	 * check if the complete packet has arrived
+        	 *     else waiting more data...
+        	 */
             if ( readBuffer.expectContentLength <= realContentLength ) {
                 readBuffer.bodycomplete = true;
                 
                 completeMessages.add(nextMessage);
                 nextMessage = null;
             }
-            else {
-            	int length       = readBuffer.prevBodyEndIndex + readBuffer.expectContentLength;
-                
-                Message message  = messageBuffer.getMessage();
-                message.metaData = new HttpHeader();
-                message.writePartialMessageToMessage(nextMessage, length - nextMessage.offset);
-                
-                nextMessage = message;
-            }
             
             return true;
         }
+		
+		return false;
+	}
+	
+	private boolean operate()
+	{
+		// body isn't complete
+		if ( onlyBodyNotCompleted() ) return true;
         
         HttpHeader metaData = (HttpHeader) nextMessage.metaData;
         

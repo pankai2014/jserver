@@ -14,22 +14,35 @@ public abstract class Server
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel socketChannel = null;
     
-    protected Server(Config config)
+    public Server()
+    {
+    	initialize();
+    }
+    
+    public Server(Config config)
     {
         this.config = config;
         
-        try {
+        initialize();
+    }
+    
+    public void load(Config config) 
+    {
+    	this.config = config;
+    }
+    
+    private void initialize() 
+    {
+    	try {
             this.socketChannel = ServerSocketChannel.open();
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        
-        listen(config.host(), config.port());
     }
     
-    public void listen(String ip, int port) 
+    private void listen(String ip, int port) 
     {
     	SocketAddress address = new InetSocketAddress(ip, port);
         
@@ -46,9 +59,25 @@ public abstract class Server
     
     public void start()
     {   
+    	listen(config.host(), config.port());
+    	
+    	createSocketProcessor();
+    	
     	socketProcessor.getAcceptThreadPool().execute(new Accept(this));
     	socketProcessor.run();
     }
+    
+    public Config getConfig() 
+    {
+    	return config;
+    }
+    
+    public SocketProcessor getSocketProcessor() 
+    {
+    	return socketProcessor;
+    }
+    
+    protected abstract void initialize(String path);
     
     protected abstract void createSocketProcessor();
 }
