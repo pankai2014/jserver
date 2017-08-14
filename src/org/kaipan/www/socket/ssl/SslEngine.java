@@ -63,7 +63,6 @@ public class SslEngine
         
         SSLEngineResult result;
         
-        //SocketChannel socketChannel     = socket.getSocketChannel();
         HandshakeStatus handshakeStatus = sslEngine.getHandshakeStatus();
         
         while ( handshakeStatus != SSLEngineResult.HandshakeStatus.FINISHED 
@@ -82,19 +81,18 @@ public class SslEngine
                                 sslEngine.closeInbound();
                             } 
                             catch (SSLException e) {
-                                Logger.write("this engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream");
+                                Logger.write("this engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, "
+                                		+ "due to end of stream");
                             }
                             
                             sslEngine.closeOutbound();
                             
                             handshakeStatus = sslEngine.getHandshakeStatus();
-                            
                             break;
                         }
                     } 
                     catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        Logger.write(e.getMessage());
                     }
                     
                     peerNetData.flip();
@@ -106,9 +104,8 @@ public class SslEngine
                         handshakeStatus = result.getHandshakeStatus();
                     } 
                     catch (SSLException e) {
-                        e.printStackTrace();
-                       //Log.write("a problem was encountered while processing the data that caused the SSLEngine to abort");
-                        
+                    	Logger.write("a problem was encountered while processing the data that caused the SSLEngine to abort");
+                    	
                         sslEngine.closeOutbound();
                         handshakeStatus = sslEngine.getHandshakeStatus();
                         
@@ -120,19 +117,27 @@ public class SslEngine
                             Logger.write("OK");
                             break;
                         case BUFFER_OVERFLOW:
-                            Logger.write("BUFFER_OVERFLOW");
-                            // will occur when peerAppData's capacity is smaller than the data derived from peerNetData's unwrap.
+                        	Logger.write("BUFFER_OVERFLOW");
+                        	
+                            /**
+                             * will occur when peerAppData's capacity is smaller than the data derived from peerNetData's unwrap.
+                             */
                             peerAppData = Ssl.enlargeApplicationBuffer(sslEngine, peerAppData);
                             
                             break;
                         case BUFFER_UNDERFLOW:
-                            Logger.write("BUFFER_UNDERFLOW");
-                            // will occur either when no data was read from the peer or when the peerNetData buffer was too small to hold all peer's data.
+                        	Logger.write("BUFFER_UNDERFLOW");
+                        	
+                            /**
+                             * will occur either when no data was read from the peer 
+                             *     or when the peerNetData buffer was too small to hold all peer's data.
+                             */
                             peerNetData = Ssl.handleBufferUnderflow(sslEngine, peerNetData);
                             
                             break;
                         case CLOSED:
-                            Logger.write("CLOSED");
+                        	Logger.write("CLOSED");
+                        	
                             // isInboundDone() is true
                             if ( sslEngine.isOutboundDone() ) {
                                 return false;
@@ -152,7 +157,6 @@ public class SslEngine
                     Logger.write("NEED_WRAP");
                     
                     myNetData.clear();
-                    
                     try {
                         result = sslEngine.wrap(myAppData, myNetData);
                         handshakeStatus = result.getHandshakeStatus();
@@ -169,47 +173,51 @@ public class SslEngine
                     switch ( result.getStatus() ) {
                         case OK:
                             Logger.write("OK");
+                            
                             myNetData.flip();
                             while ( myNetData.hasRemaining() ) {
                                 try {
                                     socket.write(myNetData);
                                 } 
                                 catch (IOException e) {
-                                    // TODO Auto-generated catch block
-                                    e.printStackTrace();
+                                   Logger.write(e.getMessage());
                                 }
                             }
                             
                             break;
                         case BUFFER_OVERFLOW:
                             Logger.write("BUFFER_OVERFLOW");
+                        	
                             myNetData = Ssl.enlargePacketBuffer(sslEngine, myNetData);
-                            
                             break;
                         case BUFFER_UNDERFLOW:
-                            Logger.write("BUFFER_UNDERFLOW");
+                        	Logger.write("BUFFER_UNDERFLOW");
+                        	
                             try {
                                 throw new SSLException("buffer underflow occured after a wrap. i don't think we should ever get here");
                             } 
-                            catch (SSLException e1) {
-                                // TODO Auto-generated catch block
-                                e1.printStackTrace();
+                            catch (SSLException e) {
+                                Logger.write(e.getMessage());
                             }
                             
                             break;
                         case CLOSED:
                             Logger.write("CLOSED");
+                            
                             try {
                                 myNetData.flip();
                                 while ( myNetData.hasRemaining() ) {
                                     socket.write(myNetData);
                                 }
                                 
-                                // At this point the handshake status will probably be NEED_UNWRAP so we make sure that peerNetData is clear to read
+                                /**
+                                 * at this point the handshake status will probably be NEED_UNWRAP so we make sure that peerNetData is clear to read
+                                 */
                                 peerNetData.clear();
                             } 
                             catch (Exception e) {
                                 Logger.write("failed to send server's close message due to socket channel's failure");
+                                
                                 handshakeStatus = sslEngine.getHandshakeStatus();
                             }
                             
@@ -257,8 +265,7 @@ public class SslEngine
         	bytesRead = socket.read(peerNetData);
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage());
         }
         
         if ( socket.endOfStreamReached == true ) {
@@ -275,7 +282,6 @@ public class SslEngine
                 
                 switch ( result.getStatus() ) {
                     case OK:
-                    	//System.out.println(new String(peerAppData.array(), 0, peerAppData.position()));
                         break;
                     case BUFFER_OVERFLOW:
                         peerAppData = Ssl.enlargeApplicationBuffer(sslEngine, peerAppData);
@@ -294,8 +300,7 @@ public class SslEngine
                 }
             } 
             catch (SSLException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+               Logger.write(e.getMessage());
             }
         }
         
@@ -322,8 +327,7 @@ public class SslEngine
 								socket.write(myNetData);
 							} 
 		                    catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								Logger.write(e.getMessage());
 							}
 		                }
 		                
@@ -344,8 +348,7 @@ public class SslEngine
 				}
 			} 
     		catch (SSLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+    			Logger.write(e.getMessage());
 			}
     	}
     	
@@ -365,8 +368,6 @@ public class SslEngine
 			sslEngine.closeInbound();
 		} 
         catch (SSLException e) {
-        	//e.printStackTrace();
-        	
 			Logger.write("this engine was forced to close inbound, without having received the proper SSL/TLS close notification message from the peer, due to end of stream");
 		}
         

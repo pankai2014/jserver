@@ -24,9 +24,14 @@ public class WsFrame
 	public final static int CLOSE_SERVER_ERROR  	= 1011;
 	public final static int CLOSE_TLS  				= 1015;
 	
-	private static byte[] getLengthBytes(int length) 
+	private static byte[] getLengthBytes(short length) 
 	{
-		return IntegerUtil.int2BigEndianBytes(length);
+		return IntegerUtil.short2BigEndianBytes(length);
+	}
+	
+	private static byte[] getLengthBytes(long length) 
+	{
+		return IntegerUtil.long2BigEndianBytes(length);
 	}
 	
 	private static int getPayloadLength(int length) 
@@ -52,7 +57,7 @@ public class WsFrame
 		if ( data.length == 0x7e ) {
 			total += 2;
 		}
-		else if ( data.length == 0x7f ) {
+		else if ( data.length >= 0x7f ) {
 			total += 8;
 		}
 
@@ -67,12 +72,15 @@ public class WsFrame
 			frame[index] = (byte) (0x01 << 7 | (0x00 << 6) | (0x00 << 5) | (0x00 << 4) | opcode);
 		}
 		
-		frame[++index] = (byte) (0x00 | getPayloadLength(data.length));
+		frame[++index] = (byte) (0x00 << 7 | getPayloadLength(data.length));
 		
-		if ( data.length == 0x7e
-				|| data.length > 0x7f ) {
-			System.arraycopy(getLengthBytes(data.length), 0, frame, ++index, getLengthBytes(data.length).length);
-			index += getLengthBytes(data.length).length - 1;
+		if ( data.length == 0x7e ) {
+			System.arraycopy(getLengthBytes((short) data.length), 0, frame, ++index, 2);
+			index += 1;
+		}
+		else if ( data.length > 0x7f ) {
+			System.arraycopy(getLengthBytes(data.length), 0, frame, ++index, 8);
+			index += 7;
 		}
 		
 		System.arraycopy(data, 0, frame, ++index, data.length);
