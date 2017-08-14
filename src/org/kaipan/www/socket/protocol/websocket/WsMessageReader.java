@@ -1,5 +1,6 @@
 package org.kaipan.www.socket.protocol.websocket;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.kaipan.www.socket.core.Socket;
@@ -32,6 +33,14 @@ public class WsMessageReader extends HttpMessageReader
 		return result;
 	}
 	
+	private boolean operate() 
+	{
+		completeMessages.add(nextMessage);
+        nextMessage = null;
+		
+		return true;
+	}
+	
 	public boolean read(Socket socket, ByteBuffer byteBuffer) 
 	{
 		if ( readBuffer.httpHandShake == NO_HANDSHAKE ) {
@@ -42,7 +51,27 @@ public class WsMessageReader extends HttpMessageReader
 		
 		readBuffer.httpHandShake = HANDSHAKE_COMPLETED;
 		
-		return true;
+		if ( nextMessage == null ) {
+    		this.nextMessage = messageBuffer.getMessage();
+    	}
+		
+		try {
+            socket.read(byteBuffer);
+        } 
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+		if ( socket.endOfStreamReached == true ) {
+			return false;
+		}
+		
+		byteBuffer.flip();
+		
+	    nextMessage.writeToMessage(byteBuffer);
+        byteBuffer.clear();
+		
+		return operate();
 	}
 	
 	public WsMessageReadBuffer getReadBuffer() 

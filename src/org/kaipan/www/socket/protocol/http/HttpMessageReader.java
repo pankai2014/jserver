@@ -9,6 +9,7 @@ import org.kaipan.www.socket.core.IMessageReader;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.Socket;
+import org.kaipan.www.socket.log.Logger;
 
 public class HttpMessageReader implements IMessageReader
 {
@@ -33,8 +34,11 @@ public class HttpMessageReader implements IMessageReader
 	
 	private boolean onlyBodyNotCompleted() 
 	{
-		if ( readBuffer.headerComplete == true
-                && readBuffer.bodycomplete == false ) {
+		if ( readBuffer.headerComplete == true 
+				&& readBuffer.bodycomplete == false ) {
+			/**
+			 * arrived body content length
+			 */
         	int realContentLength = nextMessage.length - readBuffer.prevBodyEndIndex;
         	
         	/**
@@ -67,7 +71,7 @@ public class HttpMessageReader implements IMessageReader
         // header was still unfinished
         if ( ! readBuffer.headerComplete ) {
             if ( nextMessage.length > HttpUtil.HTTP_HEAD_MAXLEN ) {
-                // TODO Write log, header is too large
+            	Logger.write("illegal request, header is too large");
                 return false;
             }
             
@@ -76,7 +80,7 @@ public class HttpMessageReader implements IMessageReader
         else {
             int headerLength = metaData.endOfHeader - nextMessage.offset;
             if ( headerLength > HttpUtil.HTTP_HEAD_MAXLEN ) {
-                // TODO Write log, header is too large
+            	Logger.write("illegal request, header is too large");
                 return false;
             }
             
@@ -126,7 +130,9 @@ public class HttpMessageReader implements IMessageReader
             e.printStackTrace();
         }
         
-        if ( socket.endOfStreamReached == true ) return false;
+        if ( socket.endOfStreamReached == true ) {
+        	return false;
+        }
 
         byteBuffer.flip();
         
