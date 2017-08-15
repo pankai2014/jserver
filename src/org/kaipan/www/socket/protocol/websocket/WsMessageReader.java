@@ -35,8 +35,10 @@ public class WsMessageReader extends HttpMessageReader
 	
 	private boolean operate() 
 	{
-		completeMessages.add(nextMessage);
-        nextMessage = null;
+		//completeMessages.add(nextMessage);
+        //nextMessage = null;
+		
+		WsUtil.parseFrame(nextMessage.sharedArray, nextMessage.offset, nextMessage.length);
 		
 		return true;
 	}

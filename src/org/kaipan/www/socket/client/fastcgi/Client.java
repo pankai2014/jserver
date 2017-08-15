@@ -41,13 +41,13 @@ public class Client
     public final static int ROLE_AUTHORIZER   = 2;
     public final static int ROLE_FILTER       = 3;
     
-    public final static int HEADER_LEN         = 8;
+    public final static int HEADER_LEN        = 8;
     
     private String host = null;
     
     private int port;
-    private int connectTimeOut   = 5000;
-    private int readWriteTimeOut = 5000;
+    private int connectTimeOut = 10000;
+    private int socketTimeOut  = 30000;
     
     private byte[]	   readBytes	    = new byte[65535];	
     private ByteBuffer readBytesBuffer  = ByteBuffer.wrap(readBytes);
@@ -78,7 +78,7 @@ public class Client
         SocketAddress address = new InetSocketAddress(host, port);
         try {
             client.connect(address, connectTimeOut);
-            client.setSoTimeout(readWriteTimeOut);
+            client.setSoTimeout(socketTimeOut);
         } 
         catch (IOException e) {
             // TODO Auto-generated catch block
@@ -328,7 +328,7 @@ public class Client
     		
     		/**
              * TODO optimize
-             * reconstructed signal, polymorphism should be used instead
+             *     reconstructed signal, polymorphism should be used instead
              */
     		switch ( ret.get("Type").intValue() ) {
 	    		case STDOUT:
