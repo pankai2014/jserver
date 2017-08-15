@@ -1,7 +1,5 @@
 package org.kaipan.www.socket.protocol.websocket;
 
-import java.io.UnsupportedEncodingException;
-
 import org.kaipan.www.socket.util.IntegerUtil;
 
 public class WsUtil
