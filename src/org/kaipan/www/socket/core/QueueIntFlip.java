@@ -4,11 +4,11 @@ public class QueueIntFlip
 {
 	public int[] elements = null;
 
-    public int capacity = 0;
-    public int writePos = 0;
-    public int readPos  = 0;
+    public volatile int capacity = 0;
+    public volatile int writePos = 0;
+    public volatile int readPos  = 0;
     
-    public boolean flipped = false;
+    public volatile boolean flipped = false;
 
     public QueueIntFlip(int capacity) 
     {

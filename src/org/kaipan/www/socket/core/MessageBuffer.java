@@ -60,7 +60,7 @@ public class MessageBuffer
         return message;
     }
 
-    public synchronized boolean expandMessage(Message message)
+    public boolean expandMessage(Message message)
     {
         if ( message.capacity == CAPACITY_SMALL) {
             return moveMessage(message, this.smallMessageBufferFreeBlocks, this.mediumMessageBufferFreeBlocks, this.mediumMessageBuffer, CAPACITY_MEDIUM);

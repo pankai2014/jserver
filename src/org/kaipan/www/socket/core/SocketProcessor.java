@@ -68,7 +68,7 @@ public class SocketProcessor
     /**
      * start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
      */
-    private long nextSocketId;
+    private volatile long nextSocketId;
     
     private Set<Socket> emptyToNonEmptySockets;
     private Set<Socket> nonEmptyToEmptySockets;
