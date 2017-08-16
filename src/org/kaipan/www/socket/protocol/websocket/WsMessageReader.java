@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import org.kaipan.www.socket.core.Socket;
+import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.protocol.http.HttpMessageReader;
 
 public class WsMessageReader extends HttpMessageReader
@@ -35,10 +36,13 @@ public class WsMessageReader extends HttpMessageReader
 	
 	private boolean operate() 
 	{
-		//completeMessages.add(nextMessage);
-        //nextMessage = null;
+		WsFrame requestFrame = WsUtil.parseFrame(nextMessage.sharedArray, nextMessage.offset, nextMessage.length);
+		nextMessage.metaData = requestFrame;
 		
-		WsUtil.parseFrame(nextMessage.sharedArray, nextMessage.offset, nextMessage.length);
+		if ( requestFrame.isComplete() ) {
+			completeMessages.add(nextMessage);
+	        nextMessage = null;
+		}
 		
 		return true;
 	}
@@ -53,22 +57,21 @@ public class WsMessageReader extends HttpMessageReader
 		
 		readBuffer.httpHandShake = HANDSHAKE_COMPLETED;
 		
-		if ( nextMessage == null ) {
-    		this.nextMessage = messageBuffer.getMessage();
-    	}
-		
 		try {
             socket.read(byteBuffer);
+            byteBuffer.flip();
         } 
         catch (IOException e) {
-            e.printStackTrace();
+        	Logger.write(e.getMessage());
         }
 		
 		if ( socket.endOfStreamReached == true ) {
 			return false;
 		}
 		
-		byteBuffer.flip();
+		if ( nextMessage == null ) {
+    		this.nextMessage = messageBuffer.getMessage();
+    	}
 		
 	    nextMessage.writeToMessage(byteBuffer);
         byteBuffer.clear();

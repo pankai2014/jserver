@@ -43,7 +43,7 @@ public class WsMessageTask implements ITask
 		processor.run(this);
 	}
 	
-	public WsConfig getWsConfig () 
+	public WsConfig getWsConfig() 
 	{
 		return config;
 	}
@@ -51,6 +51,11 @@ public class WsMessageTask implements ITask
 	public SocketProcessor getSocketProcessor() 
 	{
 		return socketProcessor;
+	}
+	
+	public Socket getSocket() 
+	{
+		return socket;
 	}
 	
 	public Message getMessage() 

@@ -90,8 +90,6 @@ public class HttpMessageReader implements IMessageReader
         int endIndex  = metaData.bodyEndIndex;
         int realIndex = nextMessage.offset + nextMessage.length;
         if ( endIndex <= realIndex ) {
-        	readBuffer.bodycomplete = true;
-            
             completeMessages.add(nextMessage);
             
             if ( realIndex > endIndex ) {
@@ -104,6 +102,8 @@ public class HttpMessageReader implements IMessageReader
             else {
             	nextMessage = null;
             }
+            
+            readBuffer.bodycomplete = true;
         }
         else {
         	readBuffer.bodycomplete        = false;
@@ -117,25 +117,23 @@ public class HttpMessageReader implements IMessageReader
     @Override
     public boolean read(Socket socket, ByteBuffer byteBuffer)
     {
-    	if ( nextMessage == null ) {
-    		this.nextMessage 		  = messageBuffer.getMessage();
-    		this.nextMessage.metaData = new HttpHeader();
-    	}
-    	
         try {
             socket.read(byteBuffer);
+            byteBuffer.flip();
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage());
         }
         
         if ( socket.endOfStreamReached == true ) {
         	return false;
         }
-
-        byteBuffer.flip();
         
+    	if ( nextMessage == null ) {
+    		this.nextMessage 		  = messageBuffer.getMessage();
+    		this.nextMessage.metaData = new HttpHeader();
+    	}
+
         // max reading data must be less than 4M
         nextMessage.writeToMessage(byteBuffer);
         byteBuffer.clear();

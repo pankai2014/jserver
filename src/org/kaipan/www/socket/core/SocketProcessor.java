@@ -449,8 +449,7 @@ public class SocketProcessor
                 Thread.sleep(1, 0);
             } 
             catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            	Logger.write(e.getMessage());
             }
         }
     }
