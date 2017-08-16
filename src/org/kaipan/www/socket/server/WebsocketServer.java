@@ -38,6 +38,7 @@ public class WebsocketServer extends Server
                 return;
             }
         }
+        
         config.load(property);
     }
 

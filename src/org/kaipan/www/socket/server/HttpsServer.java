@@ -40,6 +40,7 @@ public class HttpsServer extends Server
                 return;
             }
         }
+        
         config.load(property);
     }
 
