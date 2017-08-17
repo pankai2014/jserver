@@ -189,8 +189,9 @@ public class HttpUtil
         return loc;
     }
     
-    public static HttpRequest parseHttpRequest(Message message, HttpHeader metaData) 
+    public static HttpRequest parseHttpRequest(Message message) 
     {
+    	HttpHeader metaData = (HttpHeader) message.metaData;
         HttpRequest request = new HttpRequest();
         
         String   Str         = new String(message.sharedArray, message.offset, metaData.endOfHeader - message.offset);

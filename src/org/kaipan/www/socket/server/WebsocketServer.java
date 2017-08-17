@@ -7,8 +7,8 @@ import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.protocol.websocket.WsConfig;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReaderFactroy;
+import org.kaipan.www.socket.task.DefaultWsMessageTask;
 import org.kaipan.www.socket.task.MessageTaskFactory;
-import org.kaipan.www.socket.task.WsMessageTask;
 import org.kaipan.www.socket.util.Util;
 
 public class WebsocketServer extends Server
@@ -48,7 +48,7 @@ public class WebsocketServer extends Server
         this.socketProcessor = SocketProcessor.custom()
         		.setServer(this)
         		.setMessageReaderFactory(new WsMessageReaderFactroy())
-        		.setTaskFactory(new MessageTaskFactory(WsMessageTask.class))
+        		.setTaskFactory(new MessageTaskFactory(DefaultWsMessageTask.class))
         		.build();
 	}
 }

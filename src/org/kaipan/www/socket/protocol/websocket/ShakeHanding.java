@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 import org.kaipan.www.socket.core.Message;
-import org.kaipan.www.socket.protocol.http.HttpHeader;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
@@ -44,8 +43,7 @@ public class ShakeHanding implements IShakeHand
 	@Override
 	public void run(WsMessageTask task)
 	{
-		HttpHeader metaData = (HttpHeader) task.getMessage().metaData;
-        HttpRequest request = HttpUtil.parseHttpRequest(task.getMessage(), metaData);
+        HttpRequest request = HttpUtil.parseHttpRequest(task.getMessage());
         
         Message message = task.getSocketProcessor().getWriteProxy().getMessage();
         

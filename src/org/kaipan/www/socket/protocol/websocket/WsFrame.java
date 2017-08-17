@@ -22,12 +22,20 @@ public class WsFrame
 	public final static int CLOSE_SERVER_ERROR  	= 1011;
 	public final static int CLOSE_TLS  				= 1015;
 	
-	private boolean fin;
+	private long socketId;
 	
 	private byte opcode;
 	private byte[] data;
 	
+	private boolean fin;
 	private boolean complete;
+	
+	public WsFrame setSocketId(long socketId) 
+	{
+		this.socketId = socketId;
+		
+		return this;
+	}
 	
 	public WsFrame setFin(boolean fin) 
 	{
@@ -55,6 +63,11 @@ public class WsFrame
 		this.complete = complete;
 		
 		return this;
+	}
+	
+	public long getSocketId()
+	{
+		return socketId;
 	}
 	
 	public boolean isFin() 

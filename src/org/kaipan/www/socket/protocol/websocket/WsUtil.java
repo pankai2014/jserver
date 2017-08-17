@@ -62,13 +62,13 @@ public class WsUtil
 		return false;
 	}
 	
-	private static byte[] parseMessage(byte[] message, byte[] mask) 
+	private static byte[] parseMessage(byte[] data, byte[] mask) 
 	{
-		for ( int i = 0; i < message.length; i++ ) {
-			message[i] = (byte) (message[i] ^ mask[i % 4]);
+		for ( int i = 0; i < data.length; i++ ) {
+			data[i] = (byte) (data[i] ^ mask[i % 4]);
 		}
 		
-		return message;
+		return data;
 	}
 	
 	public static WsFrame parseFrame(byte[] data, int offset, int length) 

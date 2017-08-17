@@ -16,7 +16,6 @@ import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
-import org.kaipan.www.socket.protocol.http.HttpHeader;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
@@ -222,14 +221,12 @@ public class HttpMessageTask implements ITask
 	@Override
 	public void run()
 	{
-		HttpHeader metaData = (HttpHeader) message.metaData;
-        HttpRequest request = HttpUtil.parseHttpRequest(message, metaData);
+        HttpRequest request = HttpUtil.parseHttpRequest(message);
         
         String ext = Util.getFileExt(request.path);
-        
-        socket.closeAfterResponse = true;
-        
         if ( ext == null ) {
+        	socket.closeAfterResponse = true;
+        	
         	doMapRequest(request);
         	return;
         }
@@ -240,5 +237,7 @@ public class HttpMessageTask implements ITask
         else if ( config.dynamicExt().contains(ext) ) {
         	doDynamicRequest(request);
         }
+        
+        socket.closeAfterResponse = true;
 	}
 }
