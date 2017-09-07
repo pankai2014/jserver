@@ -1,29 +1,26 @@
-#JAVA服务器基于JAVA NIO
-1.  已实现HTTP协议
+# JAVA服务器基于JAVA NIO
++ 已实现HTTP协议
 
-2. 已实现HTTPS协议 
++ 已实现HTTPS协议 
 
-3. 已实现FASTCGI协议(Client端)
++ 已实现FASTCGI协议(Client端)
 
-4. 已实现WEBSOCKET协议
++ 已实现WEBSOCKET协议
 
-#运行HTTP/HTTPS服务器
-##运行开发包下jar文件
-
+# 运行HTTP/HTTPS服务器
+## 运行开发包下jar文件
 java -jar http-server-version-{version}.jar ./http-server.properties  
 java -jar https-server-version-{version}.jar ./https-server.properties
 
-##源码编译
-
+## 源码编译
 http:  编译源码并运行src/org/kaipan/www/socket/http/HttpServer.java  
 https: 编译源码并运行src/org/kaipan/www/socket/https/HttpsServer.java
 
-##配置文件路径
-
+## 配置文件路径
 http:  开发包下http-server.properties  
 https: 开发包下https-server.properties
 
-#HTTP/HTTPS服务器配置
+# HTTP/HTTPS服务器配置
 ## Web document root directory
 server.root = /home/will/Develop/www          &nbsp;&nbsp;&nbsp;//静态目录
 
