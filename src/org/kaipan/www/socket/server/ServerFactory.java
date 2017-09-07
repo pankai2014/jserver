@@ -36,9 +36,9 @@ public class ServerFactory
 	
 	public static void main(String[] _args)
     {
-		String[] args = {"WebsocketServer", null};
+		String[] args = {"HttpServer", null};
 		
-		String name = "WebsocketServer";
+		String name = "HttpServer";
 		String path = null;
 		
 		switch ( args.length ) {

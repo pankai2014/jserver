@@ -1,11 +1,11 @@
 # JAVA服务器基于JAVA NIO
-+ 已实现HTTP协议
++ 支持HTTP协议
 
-+ 已实现HTTPS协议 
++ 支持HTTPS协议 
 
-+ 已实现FASTCGI协议(Client端)
++ 支持FASTCGI协议(Client端)
 
-+ 已实现WEBSOCKET协议
++ 支持WEBSOCKET协议
 
 # 运行HTTP/HTTPS服务器
 ## 运行开发包下jar文件
