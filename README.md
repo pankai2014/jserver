@@ -1,4 +1,4 @@
-# JAVA服务器基于JAVA NIO
+# JAVA服务器
 + 支持HTTP协议
 
 + 支持HTTPS协议 
