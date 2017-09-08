@@ -14,12 +14,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import org.kaipan.www.socket.log.Logger;
-import org.kaipan.www.socket.router.IRouter;
+import org.kaipan.www.socket.router.Router;
 import org.kaipan.www.socket.ssl.Ssl;
 import org.kaipan.www.socket.ssl.SslConfig;
 import org.kaipan.www.socket.ssl.SslEngine;
-import org.kaipan.www.socket.task.ITask;
-import org.kaipan.www.socket.task.ITaskFactory;
+import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.task.TaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
 
 /**
@@ -36,7 +36,7 @@ public class SocketProcessor
 	/**
 	 * router for controller
 	 */
-	private IRouter router;
+	private Router router;
 	
 	private Queue<Socket> inSocketQueue;
 	
@@ -59,11 +59,11 @@ public class SocketProcessor
     private MessageBuffer readMessageBuffer;
     private MessageBuffer writeMessageBuffer;	
     
-    private IMessageReaderFactory messageReaderFactory;
+    private MessageReaderFactory messageReaderFactory;
     
     private WriteProxy writeProxy;	
     
-    private ITaskFactory taskFactory;
+    private TaskFactory taskFactory;
     
     /**
      * start incoming socket ids from 16K - reserve bottom ids for pre-defined sockets (servers).
@@ -77,18 +77,18 @@ public class SocketProcessor
     
     public SocketProcessor(
     		Server server,
-    		IRouter router,
+    		Router router,
 			Queue<Socket>  socketQueue,
 			Queue<Message> outboundMessageQueue,
 			MessageWorker messageWorker,
 			Map<Long, Socket> socketMap,
 			ByteBuffer readByteBuffer,
 			ByteBuffer writeByteBuffer,
-			IMessageReaderFactory messageReaderFactory,
+			MessageReaderFactory messageReaderFactory,
 			Set<Socket> emptyToNonEmptySockets,
 			Set<Socket> nonEmptyToEmptySockets,
 			ExecutorService acceptThreadPool,
-			ITaskFactory taskFactory)
+			TaskFactory taskFactory)
     {
     	this.server = server;
     	this.router = router;
@@ -114,8 +114,7 @@ public class SocketProcessor
             this.writeSelector = Selector.open();
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.FATAL);
         }
     	
     	this.readMessageBuffer  = new MessageBuffer();
@@ -150,8 +149,7 @@ public class SocketProcessor
             readKey.attach(socket);
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
     }
     
@@ -165,8 +163,7 @@ public class SocketProcessor
             writeKey.attach(socket);
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
     }
     
@@ -177,12 +174,12 @@ public class SocketProcessor
     	while ( socket != null ) {
     		this.nextSocketId++;
     		
-    		Logger.write("client connected, socket id = " + this.nextSocketId);
+    		Logger.write("client connected, socket id = " + this.nextSocketId, Logger.INFO);
     		
     		socket.setSocketId(this.nextSocketId);
     		socket.setMessageWriter(new MessageWriter());
     		
-    		IMessageReader messageReader = messageReaderFactory.createMessageReader();
+    		MessageReader messageReader = messageReaderFactory.createMessageReader();
     		messageReader.initialize(readMessageBuffer);
     		
     		socket.setMessageReader(messageReader);
@@ -198,8 +195,7 @@ public class SocketProcessor
                         socketChannel.configureBlocking(false);
                     } 
     			    catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        Logger.write(e.getMessage(), Logger.ERROR);
                     }
     			    
     			    if ( ssl == null ) {
@@ -217,7 +213,7 @@ public class SocketProcessor
     			    if ( ! sslEngine.doHandShake(socket) ) {
     			    	close(socket);
     			    	
-    			    	Logger.write("client closed due to handshake failure, socket id = " + socket.getSocketId());
+    			    	Logger.write("client closed due to handshake failure, socket id = " + socket.getSocketId(), Logger.INFO);
     			    }
     			}
     		}
@@ -239,8 +235,7 @@ public class SocketProcessor
            if ( readyChannels == 0 ) return;
        } 
        catch (IOException e) {
-           // TODO Auto-generated catch block
-           e.printStackTrace();
+    	   Logger.write(e.getMessage(), Logger.ERROR);
        }
        
        Set<SelectionKey>     selectedKeys = readSelector.selectedKeys();
@@ -253,13 +248,13 @@ public class SocketProcessor
                // a channel is ready for reading
                Socket socket = (Socket) key.attachment();
                
-               IMessageReader messageReader  = socket.getMessageReader();
+               MessageReader messageReader  = socket.getMessageReader();
                boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
                
                if ( ! notEndOfStreamReached ) {
                    close(socket);
                    
-                   Logger.write("client closed, socket id = " + socket.getSocketId());
+                   Logger.write("client closed, socket id = " + socket.getSocketId(), Logger.INFO);
                }
                
                List<Message> fullMessages = messageReader.getMessages();
@@ -269,7 +264,7 @@ public class SocketProcessor
                        message.socketId = socket.getSocketId();
                        
                        //ITask task = taskFactory.createTask(this, socket, message);
-                       ITask task = taskFactory.createTask(server, socket, message);
+                       Task task = taskFactory.createTask(server, socket, message);
                        messageWorker.addTask(task);
                    }
                }
@@ -297,8 +292,7 @@ public class SocketProcessor
 			registerNonEmptySockets();
 		} 
     	catch (ClosedChannelException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+    		Logger.write(e.getMessage(), Logger.ERROR);
 		}
     	
     	try {
@@ -307,8 +301,7 @@ public class SocketProcessor
 			if ( writeChannels == 0 ) return;
 		} 
     	catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.write(e.getMessage(), Logger.ERROR);
 		}
     	
         Set<SelectionKey>     selectedKeys = writeSelector.selectedKeys();
@@ -325,14 +318,13 @@ public class SocketProcessor
 					messageWriter.write(socket, writeByteBuffer);
 				} 
         		catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Logger.write(e.getMessage(), Logger.ERROR);
 				}
         		
         		if ( socket.closeAfterResponse == true ) {
         			close(socket);
         			
-        			Logger.write("close client, socket id = " + socket.getSocketId());
+        			Logger.write("close client, socket id = " + socket.getSocketId(), Logger.INFO);
         		}
         		else if ( messageWriter.isEmpty() ) {
         			nonEmptyToEmptySockets.add(socket);
@@ -371,8 +363,7 @@ public class SocketProcessor
 			socketChannel.close();
 		} 
 		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.write(e.getMessage(), Logger.INFO);
 		}
 		
 		socketMap.remove(socket.getSocketId());
@@ -449,7 +440,7 @@ public class SocketProcessor
                 Thread.sleep(1, 0);
             } 
             catch (InterruptedException e) {
-            	Logger.write(e.getMessage());
+            	Logger.write(e.getMessage(), Logger.INFO);
             }
         }
     }
@@ -484,7 +475,7 @@ public class SocketProcessor
     	return writeProxy;
     }
     
-    public IRouter getRouter() 
+    public Router getRouter() 
     {
     	return router;
     }

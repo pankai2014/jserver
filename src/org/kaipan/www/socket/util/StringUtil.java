@@ -6,6 +6,8 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
+import org.kaipan.www.socket.log.Logger;
+
 public class StringUtil 
 {
 	public static ByteBuffer string2Bytes(String str)  
@@ -17,8 +19,7 @@ public class StringUtil
             return ByteBuffer.wrap(bytes);  
         } 
         catch (UnsupportedEncodingException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
         
         return null;
@@ -39,7 +40,7 @@ public class StringUtil
             return charBuffer.toString();  
         }  
         catch (Exception e) {  
-            e.printStackTrace();  
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
         
         return null;

@@ -10,18 +10,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kaipan.www.socket.client.fastcgi.Client;
-import org.kaipan.www.socket.controller.IController;
+import org.kaipan.www.socket.controller.Controller;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
+import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.protocol.http.HttpConfig;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
 import org.kaipan.www.socket.util.Util;
 
-public class HttpMessageTask implements ITask
+public class HttpMessageTask implements Task
 {
 	protected HttpConfig config;
 
@@ -59,8 +60,7 @@ public class HttpMessageTask implements ITask
                 message.writeToMessage(response.getHeader().getBytes(config.charset()));
             } 
             catch (UnsupportedEncodingException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                Logger.write(e.getMessage(), Logger.ERROR);
             }
             
             socketProcessor.getWriteProxy().enqueue(message);
@@ -97,8 +97,7 @@ public class HttpMessageTask implements ITask
 			message.writeToMessage(bytes);
 		} 
 	    catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    	Logger.write(e.getMessage(), Logger.ERROR);
 		}
 	    
 	    message.socketId = request.socketId;	// must be set!!!
@@ -173,8 +172,7 @@ public class HttpMessageTask implements ITask
 	    			message.offset + LengthOfHeader, message.length - LengthOfHeader);
 		} 
 	    catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    	Logger.write(e.getMessage(), Logger.ERROR);
 		}
 	    
 	    nextMessage.socketId = request.socketId;
@@ -189,7 +187,7 @@ public class HttpMessageTask implements ITask
 	    
 	    String body = null;
 	    
-	    IController controller = socketProcessor.getRouter().getController(request);
+	    Controller controller = socketProcessor.getRouter().getController(request);
 	    if ( controller != null ) {
 	    	body = controller.run(request, response);
 	    }
@@ -209,8 +207,7 @@ public class HttpMessageTask implements ITask
 		 	message.writeToMessage(body.getBytes());
 		} 
 	    catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	    	Logger.write(e.getMessage(), Logger.ERROR);
 		}
 		
 		message.socketId = request.socketId;

@@ -4,7 +4,7 @@ import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.Server;
 import org.kaipan.www.socket.core.Socket;
 
-public interface ITaskFactory
+public interface TaskFactory
 {
-	public ITask createTask(Server server, Socket socket, Message message);
+	public Task createTask(Server server, Socket socket, Message message);
 }

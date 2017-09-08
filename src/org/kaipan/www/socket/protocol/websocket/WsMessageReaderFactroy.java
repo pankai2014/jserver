@@ -1,9 +1,9 @@
 package org.kaipan.www.socket.protocol.websocket;
 
-import org.kaipan.www.socket.core.IMessageReader;
-import org.kaipan.www.socket.core.IMessageReaderFactory;
+import org.kaipan.www.socket.core.MessageReader;
+import org.kaipan.www.socket.core.MessageReaderFactory;
 
-public class WsMessageReaderFactroy implements IMessageReaderFactory
+public class WsMessageReaderFactroy implements MessageReaderFactory
 {
     public WsMessageReaderFactroy() 
     {
@@ -11,7 +11,7 @@ public class WsMessageReaderFactroy implements IMessageReaderFactory
     }
 
     @Override
-    public IMessageReader createMessageReader() 
+    public MessageReader createMessageReader() 
     {
         return new WsMessageReader();
     }

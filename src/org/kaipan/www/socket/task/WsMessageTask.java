@@ -6,12 +6,12 @@ import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.core.SocketProcessor;
 import org.kaipan.www.socket.protocol.websocket.ShakeHandFactory;
 import org.kaipan.www.socket.protocol.websocket.WsConfig;
-import org.kaipan.www.socket.protocol.websocket.IShakeHand;
+import org.kaipan.www.socket.protocol.websocket.ShakeHand;
 import org.kaipan.www.socket.protocol.websocket.WsFrame;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReadBuffer;
 import org.kaipan.www.socket.protocol.websocket.WsMessageReader;
 
-public abstract class WsMessageTask implements ITask
+public abstract class WsMessageTask implements Task
 {
 	private WsConfig config;
 	
@@ -40,7 +40,7 @@ public abstract class WsMessageTask implements ITask
 		 * refactoring
 		 *     replace type code with class(218)
 		 */
-		IShakeHand processor = ShakeHandFactory.create(readBuffer.httpHandShake);
+		ShakeHand processor = ShakeHandFactory.create(readBuffer.httpHandShake);
 		processor.run(this);
 		
 		if ( readBuffer.httpHandShake != WsMessageReader.HANDSHAKE_COMPLETED ) {

@@ -3,7 +3,7 @@ package org.kaipan.www.socket.core;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public interface IMessageReader
+public interface MessageReader
 {
 	public void initialize(MessageBuffer readMessageBuffer);
 	

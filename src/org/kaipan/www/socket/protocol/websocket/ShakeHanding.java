@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.log.Logger;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 import org.kaipan.www.socket.protocol.http.HttpUtil;
@@ -12,7 +13,7 @@ import org.kaipan.www.socket.util.Util;
 
 import sun.misc.BASE64Encoder;
 
-public class ShakeHanding implements IShakeHand
+public class ShakeHanding implements ShakeHand
 {
 	private static final String GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 	
@@ -34,7 +35,7 @@ public class ShakeHanding implements IShakeHand
 			encrypt = encoder.encode(Util.sha1(String.join("", fields)));
 		} 
 		catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			Logger.write(e.getMessage(), Logger.ERROR);
 		}
 		
 		return encrypt;

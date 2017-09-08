@@ -1,6 +1,6 @@
 package org.kaipan.www.socket.task;
 
-public interface ITask extends Runnable
+public interface Task extends Runnable
 {
 	public void run();
 }

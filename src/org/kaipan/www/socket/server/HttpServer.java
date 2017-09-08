@@ -36,7 +36,7 @@ public class HttpServer extends Server
             property = Util.loadConfigFile(path);
             if ( property == null ) {
             	Logger.write("Usage: java -jar java-server-{version}.jar "
-            			+ "\"path to file java-server.properties\"");
+            			+ "\"path to file java-server.properties\"", Logger.INFO);
                 return;
             }
         }

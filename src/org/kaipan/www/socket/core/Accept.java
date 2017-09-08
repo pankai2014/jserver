@@ -7,6 +7,8 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.kaipan.www.socket.log.Logger;
+
 public class Accept implements Runnable
 {
     Server server = null;
@@ -28,8 +30,7 @@ public class Accept implements Runnable
             server.socketChannel.register(acceptSelect, SelectionKey.OP_ACCEPT);
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.write(e.getMessage(), Logger.ERROR);
         }
         
         while ( true ) {
@@ -53,8 +54,7 @@ public class Accept implements Runnable
                         	}
                         } 
                         catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            Logger.write(e.getMessage(), Logger.ERROR);
                         }
                     }
                     
@@ -64,8 +64,7 @@ public class Accept implements Runnable
                 selectedKeys.clear();
             } 
             catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            	Logger.write(e.getMessage(), Logger.ERROR);
             } 
         }
     }

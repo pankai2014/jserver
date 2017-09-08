@@ -5,20 +5,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kaipan.www.socket.controller.IController;
+import org.kaipan.www.socket.controller.Controller;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 
-public class DynamicRouter implements IRouter
+public class DynamicRouter implements Router
 {
-	private Map<String, Class<? extends IController>> mapping;
+	private Map<String, Class<? extends Controller>> mapping;
 	
 	public DynamicRouter() 
 	{
-		mapping = new HashMap<String, Class<? extends IController>>();
+		mapping = new HashMap<String, Class<? extends Controller>>();
 	}
 	
 	@Override
-	public void addMapping(String path, Class<? extends IController> controller)
+	public void addMapping(String path, Class<? extends Controller> controller)
 	{
 		mapping.put(path, controller);
 	}
@@ -30,12 +30,12 @@ public class DynamicRouter implements IRouter
 	}
 
 	@Override
-	public IController getController(HttpRequest request)
+	public Controller getController(HttpRequest request)
 	{
 		if ( mapping.containsKey(request.path) ) {
-			Class<? extends IController> Controller = mapping.get(request.path);
+			Class<? extends Controller> Controller = mapping.get(request.path);
 			
-			if ( ! IController.class.isAssignableFrom(Controller) ) {
+			if ( ! Controller.class.isAssignableFrom(Controller) ) {
 				return null;
 			}
 		
@@ -43,12 +43,12 @@ public class DynamicRouter implements IRouter
 				Class<?>[] classes = new Class[] {
 				};
 				
-				Constructor<? extends IController> constructor = Controller.getConstructor(classes);
+				Constructor<? extends Controller> constructor = Controller.getConstructor(classes);
 				
 				Object[] arguments = new Object[] {
 				};
 				
-				return (IController) constructor.newInstance(arguments);
+				return (Controller) constructor.newInstance(arguments);
 			} 
 			catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException | NoSuchMethodException | SecurityException e) {

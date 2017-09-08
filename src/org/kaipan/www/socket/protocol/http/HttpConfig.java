@@ -42,13 +42,7 @@ public class HttpConfig extends Config
             this.root = property.getProperty("server.root");
         }
         else {
-            try {
-                throw new Exception("please set www-root directory");
-            } 
-            catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }  
+        	throw new IllegalArgumentException("Please set www-root directory");  
         }
         
         if ( property.getProperty("server.static_ext") != null ) {

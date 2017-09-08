@@ -8,6 +8,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Properties;
 
+import org.kaipan.www.socket.log.Logger;
+
 public class Util
 {
     /**
@@ -44,10 +46,10 @@ public class Util
                 property.load(new FileReader(file.getAbsolutePath()));
             } 
             catch (FileNotFoundException e) {
-                e.printStackTrace();
+            	Logger.write(e.getMessage(), Logger.ERROR);
             } 
             catch (IOException e) {
-                e.printStackTrace();
+            	Logger.write(e.getMessage(), Logger.ERROR);
             }
         } 
 

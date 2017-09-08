@@ -4,14 +4,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.kaipan.www.socket.task.ITask;
+import org.kaipan.www.socket.log.Logger;
+import org.kaipan.www.socket.task.Task;
 
-public class MessageWorker implements IWorker
+public class MessageWorker implements Worker
 {
 	/**
 	 * current running state of the worker 
 	 */
-	private volatile int state = IWorker.READY;
+	private volatile int state = Worker.READY;
 	private Object LOCK = new Object();
 	
 	/**
@@ -27,7 +28,7 @@ public class MessageWorker implements IWorker
 	/**
 	 * task queue 
 	 */
-	private BlockingQueue<ITask> taskQueue = null;
+	private BlockingQueue<Task> taskQueue = null;
 	
 	/**
 	 * consumer thread 
@@ -59,7 +60,7 @@ public class MessageWorker implements IWorker
 			int maxThreadSize,
 			int threadAliveSec,
 			BlockingQueue<Runnable> threadPoolQueue,
-			BlockingQueue<ITask> taskQueue ) 
+			BlockingQueue<Task> taskQueue ) 
 	{
 		this.busySleepMsec = busySleepMsec;
 		this.taskQueue = taskQueue;
@@ -74,7 +75,7 @@ public class MessageWorker implements IWorker
 	}
 
 	/**
-	 * @see	IWorker#getLeftTask() 
+	 * @see	Worker#getLeftTask() 
 	 */
 	@Override
 	public int getLeftTask() 
@@ -83,16 +84,16 @@ public class MessageWorker implements IWorker
 	}
 	
 	/**
-	 * @see	IWorker#addTask(Runnable) 
+	 * @see	Worker#addTask(Runnable) 
 	 */
 	@Override
-	public boolean addTask(ITask task) 
+	public boolean addTask(Task task) 
 	{
 		return taskQueue.offer(task);
 	}
 
 	/**
-	 * @see	IWorker#getAvailableThread() 
+	 * @see	Worker#getAvailableThread() 
 	 */
 	@Override
 	public int getAvailableThread() 
@@ -102,7 +103,7 @@ public class MessageWorker implements IWorker
 	}
 
 	/**
-	 * @see	IWorker#getWorkingThread() 
+	 * @see	Worker#getWorkingThread() 
 	 */
 	@Override
 	public int getWorkingThread() 
@@ -111,7 +112,7 @@ public class MessageWorker implements IWorker
 	}
 
 	/**
-	 * @see	IWorker#couldHoldMore() 
+	 * @see	Worker#couldHoldMore() 
 	 */
 	@Override
 	public boolean couldHoldMore() 
@@ -121,7 +122,7 @@ public class MessageWorker implements IWorker
 	}
 
 	/**
-	 * @see	IWorker#process(String) 
+	 * @see	Worker#process(String) 
 	 */
 	@Override
 	public boolean process( Runnable task ) 
@@ -135,7 +136,7 @@ public class MessageWorker implements IWorker
 	}
 	
 	/**
-	 * @see	IWorker#start()
+	 * @see	Worker#start()
 	 */
 	@Override
 	public void start()
@@ -146,14 +147,16 @@ public class MessageWorker implements IWorker
 			{
 				while ( true ) {
 					//check and handler the stoped operation
-					if ( state == IWorker.STOPED ) break;
+					if ( state == Worker.STOPED ) break;
 					
 					//check and handler the the pause operation
-					if ( state == IWorker.PAUSED ) {
+					if ( state == Worker.PAUSED ) {
 						synchronized ( LOCK ) {
 							try {
 								LOCK.wait();
-							} catch (InterruptedException e) {e.printStackTrace();}
+							} catch (InterruptedException e) {
+								Logger.write(e.getMessage(), Logger.INFO);
+							}
 						}
 					}
 					
@@ -165,7 +168,7 @@ public class MessageWorker implements IWorker
 						}
 						
 						//take a url from the task queue and process it
-						ITask task = taskQueue.take();
+						Task task = taskQueue.take();
 						process(task);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
@@ -187,27 +190,27 @@ public class MessageWorker implements IWorker
 	@Override
 	public void pause() 
 	{
-		if ( state == IWorker.PAUSED ) return;
-		state = IWorker.PAUSED;
+		if ( state == Worker.PAUSED ) return;
+		state = Worker.PAUSED;
 	}
 
 	@Override
 	public void resume() 
 	{
-		if ( state == IWorker.RUNNING ) return;
+		if ( state == Worker.RUNNING ) return;
 		synchronized ( LOCK ) {
-			state = IWorker.RUNNING;
+			state = Worker.RUNNING;
 			LOCK.notify();
 		}
 	}
 
 	/**
-	 * @see	IWorker#shutdown() 
+	 * @see	Worker#shutdown() 
 	 */
 	@Override
 	public void shutdown() 
 	{
-		state = IWorker.STOPED;
+		state = Worker.STOPED;
 		taskQueue.clear();
 		threadPool.shutdown();
 		

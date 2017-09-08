@@ -1,9 +1,9 @@
 package org.kaipan.www.socket.protocol.https;
 
-import org.kaipan.www.socket.core.IMessageReader;
-import org.kaipan.www.socket.core.IMessageReaderFactory;
+import org.kaipan.www.socket.core.MessageReader;
+import org.kaipan.www.socket.core.MessageReaderFactory;
 
-public class HttpsMessageReaderFactory implements IMessageReaderFactory 
+public class HttpsMessageReaderFactory implements MessageReaderFactory 
 {
 
     public HttpsMessageReaderFactory() 
@@ -12,7 +12,7 @@ public class HttpsMessageReaderFactory implements IMessageReaderFactory
     }
 
     @Override
-    public IMessageReader createMessageReader() 
+    public MessageReader createMessageReader() 
     {
         return new HttpsMessageReader();
     }

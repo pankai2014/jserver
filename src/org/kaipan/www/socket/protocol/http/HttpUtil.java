@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.log.Logger;
 
 public class HttpUtil 
 {
@@ -44,7 +45,7 @@ public class HttpUtil
 			
 			int prevEndOfHeader = endOfHeader + 1;
 			
-			//metaData.headerBreakPos.add(new Integer(endOfHeader));
+			// metaData.headerBreakPos.add(new Integer(endOfHeader));
 			endOfHeader = findNextLineBreak(src, prevEndOfHeader,  endIndex);
 			
 	        if ( metaData.httpMethod == HttpHeader.HTTP_METHOD_POST
@@ -53,8 +54,7 @@ public class HttpUtil
                     findContentLength(src, prevEndOfHeader, endOfHeader, metaData);
                 } 
 	            catch (UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    Logger.write(e.getMessage(), Logger.ERROR);
                 }
 	        }
 		}

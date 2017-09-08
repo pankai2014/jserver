@@ -11,9 +11,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.kaipan.www.socket.router.IRouter;
-import org.kaipan.www.socket.task.ITask;
-import org.kaipan.www.socket.task.ITaskFactory;
+import org.kaipan.www.socket.router.Router;
+import org.kaipan.www.socket.task.Task;
+import org.kaipan.www.socket.task.TaskFactory;
 import org.kaipan.www.socket.worker.MessageWorker;
 
 public class SocketProcessorBuilder
@@ -30,16 +30,16 @@ public class SocketProcessorBuilder
 	private ByteBuffer readByteBuffer;
 	private ByteBuffer writeByteBuffer;
 	
-	private IMessageReaderFactory messageReaderFactory;
+	private MessageReaderFactory messageReaderFactory;
 	
 	private Set<Socket> emptyToNonEmptySockets;
 	private Set<Socket> nonEmptyToEmptySockets;
 	
 	private ExecutorService acceptThreadPool;
 	
-	private ITaskFactory taskFactory;
+	private TaskFactory taskFactory;
 	
-	private IRouter router;
+	private Router router;
 	
 	public SocketProcessorBuilder setServer(Server server) 
 	{
@@ -90,7 +90,7 @@ public class SocketProcessorBuilder
 		return this;
 	}
 
-	public SocketProcessorBuilder setMessageReaderFactory(IMessageReaderFactory messageReaderFactory) 
+	public SocketProcessorBuilder setMessageReaderFactory(MessageReaderFactory messageReaderFactory) 
 	{
 		this.messageReaderFactory = messageReaderFactory;
 		
@@ -118,14 +118,14 @@ public class SocketProcessorBuilder
 		return this;
 	}
 	
-	public SocketProcessorBuilder setTaskFactory(ITaskFactory taskFactory) 
+	public SocketProcessorBuilder setTaskFactory(TaskFactory taskFactory) 
 	{
 		this.taskFactory = taskFactory;
 		
 		return this;
 	}
 	
-	public SocketProcessorBuilder setRouter(IRouter router) 
+	public SocketProcessorBuilder setRouter(Router router) 
 	{
 		this.router = router;
 		
@@ -138,7 +138,7 @@ public class SocketProcessorBuilder
 		if ( outboundMessageQueue == null )   outboundMessageQueue = new LinkedBlockingQueue<Message>(10000);
 		
 		if ( messageWorker == null )		  messageWorker = new MessageWorker(2000, 100, 300, 6, 
-				new ArrayBlockingQueue<Runnable>(10000), new LinkedBlockingQueue<ITask>(10000));
+				new ArrayBlockingQueue<Runnable>(10000), new LinkedBlockingQueue<Task>(10000));
 		
 		if ( socketMap == null )			  socketMap = new HashMap<>();
 		

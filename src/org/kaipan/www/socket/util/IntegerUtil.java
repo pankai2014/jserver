@@ -5,6 +5,7 @@ public class IntegerUtil
 	public static byte[] short2BigEndian(short data) 
 	{
 		byte[] result = new byte[2];
+		
 		result[0] = (byte) data;
 		result[1] = (byte) (data >> 1);
 		
@@ -14,6 +15,7 @@ public class IntegerUtil
 	public static byte[] int2BigEndian(int data) 
 	{
 		byte[] result = new byte[4];
+		
 		result[0] = (byte) data;
 		result[1] = (byte) (data >> 1);
 		result[2] = (byte) (data >> 2);
@@ -25,6 +27,7 @@ public class IntegerUtil
 	public static byte[] long2BigEndian(long data) 
 	{
 		byte[] result = new byte[8];
+		
 		result[0] = (byte) data;
 		result[1] = (byte) (data >> 1);
 		result[2] = (byte) (data >> 2);

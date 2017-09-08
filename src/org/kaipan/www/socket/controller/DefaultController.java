@@ -3,7 +3,7 @@ package org.kaipan.www.socket.controller;
 import org.kaipan.www.socket.protocol.http.HttpRequest;
 import org.kaipan.www.socket.protocol.http.HttpResponse;
 
-public class DefaultController implements IController
+public class DefaultController implements Controller
 {	
 	public String run(HttpRequest request, HttpResponse response) 
 	{

@@ -20,6 +20,8 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
+import org.kaipan.www.socket.log.Logger;
+
 /**
  * Ssl class
  * 
@@ -52,8 +54,7 @@ public class Ssl
             context.init(km, tm, random);
         } 
         catch (NoSuchAlgorithmException | KeyManagementException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
 	}
 	
@@ -76,11 +77,11 @@ public class Ssl
              */
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(keyStore, keyPassword.toCharArray());
+            
             return kmf.getKeyManagers();
 	    } 
 	    catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | UnrecoverableKeyException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+	    	Logger.write(e.getMessage(), Logger.ERROR);
         }
 	    
 	    return null;
@@ -104,8 +105,7 @@ public class Ssl
             return trustFactory.getTrustManagers();
         } 
         catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
        
         return null;
@@ -120,8 +120,7 @@ public class Ssl
             sslEngine.beginHandshake();
         } 
 	    catch (SSLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+	    	Logger.write(e.getMessage(), Logger.ERROR);
         }
 	    
 	    return sslEngine;

@@ -4,7 +4,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.kaipan.www.socket.task.ITask;
+import org.kaipan.www.socket.task.Task;
 
 public class MessageWorkerBuilder
 {
@@ -36,7 +36,7 @@ public class MessageWorkerBuilder
 	/**
 	 * task queue of the worker 
 	 */
-	private BlockingQueue<ITask> taskQueue = null;
+	private BlockingQueue<Task> taskQueue = null;
 
 	public int getCoreThreadSize() 
 	{
@@ -84,12 +84,12 @@ public class MessageWorkerBuilder
 		return this;
 	}
 
-	public BlockingQueue<ITask> getTaskQueue() 
+	public BlockingQueue<Task> getTaskQueue() 
 	{
 		return taskQueue;
 	}
 
-	public MessageWorkerBuilder setTaskQueue(BlockingQueue<ITask> taskQueue) 
+	public MessageWorkerBuilder setTaskQueue(BlockingQueue<Task> taskQueue) 
 	{
 		this.taskQueue = taskQueue;
 		return this;
@@ -123,7 +123,7 @@ public class MessageWorkerBuilder
 		}
 		
 		if ( taskQueue == null ) {
-			taskQueue = new LinkedBlockingQueue<ITask>(10000);
+			taskQueue = new LinkedBlockingQueue<Task>(10000);
 		}
 		
 		//create and return a self defined SpiderWorker

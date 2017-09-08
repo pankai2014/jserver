@@ -9,7 +9,7 @@ import org.kaipan.www.socket.util.StringUtil;
 
 public class SocketClient
 {
-    private String IP = "127.0.0.1";
+    private String host = "127.0.0.1";
     private int port  = 8080;
     
     //private int SO_RCVBUF = 65535;
@@ -19,13 +19,13 @@ public class SocketClient
         try {
             SocketChannel client = SocketChannel.open();
             
-            InetSocketAddress address = new InetSocketAddress(IP, port);
+            InetSocketAddress address = new InetSocketAddress(host, port);
             if ( client.connect(address) ) {
                 //Select selector = new Select();
                 //selector.register(client, SelectionKey.OP_READ);
                 
                 //ByteBuffer byteBuffer = ByteBuffer.allocate(SO_RCVBUF);
-              //used for writing data
+                //used for writing data
                 //byteBuffer.rewind();
                 
                 ByteBuffer byteBuffer = StringUtil.string2Bytes("GET /index.htm HTTP/1.1\r\n");

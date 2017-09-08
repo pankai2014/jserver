@@ -37,8 +37,7 @@ public abstract class Server
             this.socketChannel = ServerSocketChannel.open();
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
     }
     
@@ -50,11 +49,10 @@ public abstract class Server
         	socketChannel.bind(address);
 		} 
         catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.write(e.getMessage(), Logger.ERROR);
 		}
         
-        Logger.write("listen " + address + "...");
+        Logger.write("listen " + address + "...", Logger.INFO);
     }
     
     public void start()

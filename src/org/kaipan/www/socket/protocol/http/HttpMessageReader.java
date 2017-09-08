@@ -5,13 +5,13 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.kaipan.www.socket.core.IMessageReader;
+import org.kaipan.www.socket.core.MessageReader;
 import org.kaipan.www.socket.core.Message;
 import org.kaipan.www.socket.core.MessageBuffer;
 import org.kaipan.www.socket.core.Socket;
 import org.kaipan.www.socket.log.Logger;
 
-public class HttpMessageReader implements IMessageReader
+public class HttpMessageReader implements MessageReader
 {
 	protected MessageBuffer    messageBuffer = null;
 	protected List<Message> completeMessages = null;
@@ -71,7 +71,7 @@ public class HttpMessageReader implements IMessageReader
         // header was still unfinished
         if ( ! readBuffer.headerComplete ) {
             if ( nextMessage.length > HttpUtil.HTTP_HEAD_MAXLEN ) {
-            	Logger.write("illegal request, header is too large");
+            	Logger.write("illegal request, header is too large", Logger.ERROR);
                 return false;
             }
             
@@ -80,7 +80,7 @@ public class HttpMessageReader implements IMessageReader
         else {
             int headerLength = metaData.endOfHeader - nextMessage.offset;
             if ( headerLength > HttpUtil.HTTP_HEAD_MAXLEN ) {
-            	Logger.write("illegal request, header is too large");
+            	Logger.write("illegal request, header is too large", Logger.ERROR);
                 return false;
             }
             
@@ -122,7 +122,7 @@ public class HttpMessageReader implements IMessageReader
             byteBuffer.flip();
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage());
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
         
         if ( socket.endOfStreamReached == true ) {

@@ -2,7 +2,7 @@ package org.kaipan.www.socket.protocol.websocket;
 
 public class ShakeHandFactory
 {
-	public static IShakeHand create(int statusCode)
+	public static ShakeHand create(int statusCode)
 	{
 		switch ( statusCode ) {
 			case WsMessageReader.NO_HANDSHAKE:

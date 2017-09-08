@@ -12,7 +12,7 @@ public class Socket
 	
 	private SslEngine 		   sslEngine = null;
 	
-    private IMessageReader messageReader = null;
+    private MessageReader messageReader  = null;
     private MessageWriter  messageWriter = null;
     private SocketChannel  socketChannel = null;
     
@@ -79,7 +79,7 @@ public class Socket
     	this.socketChannel = sockChannel;
     }
     
-    public void setMessageReader(IMessageReader messageReader) 
+    public void setMessageReader(MessageReader messageReader) 
     {
     	this.messageReader = messageReader;
     }
@@ -99,7 +99,7 @@ public class Socket
     	return sslEngine;
     }
 
-    public IMessageReader getMessageReader() 
+    public MessageReader getMessageReader() 
     {
     	return messageReader;
     }

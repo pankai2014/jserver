@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.kaipan.www.socket.core.Message;
+import org.kaipan.www.socket.log.Logger;
 
 /**
  * Factcgi client class
@@ -81,8 +82,7 @@ public class Client
             client.setSoTimeout(socketTimeOut);
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Logger.write(e.getMessage(), Logger.ERROR);
         }
     }
     
@@ -124,8 +124,7 @@ public class Client
             outBuf.flush();
         } 
         catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.ERROR);
         }
         
         return requestId;
@@ -264,8 +263,7 @@ public class Client
 				bytesRead = is.read(readBytes, offset, length);
 			} 
           	catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+          		Logger.write(e.getMessage(), Logger.ERROR);
           	}
           	
             if ( bytesRead == -1 ) {
@@ -273,8 +271,7 @@ public class Client
 					client.close();
 				} 
             	catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+            		Logger.write(e.getMessage(), Logger.ERROR);
 				}
             	return -1;
             }
@@ -316,8 +313,7 @@ public class Client
 			inBufStream = new BufferedInputStream(inStream);
 		} 
 		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Logger.write(e.getMessage(), Logger.ERROR);
 		}
         
         start:
@@ -357,8 +353,7 @@ public class Client
 			client.close();
 		} 
         catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+        	Logger.write(e.getMessage(), Logger.INFO);
 		}
     }
 }
