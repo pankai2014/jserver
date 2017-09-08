@@ -2,13 +2,17 @@ package org.kaipan.www.socket.client;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
 import org.kaipan.www.socket.log.Logger;
 
 public class SocketChannelClient implements Client
 {
+	public final static int READ_BUFFER_SIZE = 4194304;
+	
 	private SocketChannel client;
+	private ByteBuffer byteBuffer;
 	
 	public SocketChannelClient() 
 	{
@@ -29,6 +33,8 @@ public class SocketChannelClient implements Client
 		catch (IOException e) {
 			Logger.write(e.getMessage(), Logger.ERROR);
 		}
+		
+		byteBuffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
 	}
 	
 	@Override
@@ -49,6 +55,15 @@ public class SocketChannelClient implements Client
 	@Override
 	public byte[] read()
 	{
+		byteBuffer.clear();
+		
+		try {
+			client.read(byteBuffer);
+		} 
+		catch (IOException e) {
+			Logger.write(e.getMessage(), Logger.ERROR);
+		}
+		
 		return null;
 	}
 

@@ -50,9 +50,9 @@ public class Client
     private int connectTimeOut = 10000;
     private int socketTimeOut  = 30000;
     
-    private byte[]	   readBytes	    = new byte[65535];	
-    private ByteBuffer readBytesBuffer  = ByteBuffer.wrap(readBytes);
-    private ByteBuffer writeBytesBuffer = ByteBuffer.allocate(65535);
+    private byte[]	   readBytes   = new byte[65535];	
+    private ByteBuffer readBuffer  = ByteBuffer.wrap(readBytes);
+    private ByteBuffer writeBuffer = ByteBuffer.allocate(65535);
     
     private Socket  client  = null;
     private Message message = null;
@@ -117,11 +117,11 @@ public class Client
         buildStdinPacket(requestId, null);
         
         try {
-            OutputStream outStream      = client.getOutputStream();
-            BufferedOutputStream outBuf = new BufferedOutputStream(outStream);
+            OutputStream outStream         = client.getOutputStream();
+            BufferedOutputStream outBuffer = new BufferedOutputStream(outStream);
             
-            outBuf.write(message.sharedArray, message.offset, message.length);
-            outBuf.flush();
+            outBuffer.write(message.sharedArray, message.offset, message.length);
+            outBuffer.flush();
         } 
         catch (IOException e) {
         	Logger.write(e.getMessage(), Logger.ERROR);
@@ -132,17 +132,17 @@ public class Client
     
     private void addHeader(int requestId, int type, int clen) 
     {
-    	writeBytesBuffer.put( (byte) ((VERSION) & 0xFF) );             /* version */
-    	writeBytesBuffer.put( (byte) ((type)    & 0xFF) );             /* type */
+    	writeBuffer.put( (byte) ((VERSION) & 0xFF) );             /* version */
+    	writeBuffer.put( (byte) ((type)    & 0xFF) );             /* type */
         
-    	writeBytesBuffer.put( (byte) ((requestId >> 8) & 0xFF) );      /* requestIdB1, (& 0xFF) unsigned character!!! */
-    	writeBytesBuffer.put( (byte) ((requestId)      & 0xFF) );      /* requestIdB0 */
+    	writeBuffer.put( (byte) ((requestId >> 8) & 0xFF) );      /* requestIdB1, (& 0xFF) unsigned character!!! */
+    	writeBuffer.put( (byte) ((requestId)      & 0xFF) );      /* requestIdB0 */
         
-    	writeBytesBuffer.put( (byte) ((clen >> 8) & 0xFF) );           /* contentLengthB1 */
-    	writeBytesBuffer.put( (byte) ((clen)      & 0xFF) );           /* contentLengthB0 */
+    	writeBuffer.put( (byte) ((clen >> 8) & 0xFF) );           /* contentLengthB1 */
+    	writeBuffer.put( (byte) ((clen)      & 0xFF) );           /* contentLengthB0 */
         
-    	writeBytesBuffer.put( (byte) (0 & 0x00) );                     /* paddingLength */
-    	writeBytesBuffer.put( (byte) (0 & 0x00) );                     /* reserved */
+    	writeBuffer.put( (byte) (0 & 0x00) );                     /* paddingLength */
+    	writeBuffer.put( (byte) (0 & 0x00) );                     /* reserved */
     }
     
     private void builStartPacket(int requestId) 
@@ -151,18 +151,18 @@ public class Client
         
         int loc = 0;
         
-        writeBytesBuffer.put( (byte) (0 & 0x00) );         		    loc++;
-        writeBytesBuffer.put( (byte) (ROLE_RESPONDER 	  & 0xFF)); loc++;
-        writeBytesBuffer.put( (byte) ((keepAlive ? 1 : 0) & 0xFF)); loc++;
+        writeBuffer.put( (byte) (0 & 0x00) );         		    loc++;
+        writeBuffer.put( (byte) (ROLE_RESPONDER 	  & 0xFF)); loc++;
+        writeBuffer.put( (byte) ((keepAlive ? 1 : 0) & 0xFF)); loc++;
         
         for ( int i =  loc; i < HEADER_LEN; i++ ) {
-        	writeBytesBuffer.put( (byte) (0 & 0x00) );
+        	writeBuffer.put( (byte) (0 & 0x00) );
         }
         
-        writeBytesBuffer.flip();
-        message.writeToMessage(writeBytesBuffer);
+        writeBuffer.flip();
+        message.writeToMessage(writeBuffer);
         
-        writeBytesBuffer.clear();
+        writeBuffer.clear();
     }
     
     private void buildParamsPacket(int requestId, Map<String, String> params) 
@@ -173,34 +173,34 @@ public class Client
     	     }
     	}
     	
-    	readBytesBuffer.flip();
+    	readBuffer.flip();
     	
-    	addHeader(requestId, PARAMS, readBytesBuffer.remaining());
+    	addHeader(requestId, PARAMS, readBuffer.remaining());
     	
-      	writeBytesBuffer.flip();
+      	writeBuffer.flip();
     	
-    	message.writeToMessage(writeBytesBuffer);
-    	message.writeToMessage(readBytesBuffer);
+    	message.writeToMessage(writeBuffer);
+    	message.writeToMessage(readBuffer);
     	
-    	readBytesBuffer.clear();
-    	writeBytesBuffer.clear();
+    	readBuffer.clear();
+    	writeBuffer.clear();
     }
     
     private void buildStdinPacket(int requestId, byte[] stdin) 
     {
     	int clen = 0;
         if ( stdin != null ) {
-        	writeBytesBuffer.put(stdin);
+        	writeBuffer.put(stdin);
         	
         	clen = stdin.length;
         }
         
         addHeader(requestId, STDIN, clen);
         
-        writeBytesBuffer.flip();
-        message.writeToMessage(writeBytesBuffer);
+        writeBuffer.flip();
+        message.writeToMessage(writeBuffer);
         
-        writeBytesBuffer.clear();
+        writeBuffer.clear();
     }
     
     private void buildNvpair(String name, String value) 
@@ -209,27 +209,27 @@ public class Client
         int vlen = value.length();
         
         if ( nlen < 128 ) {
-        	readBytesBuffer.put( (byte) (nlen & 0xFF) );
+        	readBuffer.put( (byte) (nlen & 0xFF) );
         }
         else {
-        	readBytesBuffer.put( (byte) ((nlen >> 24) | 0x80) );     /* nameLengthB3 */
-        	readBytesBuffer.put( (byte) ((nlen >> 16) & 0xFF) );     /* nameLengthB2 */
-        	readBytesBuffer.put( (byte) ((nlen >> 8)  & 0xFF) );     /* nameLengthB1 */
-        	readBytesBuffer.put( (byte) ((nlen)       & 0xFF) );     /* nameLengthB0 */
+        	readBuffer.put( (byte) ((nlen >> 24) | 0x80) );     /* nameLengthB3 */
+        	readBuffer.put( (byte) ((nlen >> 16) & 0xFF) );     /* nameLengthB2 */
+        	readBuffer.put( (byte) ((nlen >> 8)  & 0xFF) );     /* nameLengthB1 */
+        	readBuffer.put( (byte) ((nlen)       & 0xFF) );     /* nameLengthB0 */
         }
         
         if ( vlen < 128 ) {
-        	readBytesBuffer.put( (byte) (vlen & 0xFF) );
+        	readBuffer.put( (byte) (vlen & 0xFF) );
         }
         else {
-        	readBytesBuffer.put( (byte) ((vlen >> 24) | 0x80) );     /* valueLengthB3 */
-        	readBytesBuffer.put( (byte) ((vlen >> 16) & 0xFF) );     /* valueLengthB2 */
-        	readBytesBuffer.put( (byte) ((vlen >> 8)  & 0xFF) );     /* valueLengthB1 */
-        	readBytesBuffer.put( (byte) ((vlen)       & 0xFF) );     /* valueLengthB0 */
+        	readBuffer.put( (byte) ((vlen >> 24) | 0x80) );     /* valueLengthB3 */
+        	readBuffer.put( (byte) ((vlen >> 16) & 0xFF) );     /* valueLengthB2 */
+        	readBuffer.put( (byte) ((vlen >> 8)  & 0xFF) );     /* valueLengthB1 */
+        	readBuffer.put( (byte) ((vlen)       & 0xFF) );     /* valueLengthB0 */
         }
         
-        readBytesBuffer.put(name.getBytes());
-        readBytesBuffer.put(value.getBytes());
+        readBuffer.put(name.getBytes());
+        readBuffer.put(value.getBytes());
     }
     
     private Map<String, Integer> decodePacketHeader() 
@@ -328,8 +328,8 @@ public class Client
              */
     		switch ( ret.get("Type").intValue() ) {
 	    		case STDOUT:
-	    			writeBytesBuffer.put(readBytes, HEADER_LEN, ret.get("ContentLength").intValue());
-	    			readBytesBuffer.clear();
+	    			writeBuffer.put(readBytes, HEADER_LEN, ret.get("ContentLength").intValue());
+	    			readBuffer.clear();
 	    			break;
 	    		case GET_VALUES_RESULT:	
 	    			break;
@@ -341,13 +341,13 @@ public class Client
     		
     	} while ( true );
         
-        writeBytesBuffer.flip();
+        writeBuffer.flip();
         
         message.length = 0;
-        message.writeToMessage(writeBytesBuffer);
+        message.writeToMessage(writeBuffer);
         
-        readBytesBuffer.clear();
-        writeBytesBuffer.clear();
+        readBuffer.clear();
+        writeBuffer.clear();
         
         try {
 			client.close();
