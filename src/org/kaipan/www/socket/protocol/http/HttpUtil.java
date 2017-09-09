@@ -54,7 +54,7 @@ public class HttpUtil
                     findContentLength(src, prevEndOfHeader, endOfHeader, metaData);
                 } 
 	            catch (UnsupportedEncodingException e) {
-                    Logger.write(e.getMessage(), Logger.ERROR);
+                    Logger.error(e.getStackTrace());
                 }
 	        }
 		}

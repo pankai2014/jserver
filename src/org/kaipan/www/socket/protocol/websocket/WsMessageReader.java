@@ -62,12 +62,10 @@ public class WsMessageReader extends HttpMessageReader
             byteBuffer.flip();
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage());
+        	Logger.error(e.getStackTrace());
+        	
+        	return false;
         }
-		
-		if ( socket.endOfStreamReached == true ) {
-			return false;
-		}
 		
 		if ( nextMessage == null ) {
     		this.nextMessage = messageBuffer.getMessage();

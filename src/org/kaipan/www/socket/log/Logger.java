@@ -8,13 +8,32 @@ public class Logger
 	public final static int INFO  = 20000;
 	public final static int DEBUG = 10000;
 	
-    public static void write(String str) 
-    {
-        System.out.println(str);
-    }
+	public final static int ALL   = Integer.MIN_VALUE;
+	
+	public static void info(String message) 
+	{
+		System.out.println(message);
+	}
+	
+	public static void warn(String message) 
+	{
+		System.out.println(message);
+	}
+	
+	public static void debug(String message) 
+	{
+		
+	}
+	
+	public static void error(String message) 
+	{
+		System.out.println(message);
+	}
     
-    public static void write(String str, int level) 
+    public static void error(StackTraceElement[] stack) 
     {
-        System.out.println(str);
+    	for ( StackTraceElement line : stack ) {
+    		System.out.println(line);
+    	}
     }
 }

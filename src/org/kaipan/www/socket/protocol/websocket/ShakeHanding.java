@@ -35,7 +35,7 @@ public class ShakeHanding implements ShakeHand
 			encrypt = encoder.encode(Util.sha1(String.join("", fields)));
 		} 
 		catch (NoSuchAlgorithmException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
 		
 		return encrypt;

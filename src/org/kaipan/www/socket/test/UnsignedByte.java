@@ -1,5 +1,7 @@
 package org.kaipan.www.socket.test;
 
+import java.nio.ByteBuffer;
+
 public class UnsignedByte 
 {
 	public void test2() 
@@ -66,8 +68,27 @@ public class UnsignedByte
 //    	System.out.println();
 	}
 	
+	public static boolean test3() 
+	{
+		byte[] bytes = new byte[4];
+		
+		ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+		
+		byteBuffer.putInt(65);
+		
+		System.out.println(bytes[3]);
+		System.out.println("char: " + (char) bytes[3]);
+		System.out.println("string: " + new String(bytes, 0, 4));
+		
+		return true;
+	}
+	
 	public static void main(String[] args) 
 	{
+		if ( test3() ) {
+			return;
+		}
+		
 		// TODO Auto-generated method stub
         int Id = 257;
         byte m = (byte) ((Id >> 8) & 0xFF);

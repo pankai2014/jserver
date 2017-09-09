@@ -155,7 +155,7 @@ public class MessageWorker implements Worker
 							try {
 								LOCK.wait();
 							} catch (InterruptedException e) {
-								Logger.write(e.getMessage(), Logger.INFO);
+								Logger.error(e.getStackTrace());
 							}
 						}
 					}
@@ -171,7 +171,7 @@ public class MessageWorker implements Worker
 						Task task = taskQueue.take();
 						process(task);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						Logger.error(e.getStackTrace());
 					}
 				}
 			}

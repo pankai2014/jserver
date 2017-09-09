@@ -46,7 +46,7 @@ public class MessageTaskFactory implements TaskFactory
 		} 
 		catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException | NoSuchMethodException | SecurityException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
 		
 		return Task;

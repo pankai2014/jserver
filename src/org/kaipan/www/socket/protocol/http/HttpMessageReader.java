@@ -71,7 +71,8 @@ public class HttpMessageReader implements MessageReader
         // header was still unfinished
         if ( ! readBuffer.headerComplete ) {
             if ( nextMessage.length > HttpUtil.HTTP_HEAD_MAXLEN ) {
-            	Logger.write("illegal request, header is too large", Logger.ERROR);
+            	Logger.warn("illegal request, header is too large");
+            	
                 return false;
             }
             
@@ -80,7 +81,8 @@ public class HttpMessageReader implements MessageReader
         else {
             int headerLength = metaData.endOfHeader - nextMessage.offset;
             if ( headerLength > HttpUtil.HTTP_HEAD_MAXLEN ) {
-            	Logger.write("illegal request, header is too large", Logger.ERROR);
+            	Logger.warn("illegal request, header is too large");
+            	
                 return false;
             }
             
@@ -122,10 +124,8 @@ public class HttpMessageReader implements MessageReader
             byteBuffer.flip();
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
-        }
-        
-        if ( socket.endOfStreamReached == true ) {
+        	Logger.error(e.getStackTrace());
+        	
         	return false;
         }
         

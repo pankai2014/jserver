@@ -30,7 +30,7 @@ public class Accept implements Runnable
             server.socketChannel.register(acceptSelect, SelectionKey.OP_ACCEPT);
         } 
         catch (IOException e) {
-            Logger.write(e.getMessage(), Logger.ERROR);
+            Logger.error(e.getStackTrace());
         }
         
         while ( true ) {
@@ -54,7 +54,7 @@ public class Accept implements Runnable
                         	}
                         } 
                         catch (IOException e) {
-                            Logger.write(e.getMessage(), Logger.ERROR);
+                            Logger.error(e.getStackTrace());
                         }
                     }
                     
@@ -64,7 +64,7 @@ public class Accept implements Runnable
                 selectedKeys.clear();
             } 
             catch (IOException e) {
-            	Logger.write(e.getMessage(), Logger.ERROR);
+            	Logger.error(e.getStackTrace());
             } 
         }
     }

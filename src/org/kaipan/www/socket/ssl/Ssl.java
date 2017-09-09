@@ -54,7 +54,7 @@ public class Ssl
             context.init(km, tm, random);
         } 
         catch (NoSuchAlgorithmException | KeyManagementException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
 	}
 	
@@ -81,7 +81,7 @@ public class Ssl
             return kmf.getKeyManagers();
 	    } 
 	    catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | UnrecoverableKeyException e) {
-	    	Logger.write(e.getMessage(), Logger.ERROR);
+	    	Logger.error(e.getStackTrace());
         }
 	    
 	    return null;
@@ -105,7 +105,7 @@ public class Ssl
             return trustFactory.getTrustManagers();
         } 
         catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
        
         return null;
@@ -120,7 +120,7 @@ public class Ssl
             sslEngine.beginHandshake();
         } 
 	    catch (SSLException e) {
-	    	Logger.write(e.getMessage(), Logger.ERROR);
+	    	Logger.error(e.getStackTrace());
         }
 	    
 	    return sslEngine;

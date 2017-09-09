@@ -19,7 +19,7 @@ public class StringUtil
             return ByteBuffer.wrap(bytes);  
         } 
         catch (UnsupportedEncodingException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
         
         return null;
@@ -40,7 +40,7 @@ public class StringUtil
             return charBuffer.toString();  
         }  
         catch (Exception e) {  
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
         
         return null;

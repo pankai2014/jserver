@@ -16,7 +16,6 @@ public class Socket
     private MessageWriter  messageWriter = null;
     private SocketChannel  socketChannel = null;
     
-    public boolean endOfStreamReached = false;
     public boolean closeAfterResponse = false;
     
     public Socket() 
@@ -30,38 +29,13 @@ public class Socket
     }
     
     public int read(ByteBuffer byteBuffer) throws IOException 
-    {
-        int bytesRead = this.socketChannel.read(byteBuffer);
-        int totalBytesRead = bytesRead;
-
-        while ( bytesRead > 0 ) {
-            bytesRead = this.socketChannel.read(byteBuffer);
-            totalBytesRead += bytesRead;
-        }
-        
-        if ( bytesRead == -1 ) {
-            // the socket closed, error occurred, or terminated unexpectedly
-        	endOfStreamReached = true;
-        }
-
-        return totalBytesRead;
+    {   
+    	return Stream.read(socketChannel, byteBuffer);
     }
 
     public int write(ByteBuffer byteBuffer) throws IOException 
     {
-        int bytesWritten 	  = this.socketChannel.write(byteBuffer);
-        int totalBytesWritten = bytesWritten; 
-
-        /**
-         * ByteBuffer method: remaining
-         *    return limit(length) = opacity - position
-         */
-        while ( bytesWritten > 0 && byteBuffer.hasRemaining() ) {
-            bytesWritten = this.socketChannel.write(byteBuffer);
-            totalBytesWritten += bytesWritten;
-        }
-
-        return totalBytesWritten;
+    	return Stream.write(socketChannel, byteBuffer);
     }
     
     public void setSocketId(long socketId) 

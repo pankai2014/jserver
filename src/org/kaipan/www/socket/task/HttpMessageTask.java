@@ -60,8 +60,10 @@ public class HttpMessageTask implements Task
                 message.writeToMessage(response.getHeader().getBytes(config.charset()));
             } 
             catch (UnsupportedEncodingException e) {
-                Logger.write(e.getMessage(), Logger.ERROR);
+                Logger.error(e.getStackTrace());
             }
+            
+            message.socketId = request.socketId;
             
             socketProcessor.getWriteProxy().enqueue(message);
             return;
@@ -97,7 +99,7 @@ public class HttpMessageTask implements Task
 			message.writeToMessage(bytes);
 		} 
 	    catch (UnsupportedEncodingException e) {
-	    	Logger.write(e.getMessage(), Logger.ERROR);
+	    	Logger.error(e.getStackTrace());
 		}
 	    
 	    message.socketId = request.socketId;	// must be set!!!
@@ -172,7 +174,7 @@ public class HttpMessageTask implements Task
 	    			message.offset + LengthOfHeader, message.length - LengthOfHeader);
 		} 
 	    catch (UnsupportedEncodingException e) {
-	    	Logger.write(e.getMessage(), Logger.ERROR);
+	    	Logger.error(e.getStackTrace());
 		}
 	    
 	    nextMessage.socketId = request.socketId;
@@ -207,7 +209,7 @@ public class HttpMessageTask implements Task
 		 	message.writeToMessage(body.getBytes());
 		} 
 	    catch (UnsupportedEncodingException e) {
-	    	Logger.write(e.getMessage(), Logger.ERROR);
+	    	Logger.error(e.getStackTrace());
 		}
 		
 		message.socketId = request.socketId;

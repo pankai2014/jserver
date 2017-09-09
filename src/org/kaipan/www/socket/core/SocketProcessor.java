@@ -114,7 +114,7 @@ public class SocketProcessor
             this.writeSelector = Selector.open();
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage(), Logger.FATAL);
+        	Logger.error(e.getStackTrace());
         }
     	
     	this.readMessageBuffer  = new MessageBuffer();
@@ -149,7 +149,7 @@ public class SocketProcessor
             readKey.attach(socket);
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
     }
     
@@ -163,7 +163,7 @@ public class SocketProcessor
             writeKey.attach(socket);
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
     }
     
@@ -174,7 +174,7 @@ public class SocketProcessor
     	while ( socket != null ) {
     		this.nextSocketId++;
     		
-    		Logger.write("client connected, socket id = " + this.nextSocketId, Logger.INFO);
+    		Logger.info("client connected, socket id = " + this.nextSocketId);
     		
     		socket.setSocketId(this.nextSocketId);
     		socket.setMessageWriter(new MessageWriter());
@@ -195,7 +195,7 @@ public class SocketProcessor
                         socketChannel.configureBlocking(false);
                     } 
     			    catch (IOException e) {
-                        Logger.write(e.getMessage(), Logger.ERROR);
+                        Logger.error(e.getStackTrace());
                     }
     			    
     			    if ( ssl == null ) {
@@ -213,7 +213,7 @@ public class SocketProcessor
     			    if ( ! sslEngine.doHandShake(socket) ) {
     			    	close(socket);
     			    	
-    			    	Logger.write("client closed due to handshake failure, socket id = " + socket.getSocketId(), Logger.INFO);
+    			    	Logger.info("client closed due to handshake failure, socket id = " + socket.getSocketId());
     			    }
     			}
     		}
@@ -235,7 +235,7 @@ public class SocketProcessor
            if ( readyChannels == 0 ) return;
        } 
        catch (IOException e) {
-    	   Logger.write(e.getMessage(), Logger.ERROR);
+    	   Logger.error(e.getStackTrace());
        }
        
        Set<SelectionKey>     selectedKeys = readSelector.selectedKeys();
@@ -254,7 +254,7 @@ public class SocketProcessor
                if ( ! notEndOfStreamReached ) {
                    close(socket);
                    
-                   Logger.write("client closed, socket id = " + socket.getSocketId(), Logger.INFO);
+                   Logger.info("client closed, socket id = " + socket.getSocketId());
                }
                
                List<Message> fullMessages = messageReader.getMessages();
@@ -292,7 +292,7 @@ public class SocketProcessor
 			registerNonEmptySockets();
 		} 
     	catch (ClosedChannelException e) {
-    		Logger.write(e.getMessage(), Logger.ERROR);
+    		Logger.error(e.getStackTrace());
 		}
     	
     	try {
@@ -301,7 +301,7 @@ public class SocketProcessor
 			if ( writeChannels == 0 ) return;
 		} 
     	catch (IOException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
     	
         Set<SelectionKey>     selectedKeys = writeSelector.selectedKeys();
@@ -318,13 +318,13 @@ public class SocketProcessor
 					messageWriter.write(socket, writeByteBuffer);
 				} 
         		catch (IOException e) {
-					Logger.write(e.getMessage(), Logger.ERROR);
+					Logger.error(e.getStackTrace());
 				}
         		
         		if ( socket.closeAfterResponse == true ) {
         			close(socket);
         			
-        			Logger.write("close client, socket id = " + socket.getSocketId(), Logger.INFO);
+        			Logger.info("close client, socket id = " + socket.getSocketId());
         		}
         		else if ( messageWriter.isEmpty() ) {
         			nonEmptyToEmptySockets.add(socket);
@@ -363,7 +363,7 @@ public class SocketProcessor
 			socketChannel.close();
 		} 
 		catch (IOException e) {
-			Logger.write(e.getMessage(), Logger.INFO);
+			Logger.error(e.getStackTrace());
 		}
 		
 		socketMap.remove(socket.getSocketId());
@@ -440,7 +440,7 @@ public class SocketProcessor
                 Thread.sleep(1, 0);
             } 
             catch (InterruptedException e) {
-            	Logger.write(e.getMessage(), Logger.INFO);
+            	Logger.error(e.getStackTrace());
             }
         }
     }

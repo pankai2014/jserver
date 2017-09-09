@@ -46,10 +46,10 @@ public class Util
                 property.load(new FileReader(file.getAbsolutePath()));
             } 
             catch (FileNotFoundException e) {
-            	Logger.write(e.getMessage(), Logger.ERROR);
+            	Logger.error(e.getStackTrace());
             } 
             catch (IOException e) {
-            	Logger.write(e.getMessage(), Logger.ERROR);
+            	Logger.error(e.getStackTrace());
             }
         } 
 

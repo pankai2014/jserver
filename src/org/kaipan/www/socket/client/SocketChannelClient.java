@@ -5,6 +5,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import org.kaipan.www.socket.core.Stream;
 import org.kaipan.www.socket.log.Logger;
 
 public class SocketChannelClient implements Client
@@ -12,11 +13,10 @@ public class SocketChannelClient implements Client
 	public final static int READ_BUFFER_SIZE = 4194304;
 	
 	private SocketChannel client;
-	private ByteBuffer byteBuffer;
 	
 	public SocketChannelClient() 
 	{
-		this.initialize(true);
+		this.initialize(false);
 	}
 	
 	public SocketChannelClient(boolean blocking) 
@@ -31,10 +31,8 @@ public class SocketChannelClient implements Client
 			client.configureBlocking(blocking);
 		} 
 		catch (IOException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
-		
-		byteBuffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
 	}
 	
 	@Override
@@ -46,36 +44,32 @@ public class SocketChannelClient implements Client
 			return client.connect(address);
 		} 
 		catch (IOException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
 		
 		return false;
 	}
 
 	@Override
-	public byte[] read()
+	public int read(ByteBuffer byteBuffer) throws IOException
 	{
-		byteBuffer.clear();
-		
+		return Stream.read(client, byteBuffer);
+	}
+
+	@Override
+	public int write(ByteBuffer byteBuffer) throws IOException
+	{
+		return Stream.write(client, byteBuffer);
+	}
+
+	@Override
+	public void close()
+	{
 		try {
-			client.read(byteBuffer);
+			client.close();
 		} 
 		catch (IOException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
-		
-		return null;
-	}
-
-	@Override
-	public boolean write(byte[] data)
-	{
-		return false;
-	}
-
-	@Override
-	public boolean close()
-	{
-		return false;
 	}
 }

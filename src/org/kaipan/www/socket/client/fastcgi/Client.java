@@ -82,7 +82,7 @@ public class Client
             client.setSoTimeout(socketTimeOut);
         } 
         catch (IOException e) {
-            Logger.write(e.getMessage(), Logger.ERROR);
+            Logger.error(e.getStackTrace());
         }
     }
     
@@ -124,7 +124,7 @@ public class Client
             outBuffer.flush();
         } 
         catch (IOException e) {
-        	Logger.write(e.getMessage(), Logger.ERROR);
+        	Logger.error(e.getStackTrace());
         }
         
         return requestId;
@@ -263,7 +263,7 @@ public class Client
 				bytesRead = is.read(readBytes, offset, length);
 			} 
           	catch (IOException e) {
-          		Logger.write(e.getMessage(), Logger.ERROR);
+          		Logger.error(e.getStackTrace());
           	}
           	
             if ( bytesRead == -1 ) {
@@ -271,7 +271,7 @@ public class Client
 					client.close();
 				} 
             	catch (IOException e) {
-            		Logger.write(e.getMessage(), Logger.ERROR);
+            		Logger.error(e.getStackTrace());
 				}
             	return -1;
             }
@@ -313,7 +313,7 @@ public class Client
 			inBufStream = new BufferedInputStream(inStream);
 		} 
 		catch (IOException e) {
-			Logger.write(e.getMessage(), Logger.ERROR);
+			Logger.error(e.getStackTrace());
 		}
         
         start:
@@ -353,7 +353,7 @@ public class Client
 			client.close();
 		} 
         catch (IOException e) {
-        	Logger.write(e.getMessage(), Logger.INFO);
+        	Logger.error(e.getStackTrace());
 		}
     }
 }
