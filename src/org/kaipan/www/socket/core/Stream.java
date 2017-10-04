@@ -5,6 +5,11 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SocketChannel;
 
+/**
+ * Stream class applies to I/O non-blocking operation
+ * 
+ * @author will<pan.kai@icloud.com>
+ */
 public class Stream
 {
 	public static int read(SocketChannel socketChannel, ByteBuffer byteBuffer) throws IOException 

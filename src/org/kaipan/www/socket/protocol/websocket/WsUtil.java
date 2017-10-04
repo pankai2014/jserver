@@ -81,12 +81,12 @@ public class WsUtil
 			frame.setFin(true);
 		}
 		
-		int fsv1 = data[index] & 0x40;
-		int fsv2 = data[index] & 0x20;
-		int fsv3 = data[index] & 0x10;
+		int rsv1 = data[index] & 0x40;
+		int rsv2 = data[index] & 0x20;
+		int rsv3 = data[index] & 0x10;
 		
-		if ( fsv1 == 1 || fsv2 == 1 || fsv3 == 1 ) {
-			
+		if ( rsv1 == 1 || rsv2 == 1 || rsv3 == 1 ) {
+			throw new IllegalArgumentException("RSV must be set to 0");
 		}
 		
 		frame.setOpcode((byte) (data[index] & 0x0f));

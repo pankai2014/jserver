@@ -13,9 +13,9 @@ import org.kaipan.www.socket.task.HttpsMessageTask;
 import org.kaipan.www.socket.task.MessageTaskFactory;
 import org.kaipan.www.socket.util.Util;
 
-public class HttpsServer extends Server
+public class DefaultHttpsServer extends Server
 {
-	public HttpsServer(String path) 
+	public DefaultHttpsServer(String path) 
 	{
 		super();
 		

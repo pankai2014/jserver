@@ -11,9 +11,9 @@ import org.kaipan.www.socket.task.DefaultWsMessageTask;
 import org.kaipan.www.socket.task.MessageTaskFactory;
 import org.kaipan.www.socket.util.Util;
 
-public class WebsocketServer extends Server
+public class DefaultWebsocketServer extends Server
 {
-	public WebsocketServer(String path) 
+	public DefaultWebsocketServer(String path) 
 	{
 		super();
 		

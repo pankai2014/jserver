@@ -6,10 +6,25 @@ public class QueueBean
 	public final int QUEUE_DELETE_TYPE = 2;
 	public final int QUEUE_SHIFT_TYPE  = 3;
 	public final int QUEUE_POP_TYPE    = 4;
-	public final int QUEUE_OK_TYPE     = 5;
+	public final int QUEUE_ACK_TYPE    = 5;
 	
 	private int type;
 	
 	private String queueId;
 	private String data;
+	
+	public int getType() 
+	{
+		return type;
+	}
+	
+	public String getQueuId() 
+	{
+		return queueId;
+	}
+	
+	public String getDate() 
+	{
+		return data;
+	}
 }
