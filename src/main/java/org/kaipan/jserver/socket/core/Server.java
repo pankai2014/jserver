@@ -4,31 +4,34 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
+import java.util.Properties;
 
 import org.kaipan.jserver.socket.log.Logger;
+import org.kaipan.jserver.socket.util.Util;
 
 public abstract class Server
 {	
     protected Config config = null;
     
+    protected String path;
+    protected String filename;
+    
     protected SocketProcessor   socketProcessor = null;
     protected ServerSocketChannel socketChannel = null;
     
-    public Server()
+    public Server(Config config, String filename) 
     {
-    	initialize();
+    	this(config, filename, null);
     }
     
-    public Server(Config config)
-    {
-        this.config = config;
-        
-        initialize();
-    }
-    
-    public void load(Config config) 
+    public Server(Config config, String filename, String path) 
     {
     	this.config = config;
+    	
+    	this.path 	  = path;
+    	this.filename = filename;
+    	
+    	initialize();
     }
     
     private void initialize() 
@@ -39,6 +42,22 @@ public abstract class Server
         catch (IOException e) {
         	Logger.error(e.getStackTrace());
         }
+    	
+        Properties property = null;
+        if ( path == null ) {
+        	ClassLoader classLoader = getClass().getClassLoader();  
+            property = Util.loadConfigFile(classLoader.getResource(filename).getFile());
+        }
+        else {
+            property = Util.loadConfigFile(path + filename);
+            if ( property == null ) {
+            	Logger.info("Usage: java -jar java-server-{version}.jar "
+            			+ "\"path to file http-server.properties\"");
+                return;
+            }
+        }
+        
+        config.load(property);
     }
     
     private void listen(String ip, int port) 
@@ -74,8 +93,6 @@ public abstract class Server
     {
     	return socketProcessor;
     }
-    
-    protected abstract void initialize(String path);
     
     protected abstract void createSocketProcessor();
 }

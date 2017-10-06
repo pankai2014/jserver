@@ -1,5 +1,7 @@
 package org.kaipan.jserver.socket.protocol.websocket;
 
+import java.util.Random;
+
 import org.kaipan.jserver.socket.util.IntegerUtil;
 
 public class WsUtil
@@ -44,9 +46,9 @@ public class WsUtil
 		return Length;
 	}
 	
-	private static boolean isFin(byte mask) 
+	private static boolean isFin(byte fin) 
 	{
-		if ( (mask & 0x80) > 0 ) {
+		if ( (fin & 0x80) > 0 ) {
 			return true;
 		}
 		
@@ -128,7 +130,7 @@ public class WsUtil
 		return parseFrame(data, 0, data.length);
 	}
 	
-	private static byte[] buildFrame(byte[] data, int opcode, boolean close) 
+	private static byte[] buildFrame(byte[] data, int opcode, boolean mask, boolean close) 
 	{
 		int total = 2 + data.length;
 		if ( data.length == 0x7e ) {
@@ -142,14 +144,20 @@ public class WsUtil
 		
 		int index = 0;
 		
-		if ( close != true ) {
-			frame[index] = (byte) (0x00 << 7 | (0x00 << 6) | (0x00 << 5) | (0x00 << 4) | opcode);
+		if ( close ) {
+			frame[index] = (byte) (0x01 << 7 | (0x00 << 6) | (0x00 << 5) | (0x00 << 4) | opcode);
+			
 		}
 		else {
-			frame[index] = (byte) (0x01 << 7 | (0x00 << 6) | (0x00 << 5) | (0x00 << 4) | opcode);
+			frame[index] = (byte) (0x00 << 7 | (0x00 << 6) | (0x00 << 5) | (0x00 << 4) | opcode);
 		}
 		
-		frame[++index] = (byte) (0x00 << 7 | getPayloadLength(data.length));
+		if ( mask ) {
+			frame[++index] = (byte) (0x01 << 7 | getPayloadLength(data.length));
+		}
+		else {
+			frame[++index] = (byte) (0x00 << 7 | getPayloadLength(data.length));
+		}
 		
 		if ( data.length == 0x7e ) {
 			System.arraycopy(getLengthBytes((short) data.length), 0, frame, ++index, 2);
@@ -160,24 +168,35 @@ public class WsUtil
 			index += 7;
 		}
 		
+		if ( mask ) {
+			Random random = new Random();
+			
+			byte[] masking = IntegerUtil.int2BigEndian(Math.abs(random.nextInt()));
+			
+			System.arraycopy(masking, 0, frame, ++index, 4);
+			index += 3;
+			
+			parseMessage(data, masking);
+		}
+		
 		System.arraycopy(data, 0, frame, ++index, data.length);
 		index += data.length - 1;
 		
 		return frame;
 	}
 	
-	public static byte[] newFrame(int data, int opcode, boolean close) 
+	public static byte[] newFrame(int data, int opcode, boolean mask, boolean close) 
 	{
-		return buildFrame(IntegerUtil.int2BigEndian(data), opcode, close);
+		return buildFrame(IntegerUtil.int2BigEndian(data), opcode, mask, close);
 	}
 	
-	public static byte[] newFrame(byte[] data, int opcode, boolean close) 
+	public static byte[] newFrame(byte[] data, int opcode, boolean mask, boolean close) 
 	{
-		return buildFrame(data, opcode, close);
+		return buildFrame(data, opcode, mask, close);
 	}
 	
 	public static byte[] newCloseFrame() 
 	{
-		return newFrame(String.valueOf(WsFrame.CLOSE_NORMAL).getBytes(), WsFrame.OPCODE_CLOSE, true);
+		return newFrame(String.valueOf(WsFrame.CLOSE_NORMAL).getBytes(), WsFrame.OPCODE_CLOSE, false, true);
 	}
 }

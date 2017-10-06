@@ -1,47 +1,20 @@
 package org.kaipan.jserver.socket.server;
 
-import java.util.Properties;
-
 import org.kaipan.jserver.socket.controller.DefaultController;
+import org.kaipan.jserver.socket.core.Config;
 import org.kaipan.jserver.socket.core.Server;
 import org.kaipan.jserver.socket.core.SocketProcessor;
-import org.kaipan.jserver.socket.log.Logger;
 import org.kaipan.jserver.socket.protocol.http.HttpMessageReaderFactory;
-import org.kaipan.jserver.socket.protocol.https.HttpsConfig;
 import org.kaipan.jserver.socket.router.DynamicRouter;
 import org.kaipan.jserver.socket.task.HttpsMessageTask;
 import org.kaipan.jserver.socket.task.MessageTaskFactory;
-import org.kaipan.jserver.socket.util.Util;
 
 public class DefaultHttpsServer extends Server
 {
-	public DefaultHttpsServer(String path) 
+	public DefaultHttpsServer(Config config, String filename, String path) 
 	{
-		super();
-		
-		initialize(path);
+		super(config, filename, path);
 	}
-    
-    protected void initialize(String path) 
-    {
-    	config = new HttpsConfig();
-        
-        Properties property = null;
-        if ( path == null ) {
-            ClassLoader classLoader = getClass().getClassLoader();  
-            property = Util.loadConfigFile(classLoader.getResource("https-server.properties").getFile());
-        }
-        else {
-            property = Util.loadConfigFile(path);
-            if ( property == null ) {
-            	Logger.info("Usage: java -jar java-server-{version}.jar "
-            			+ "\"path to file https-server.properties\"");
-                return;
-            }
-        }
-        
-        config.load(property);
-    }
 
     @Override
     protected void createSocketProcessor()

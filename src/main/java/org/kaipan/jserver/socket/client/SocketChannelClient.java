@@ -5,7 +5,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
-import org.kaipan.jserver.socket.core.Stream;
 import org.kaipan.jserver.socket.log.Logger;
 
 public class SocketChannelClient implements Client
@@ -16,19 +15,9 @@ public class SocketChannelClient implements Client
 	
 	public SocketChannelClient() 
 	{
-		this.initialize(false);
-	}
-	
-	public SocketChannelClient(boolean blocking) 
-	{
-		this.initialize(blocking);
-	}
-
-	private void initialize(boolean blocking) 
-	{
 		try {
 			client = SocketChannel.open();
-			client.configureBlocking(blocking);
+			client.configureBlocking(true);
 		} 
 		catch (IOException e) {
 			Logger.error(e.getStackTrace());
@@ -51,12 +40,12 @@ public class SocketChannelClient implements Client
 
 	public int read(ByteBuffer byteBuffer) throws IOException
 	{
-		return Stream.read(client, byteBuffer);
+		return client.read(byteBuffer);
 	}
 
 	public int write(ByteBuffer byteBuffer) throws IOException
 	{
-		return Stream.write(client, byteBuffer);
+		return client.write(byteBuffer);
 	}
 
 	public void close()

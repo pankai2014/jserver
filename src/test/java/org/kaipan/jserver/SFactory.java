@@ -1,6 +1,7 @@
 package org.kaipan.jserver;
 
 import org.kaipan.jserver.socket.core.Server;
+import org.kaipan.jserver.socket.protocol.http.HttpConfig;
 import org.kaipan.jserver.socket.server.ServerFactory;
 
 public class SFactory
@@ -26,7 +27,7 @@ public class SFactory
 		
 		String[] parts = {ServerFactory.class.getPackage().getName(), ".", name};
 		
-		Server server = ServerFactory.create(String.join("", parts), path);
+		Server server = ServerFactory.create(String.join("", parts), new HttpConfig(), "http-server.properties", path);
         server.start();
     }
 }

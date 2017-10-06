@@ -248,7 +248,7 @@ public class SocketProcessor
                // a channel is ready for reading
                Socket socket = (Socket) key.attachment();
                
-               MessageReader messageReader  = socket.getMessageReader();
+               MessageReader messageReader   = socket.getMessageReader();
                boolean notEndOfStreamReached = messageReader.read(socket, readByteBuffer);
                
                if ( ! notEndOfStreamReached ) {

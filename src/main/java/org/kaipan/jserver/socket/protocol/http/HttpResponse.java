@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class HttpResponse
 {
-	public final static String SERVER_NAME = "JAVA NIO HTTP SERVER, @author will<pan.kai@icloud.com>";
+	public final static String SERVER_NAME = "JAVA SERVER, @author will<pan.kai@icloud.com>";
 	
     public final static Map<Integer, String> HTTP_HEADER_CODE = new HashMap<Integer, String>() 
     {

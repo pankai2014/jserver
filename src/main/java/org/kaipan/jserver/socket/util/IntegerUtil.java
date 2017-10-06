@@ -1,5 +1,11 @@
 package org.kaipan.jserver.socket.util;
 
+/**
+ * Integer small endian order is converted to big endian order
+ * 
+ * @author will<pan.kai@icloud.com>
+ * @date   2017/10/15
+ */
 public class IntegerUtil
 {
 	public static byte[] short2BigEndian(short data) 
