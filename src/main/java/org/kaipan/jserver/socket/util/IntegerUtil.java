@@ -61,4 +61,20 @@ public class IntegerUtil
 		
 		return result;
 	}
+	
+	public static int bigEndian2Int(byte[] bytes) 
+	{
+		return bigEndian2Int(bytes, 0, bytes.length);
+	}
+	
+	public static int bigEndian2Int(byte[] bytes, int offset, int length) 
+	{
+		int result = 0x00;
+		
+		for ( int i = 0; i < bytes.length; i++ ) {
+			result |= bytes[offset + i] << (i * 8);
+		}
+		
+		return result;
+	}
 }

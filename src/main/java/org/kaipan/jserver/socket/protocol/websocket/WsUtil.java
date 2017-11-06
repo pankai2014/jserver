@@ -34,16 +34,8 @@ public class WsUtil
 	}
 	
 	private static int getDataLength(byte[] data, int offset, int length) 
-	{
-		byte[] bytes = IntegerUtil.bigEndian2LittleEndian(data, offset, length);
-		
-		int Length = 0x00;
-		
-		for ( int i = 0; i < length; i++ ) {
-			Length |= bytes[i];
-		}
-		
-		return Length;
+	{		
+		return IntegerUtil.bigEndian2Int(data, offset, length);
 	}
 	
 	private static boolean isFin(byte fin) 
@@ -130,9 +122,13 @@ public class WsUtil
 		return parseFrame(data, 0, data.length);
 	}
 	
-	private static byte[] buildFrame(byte[] data, int opcode, boolean mask, boolean close) 
+	private static byte[] buildFrame(int opcode, boolean mask, byte[] data, boolean close) 
 	{
 		int total = 2 + data.length;
+		if ( mask == true ) {
+			total +=  4;
+		}
+		
 		if ( data.length == 0x7e ) {
 			total += 2;
 		}
@@ -185,18 +181,13 @@ public class WsUtil
 		return frame;
 	}
 	
-	public static byte[] newFrame(int data, int opcode, boolean mask, boolean close) 
+	public static byte[] newFrame(int opcode, boolean mask, byte[] data, boolean close) 
 	{
-		return buildFrame(IntegerUtil.int2BigEndian(data), opcode, mask, close);
-	}
-	
-	public static byte[] newFrame(byte[] data, int opcode, boolean mask, boolean close) 
-	{
-		return buildFrame(data, opcode, mask, close);
+		return buildFrame(opcode, mask, data, close);
 	}
 	
 	public static byte[] newCloseFrame() 
 	{
-		return newFrame(String.valueOf(WsFrame.CLOSE_NORMAL).getBytes(), WsFrame.OPCODE_CLOSE, false, true);
+		return newFrame(WsFrame.OPCODE_CLOSE, false, String.valueOf(WsFrame.CLOSE_NORMAL).getBytes(), true);
 	}
 }

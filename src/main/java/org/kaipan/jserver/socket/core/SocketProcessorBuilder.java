@@ -142,7 +142,7 @@ public class SocketProcessorBuilder
 		
 		if ( socketMap == null )			  socketMap = new HashMap<Long, Socket>();
 		
-		if ( readByteBuffer == null )		  readByteBuffer = ByteBuffer.allocate(1024 * 1024 * 4);
+		if ( readByteBuffer  == null )		  readByteBuffer  = ByteBuffer.allocate(1024 * 1024 * 4);
 		if ( writeByteBuffer == null )		  writeByteBuffer = ByteBuffer.allocate(1024 * 1024 * 4);
 		
 		if ( emptyToNonEmptySockets == null ) emptyToNonEmptySockets = new HashSet<Socket>();

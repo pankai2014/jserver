@@ -263,7 +263,6 @@ public class SocketProcessor
                    for ( Message message : fullMessages ) {
                        message.socketId = socket.getSocketId();
                        
-                       //ITask task = taskFactory.createTask(this, socket, message);
                        Task task = taskFactory.createTask(server, socket, message);
                        messageWorker.addTask(task);
                    }

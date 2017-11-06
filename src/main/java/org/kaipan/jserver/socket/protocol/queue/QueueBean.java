@@ -1,18 +1,16 @@
-package org.kaipan.jserver.socket.packet;
+package org.kaipan.jserver.socket.protocol.queue;
 
 public class QueueBean
 {
-	public final static int QUEUE_ADD_TYPE    = 1;
-	public final static int QUEUE_DELETE_TYPE = 2;
-	public final static int QUEUE_SHIFT_TYPE  = 3;
-	public final static int QUEUE_POP_TYPE    = 4;
-	public final static int QUEUE_ACK_TYPE    = 5;
+	public final static int QUEUE_PUSH_TYPE = 1;
+	public final static int QUEUE_POP_TYPE  = 2;
+	public final static int QUEUE_ACK_TYPE  = 3;
 	
 	private int id;
 	private int type;
 	
-	private String data;
-	
+	private byte[] data;
+
 	public QueueBean setId(int id) 
 	{
 		this.id = id;
@@ -27,7 +25,7 @@ public class QueueBean
 		return this;
 	}
 	
-	public QueueBean setData(String data) 
+	public QueueBean setData(byte[] data) 
 	{
 		this.data = data;
 		
@@ -44,17 +42,18 @@ public class QueueBean
 		return type;
 	}
 	
-	public String getData() 
+	public byte[] getData() 
 	{
 		return data;
 	}
-	
+
 	public String toString() 
 	{
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append(id)
-			.append(type).append(data);
+		builder.append(id).append("|")
+			.append(type).append("|")
+			.append(new String(data));
 		
 		return builder.toString();
 	}
