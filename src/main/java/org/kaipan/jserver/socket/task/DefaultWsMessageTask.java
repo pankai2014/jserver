@@ -15,10 +15,10 @@ public class DefaultWsMessageTask extends WsMessageTask
 	}
 
 	@Override
-	protected void onMessage(WsFrame request)
+	protected void onMessage(WsFrame frame)
 	{
-		Logger.info(new String(request.getData()));
+		Logger.info(new String(frame.getData()));
 		
-		send(request.getSocketId(), WsUtil.newCloseFrame());
+		send(frame.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_NORMAL));
 	}
 }

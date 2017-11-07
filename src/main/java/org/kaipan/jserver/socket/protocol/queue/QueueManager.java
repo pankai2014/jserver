@@ -6,7 +6,7 @@ import org.kaipan.jserver.database.LevelDB;
 import org.kaipan.jserver.socket.log.Logger;
 import org.kaipan.jserver.socket.util.IntegerUtil;
 
-public class Queue
+public class QueueManager
 {
 	private LevelDB leveldb;
 	
@@ -24,9 +24,9 @@ public class Queue
     private String pushCountKey;
     private String ackCountKey;
 	
-	private static Queue queue;
+	private static QueueManager queue;
 	
-	private Queue(String dbFile) 
+	private QueueManager(String dbFile) 
 	{
 		try {
 			this.leveldb = new LevelDB(dbFile);
@@ -43,10 +43,10 @@ public class Queue
 		this.ackCountKey  = "_ack_count_index";
 	}
 	
-	public static Queue getInstance(String dbFile) 
+	public static QueueManager getInstance(String dbFile) 
 	{
 		if ( queue == null ) {
-			queue = new Queue(dbFile);
+			queue = new QueueManager(dbFile);
 		}
 		
 		return queue;

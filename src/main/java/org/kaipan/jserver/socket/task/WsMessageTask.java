@@ -40,7 +40,7 @@ public abstract class WsMessageTask implements Task
 		 *     replace type code with class(218)
 		 */
 		ShakeHand processor = ShakeHandFactory.create(readBuffer.httpHandShake);
-		processor.run(this);
+		processor.process(this);
 		
 		if ( readBuffer.httpHandShake != WsMessageReader.HANDSHAKE_COMPLETED ) {
 			return;

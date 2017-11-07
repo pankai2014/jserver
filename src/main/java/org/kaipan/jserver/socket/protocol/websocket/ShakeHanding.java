@@ -42,7 +42,7 @@ public class ShakeHanding implements ShakeHand
 		return encrypt;
 	}
 	
-	public void run(WsMessageTask task)
+	public void process(WsMessageTask task)
 	{
         HttpRequest request = HttpUtil.parseHttpRequest(task.getMessage());
         

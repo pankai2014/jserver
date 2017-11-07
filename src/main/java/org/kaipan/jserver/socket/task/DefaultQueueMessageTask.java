@@ -3,9 +3,11 @@ package org.kaipan.jserver.socket.task;
 import org.kaipan.jserver.socket.core.Message;
 import org.kaipan.jserver.socket.core.Server;
 import org.kaipan.jserver.socket.core.Socket;
-import org.kaipan.jserver.socket.log.Logger;
-import org.kaipan.jserver.socket.protocol.queue.Queue;
-import org.kaipan.jserver.socket.protocol.websocket.WsConfig;
+import org.kaipan.jserver.socket.protocol.queue.Action;
+import org.kaipan.jserver.socket.protocol.queue.ActionFactory;
+import org.kaipan.jserver.socket.protocol.queue.QueueBean;
+import org.kaipan.jserver.socket.protocol.queue.QueueManager;
+import org.kaipan.jserver.socket.protocol.queue.QueueUtil;
 import org.kaipan.jserver.socket.protocol.websocket.WsFrame;
 import org.kaipan.jserver.socket.protocol.websocket.WsUtil;
 
@@ -17,14 +19,24 @@ public class DefaultQueueMessageTask extends WsMessageTask
 	}
 
 	@Override
-	protected void onMessage(WsFrame request)
+	protected void onMessage(WsFrame frame)
 	{
-		Logger.info(new String(request.getData()));
-		
-		WsConfig config = getWsConfig();
-		Queue queue = Queue.getInstance(config.queuePath());
-		if ( queue == null ) {
-			send(request.getSocketId(), WsUtil.newCloseFrame());
+		QueueManager manager = QueueManager.getInstance(getWsConfig().queuePath());
+		if ( manager == null ) {
+			send(frame.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_SERVER_ERROR));
 		}
+		
+		QueueBean bean = QueueUtil.parseBean(frame.getData());
+		
+		Action processor = ActionFactory.create(bean.getType());
+		byte[] data = processor.process(manager, bean);
+		if ( data == null ) {
+			send(frame.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_ABNORMAL));
+		}
+		
+		byte[] result = WsUtil.newFrame(WsFrame.OPCODE_BINARY, 
+				false, data, true);
+		
+		send(frame.getSocketId(), result);
 	}
 }

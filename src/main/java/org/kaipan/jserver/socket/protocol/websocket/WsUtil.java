@@ -186,8 +186,8 @@ public class WsUtil
 		return buildFrame(opcode, mask, data, close);
 	}
 	
-	public static byte[] newCloseFrame() 
+	public static byte[] newCloseFrame(int code) 
 	{
-		return newFrame(WsFrame.OPCODE_CLOSE, false, String.valueOf(WsFrame.CLOSE_NORMAL).getBytes(), true);
+		return newFrame(WsFrame.OPCODE_CLOSE, false, String.valueOf(code).getBytes(), true);
 	}
 }

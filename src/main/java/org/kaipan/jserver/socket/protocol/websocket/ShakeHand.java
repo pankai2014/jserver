@@ -4,5 +4,5 @@ import org.kaipan.jserver.socket.task.WsMessageTask;
 
 public interface ShakeHand
 {
-	public void run(WsMessageTask task);
+	public void process(WsMessageTask task);
 }

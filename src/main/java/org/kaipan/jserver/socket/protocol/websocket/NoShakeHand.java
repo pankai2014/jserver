@@ -9,7 +9,7 @@ public class NoShakeHand implements ShakeHand
 		
 	}
 	
-	public void run(WsMessageTask task)
+	public void process(WsMessageTask task)
 	{
 		
 	}
