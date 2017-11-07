@@ -8,8 +8,8 @@ public class QueueUtil
 	{
 		QueueBean bean = new QueueBean();
 		
-		bean.setId(IntegerUtil.bigEndian2Int(data, 0, 4));
-		bean.setType(IntegerUtil.bigEndian2Int(data, 4, 4));
+		bean.setId(IntegerUtil.bigEndian2Int(data, 0));
+		bean.setType(IntegerUtil.bigEndian2Int(data, 4));
 		
 		byte[] body = null;
 		

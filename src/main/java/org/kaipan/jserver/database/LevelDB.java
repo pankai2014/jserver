@@ -9,6 +9,7 @@ import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.ReadOptions;
+import org.iq80.leveldb.Snapshot;
 import org.iq80.leveldb.WriteOptions;
 import org.kaipan.jserver.socket.log.Logger;
 
@@ -70,14 +71,14 @@ public class LevelDB
     	return db.get(key, rdOpt);
     }
     
-    public void set(byte[] key, byte value[]) 
+    public Snapshot set(byte[] key, byte value[]) 
     {
-    	db.put(key, value, wtOpt);
+    	return db.put(key, value, wtOpt);
     }
     
-    public void delete(byte[] key) 
+    public Snapshot delete(byte[] key) 
     {
-    	db.delete(key, wtOpt);
+    	return db.delete(key, wtOpt);
     }
     
     public String shift()

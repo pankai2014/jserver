@@ -13,30 +13,38 @@ import org.kaipan.jserver.socket.protocol.websocket.WsUtil;
 
 public class DefaultQueueMessageTask extends WsMessageTask
 {
+	private static Object LOCK = new Object();
+	
 	public DefaultQueueMessageTask(Server server, Socket socket, Message message)
 	{
 		super(server, socket, message);
 	}
 
 	@Override
-	protected void onMessage(WsFrame frame)
+	protected void onMessage(WsFrame request)
 	{
 		QueueManager manager = QueueManager.getInstance(getWsConfig().queuePath());
 		if ( manager == null ) {
-			send(frame.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_SERVER_ERROR));
+			send(request.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_SERVER_ERROR));
 		}
 		
-		QueueBean bean = QueueUtil.parseBean(frame.getData());
-		
+		QueueBean bean   = QueueUtil.parseBean(request.getData());
 		Action processor = ActionFactory.create(bean.getType());
-		byte[] data = processor.process(manager, bean);
-		if ( data == null ) {
-			send(frame.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_ABNORMAL));
+		
+		byte[] result = null;
+		
+		synchronized ( LOCK ) {
+			result = processor.process(manager, bean);
+			if ( result == null ) {
+				send(request.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_ABNORMAL));
+			}
+			
+			LOCK.notify();
 		}
 		
-		byte[] result = WsUtil.newFrame(WsFrame.OPCODE_BINARY, 
-				false, data, true);
+		byte[] response = WsUtil.newFrame(WsFrame.OPCODE_BINARY, 
+				false, result, true);
 		
-		send(frame.getSocketId(), result);
+		send(request.getSocketId(), response);
 	}
 }

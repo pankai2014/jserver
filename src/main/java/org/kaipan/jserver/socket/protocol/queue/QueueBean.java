@@ -2,9 +2,10 @@ package org.kaipan.jserver.socket.protocol.queue;
 
 public class QueueBean
 {
-	public final static int QUEUE_PUSH_TYPE = 1;
-	public final static int QUEUE_POP_TYPE  = 2;
-	public final static int QUEUE_ACK_TYPE  = 3;
+	public final static int QUEUE_PUSH_TYPE  = 1;
+	public final static int QUEUE_POP_TYPE   = 2;
+	public final static int QUEUE_ACK_TYPE   = 3;
+	public final static int QUEUE_STATS_TYPE = 4;
 	
 	private int id;
 	private int type;

@@ -146,7 +146,8 @@ public class MessageWorker implements Worker
 						synchronized ( LOCK ) {
 							try {
 								LOCK.wait();
-							} catch (InterruptedException e) {
+							} 
+							catch (InterruptedException e) {
 								Logger.error(e.getStackTrace());
 							}
 						}
@@ -162,7 +163,8 @@ public class MessageWorker implements Worker
 						//take a url from the task queue and process it
 						Task task = taskQueue.take();
 						process(task);
-					} catch (InterruptedException e) {
+					} 
+					catch (InterruptedException e) {
 						Logger.error(e.getStackTrace());
 					}
 				}

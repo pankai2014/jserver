@@ -2,6 +2,7 @@ package org.kaipan.jserver.socket.protocol.queue;
 
 import java.io.IOException;
 
+import org.iq80.leveldb.Snapshot;
 import org.kaipan.jserver.database.LevelDB;
 import org.kaipan.jserver.socket.log.Logger;
 import org.kaipan.jserver.socket.util.IntegerUtil;
@@ -10,12 +11,12 @@ public class QueueManager
 {
 	private LevelDB leveldb;
 	
-	private volatile int headIndex;
-	private volatile int tailIndex;
+	private volatile long headIndex;
+	private volatile long tailIndex;
 	
-	private volatile int popCount;
-	private volatile int pushCount;
-	private volatile int ackCount;
+	private volatile long popCount;
+	private volatile long pushCount;
+	private volatile long ackCount;
 	
     private String headIndexKey;
     private String tailIndexKey;
@@ -52,84 +53,104 @@ public class QueueManager
 		return queue;
 	}
 	
-	public LevelDB getLevelDB() 
+	public byte[] get(byte[] key) 
 	{
-		return leveldb;
+		return leveldb.get(key);
 	}
-
-	public int getHeadIndex()
+	
+	public boolean set(byte[] key, byte[] value) 
 	{
-		byte[] bytes = this.leveldb.get(this.headIndexKey.getBytes());
+		Snapshot snapshot = leveldb.set(key, value);
+		if ( snapshot == null ) {
+			return false;
+		}
 		
-		headIndex = bytes == null ? 1 : IntegerUtil.bigEndian2Int(bytes);
+		return true;
+	}
+	
+	public boolean delete(byte[] key) 
+	{
+		Snapshot snapshot = leveldb.delete(key);
+		if ( snapshot == null ) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	public long getHeadIndex()
+	{
+		byte[] bytes = leveldb.get(this.headIndexKey.getBytes());
+		
+		headIndex = bytes == null ? 1 : IntegerUtil.bigEndian2Long(bytes);
 		return headIndex;
 	}
 
-	public void setHeadIndex(int headIndex)
+	public void setHeadIndex(long headIndex)
 	{
 		this.headIndex = headIndex;
 		
-		leveldb.set(headIndexKey.getBytes(), IntegerUtil.int2BigEndian(headIndex));
+		leveldb.set(headIndexKey.getBytes(), IntegerUtil.long2BigEndian(headIndex));
 	}
 
-	public int getTailIndex()
+	public long getTailIndex()
 	{
 		byte[] bytes = leveldb.get(tailIndexKey.getBytes());
 		
-		tailIndex = bytes == null ? 1 : IntegerUtil.bigEndian2Int(bytes);
+		tailIndex = bytes == null ? 1 : IntegerUtil.bigEndian2Long(bytes);
 		return tailIndex;
 	}
 
-	public void setTailIndex(int tailIndex)
+	public void setTailIndex(long tailIndex)
 	{
 		this.tailIndex = tailIndex;
 		
-		leveldb.set(tailIndexKey.getBytes(), IntegerUtil.int2BigEndian(tailIndex));
+		leveldb.set(tailIndexKey.getBytes(), IntegerUtil.long2BigEndian(tailIndex));
 	}
 
-	public int getPopCount()
+	public long getPopCount()
 	{
 		byte[] bytes = leveldb.get(popCountKey.getBytes());
 		
-		popCount = bytes == null ? 0 : IntegerUtil.bigEndian2Int(bytes);
+		popCount = bytes == null ? 0 : IntegerUtil.bigEndian2Long(bytes);
 		return popCount;
 	}
 
-	public void setPopCount(int popCount)
+	public void setPopCount(long popCount)
 	{
 		this.popCount = popCount;
 		
-		leveldb.set(popCountKey.getBytes(), IntegerUtil.int2BigEndian(popCount));
+		leveldb.set(popCountKey.getBytes(), IntegerUtil.long2BigEndian(popCount));
 	}
 
-	public int getPushCount()
+	public long getPushCount()
 	{
 		byte[] bytes = leveldb.get(pushCountKey.getBytes());
 		
-		pushCount = bytes == null ? 0 : IntegerUtil.bigEndian2Int(bytes);
+		pushCount = bytes == null ? 0 : IntegerUtil.bigEndian2Long(bytes);
 		return pushCount;
 	}
 
-	public void setPushCount(int pushCount)
+	public void setPushCount(long pushCount)
 	{
 		this.pushCount = pushCount;
 		
-		leveldb.set(pushCountKey.getBytes(), IntegerUtil.int2BigEndian(pushCount));
+		leveldb.set(pushCountKey.getBytes(), IntegerUtil.long2BigEndian(pushCount));
 	}
 
-	public int getAckCount()
+	public long getAckCount()
 	{
 		byte[] bytes = leveldb.get(ackCountKey.getBytes());
 		
-		ackCount = bytes == null ? 0 : IntegerUtil.bigEndian2Int(bytes);
+		ackCount = bytes == null ? 0 : IntegerUtil.bigEndian2Long(bytes);
 		return ackCount;
 	}
 
-	public void setAckCount(int ackCount)
+	public void setAckCount(long ackCount)
 	{
 		this.ackCount = ackCount;
 		
-		leveldb.set(ackCountKey.getBytes(), IntegerUtil.int2BigEndian(ackCount));
+		leveldb.set(ackCountKey.getBytes(), IntegerUtil.long2BigEndian(ackCount));
 	}
 
 	public String getHeadIndexKey()

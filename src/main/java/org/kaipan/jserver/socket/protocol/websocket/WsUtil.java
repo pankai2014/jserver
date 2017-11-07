@@ -33,11 +33,6 @@ public class WsUtil
 		return Length;
 	}
 	
-	private static int getDataLength(byte[] data, int offset, int length) 
-	{		
-		return IntegerUtil.bigEndian2Int(data, offset, length);
-	}
-	
 	private static boolean isFin(byte fin) 
 	{
 		if ( (fin & 0x80) > 0 ) {
@@ -93,12 +88,12 @@ public class WsUtil
 		
 		int Length = data[index] & 0x7f;
 		if ( Length == 0x7e ) {
-			Length = getDataLength(data, index, 2);
+			Length = IntegerUtil.bigEndian2Short(data, index);
 			
 			index += 2;
 		}
 		else if ( Length == 0x7f ) {		
-			Length = getDataLength(data, index, 8);
+			Length = IntegerUtil.bigEndian2Long(data, index);
 			
 			index += 8;
 		}

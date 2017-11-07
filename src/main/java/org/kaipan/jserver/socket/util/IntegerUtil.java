@@ -62,16 +62,48 @@ public class IntegerUtil
 		return result;
 	}
 	
-	public static int bigEndian2Int(byte[] bytes) 
+	public static int bigEndian2Short(byte[] bytes) 
 	{
-		return bigEndian2Int(bytes, 0, bytes.length);
+		return bigEndian2Int(bytes, 0);
 	}
 	
-	public static int bigEndian2Int(byte[] bytes, int offset, int length) 
+	public static int bigEndian2Short(byte[] bytes, int offset) 
 	{
 		int result = 0x00;
 		
-		for ( int i = 0; i < bytes.length; i++ ) {
+		for ( int i = 0; i < 2; i++ ) {
+			result |= bytes[offset + i] << (i * 8);
+		}
+		
+		return result;
+	}
+	
+	public static int bigEndian2Int(byte[] bytes) 
+	{
+		return bigEndian2Int(bytes, 0);
+	}
+	
+	public static int bigEndian2Int(byte[] bytes, int offset) 
+	{
+		int result = 0x00;
+		
+		for ( int i = 0; i < 4; i++ ) {
+			result |= bytes[offset + i] << (i * 8);
+		}
+		
+		return result;
+	}
+	
+	public static int bigEndian2Long(byte[] bytes) 
+	{
+		return bigEndian2Int(bytes, 0);
+	}
+	
+	public static int bigEndian2Long(byte[] bytes, int offset) 
+	{
+		int result = 0x00;
+		
+		for ( int i = 0; i < 8; i++ ) {
 			result |= bytes[offset + i] << (i * 8);
 		}
 		

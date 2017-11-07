@@ -13,6 +13,9 @@ public class ActionFactory
 				
 			case QueueBean.QUEUE_ACK_TYPE:
 				return new AckAction();
+				
+			case QueueBean.QUEUE_STATS_TYPE:
+				return new StatsAction();
 		}
 		
 		throw new IllegalArgumentException("Incorrect type value");
