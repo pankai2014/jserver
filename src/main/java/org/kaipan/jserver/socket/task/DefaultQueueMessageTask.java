@@ -23,12 +23,12 @@ public class DefaultQueueMessageTask extends WsMessageTask
 	@Override
 	protected void onMessage(WsFrame request)
 	{
-		QueueManager manager = QueueManager.getInstance(getWsConfig().queuePath());
+		QueueManager manager = QueueManager.getInstance(getWsConfig().leveldbPath());
 		if ( manager == null ) {
 			send(request.getSocketId(), WsUtil.newCloseFrame(WsFrame.CLOSE_SERVER_ERROR));
 		}
 		
-		QueueBean bean   = QueueUtil.parseBean(request.getData());
+		QueueBean  bean  = QueueUtil.parseBean(request.getData());
 		Action processor = ActionFactory.create(bean.getType());
 		
 		byte[] result = null;

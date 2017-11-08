@@ -8,7 +8,7 @@ public class PushAction implements Action
 	{
 		long tailIndex = manager.getTailIndex();
 		long pushCount = manager.getPushCount();
-	
+		
 		boolean written = manager.set(IntegerUtil.long2BigEndian(tailIndex), bean.getData());
 		if ( written == false ) {
 			return null;

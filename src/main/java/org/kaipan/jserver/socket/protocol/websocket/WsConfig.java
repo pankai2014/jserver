@@ -6,7 +6,7 @@ import org.kaipan.jserver.socket.core.Config;
 
 public class WsConfig extends Config
 {
-	private String queue_path;
+	private String leveldb_path;
 	
 	public WsConfig() 
 	{
@@ -28,8 +28,8 @@ public class WsConfig extends Config
             this.port(Integer.parseInt(property.getProperty("server.port")));
         }
         
-        if ( property.getProperty("server.queue_path") != null ) {
-            this.port(Integer.parseInt(property.getProperty("server.queue_path")));
+        if ( property.getProperty("server.leveldb.path") != null ) {
+            this.leveldb_path = property.getProperty("server.leveldb.path");
         }
         
         if ( property.getProperty("server.charset") != null ) {
@@ -37,8 +37,8 @@ public class WsConfig extends Config
         }
     }
 	
-	public String queuePath() 
+	public String leveldbPath() 
 	{
-		return queue_path;
+		return leveldb_path;
 	}
 }

@@ -71,14 +71,40 @@ public class LevelDB
     	return db.get(key, rdOpt);
     }
     
-    public Snapshot set(byte[] key, byte value[]) 
+    public boolean set(byte[] key, byte value[]) 
     {
-    	return db.put(key, value, wtOpt);
+    	Snapshot snapshot = db.put(key, value, wtOpt);
+    	
+    	if ( wtOpt.snapshot() ) {
+    		if ( snapshot == null ) {
+    			return false;
+    		}
+    	}
+    	else {
+    		if ( snapshot != null ) {
+    			return false;
+    		}
+    	}
+    	
+    	return true;
     }
     
-    public Snapshot delete(byte[] key) 
+    public boolean delete(byte[] key) 
     {
-    	return db.delete(key, wtOpt);
+    	Snapshot snapshot = db.delete(key, wtOpt);
+    	
+    	if ( wtOpt.snapshot() ) {
+    		if ( snapshot == null ) {
+    			return false;
+    		}
+    	}
+    	else {
+    		if ( snapshot != null ) {
+    			return false;
+    		}
+    	}
+    	
+    	return true;
     }
     
     public String shift()

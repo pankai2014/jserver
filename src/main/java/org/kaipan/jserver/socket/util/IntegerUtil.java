@@ -13,7 +13,7 @@ public class IntegerUtil
 		byte[] result = new byte[2];
 		
 		result[0] = (byte) data;
-		result[1] = (byte) (data >> 1);
+		result[1] = (byte) (data >> 8);
 		
 		return result;
 	}
@@ -23,9 +23,9 @@ public class IntegerUtil
 		byte[] result = new byte[4];
 		
 		result[0] = (byte) data;
-		result[1] = (byte) (data >> 1);
-		result[2] = (byte) (data >> 2);
-		result[3] = (byte) (data >> 3);
+		result[1] = (byte) (data >> 8);
+		result[2] = (byte) (data >> 16);
+		result[3] = (byte) (data >> 24);
 		
 		return result;
 	}
@@ -35,13 +35,13 @@ public class IntegerUtil
 		byte[] result = new byte[8];
 		
 		result[0] = (byte) data;
-		result[1] = (byte) (data >> 1);
-		result[2] = (byte) (data >> 2);
-		result[3] = (byte) (data >> 3);
-		result[4] = (byte) (data >> 4);
-		result[5] = (byte) (data >> 5);
-		result[6] = (byte) (data >> 6);
-		result[7] = (byte) (data >> 7);
+		result[1] = (byte) (data >> 8);
+		result[2] = (byte) (data >> 16);
+		result[3] = (byte) (data >> 24);
+		result[4] = (byte) (data >> 32);
+		result[5] = (byte) (data >> 40);
+		result[6] = (byte) (data >> 48);
+		result[7] = (byte) (data >> 56);
 		
 		return result;
 	}
@@ -62,17 +62,17 @@ public class IntegerUtil
 		return result;
 	}
 	
-	public static int bigEndian2Short(byte[] bytes) 
+	public static short bigEndian2Short(byte[] bytes) 
 	{
-		return bigEndian2Int(bytes, 0);
+		return bigEndian2Short(bytes, 0);
 	}
 	
-	public static int bigEndian2Short(byte[] bytes, int offset) 
+	public static short bigEndian2Short(byte[] bytes, int offset) 
 	{
-		int result = 0x00;
+		short result = 0x00;
 		
 		for ( int i = 0; i < 2; i++ ) {
-			result |= bytes[offset + i] << (i * 8);
+			result |= ((short) bytes[offset + i] & 0xff) << (i * 8);
 		}
 		
 		return result;
@@ -88,23 +88,23 @@ public class IntegerUtil
 		int result = 0x00;
 		
 		for ( int i = 0; i < 4; i++ ) {
-			result |= bytes[offset + i] << (i * 8);
+			result |= (bytes[offset + i] & 0xff) << (i * 8);
 		}
 		
 		return result;
 	}
 	
-	public static int bigEndian2Long(byte[] bytes) 
+	public static long bigEndian2Long(byte[] bytes) 
 	{
-		return bigEndian2Int(bytes, 0);
+		return bigEndian2Long(bytes, 0);
 	}
 	
-	public static int bigEndian2Long(byte[] bytes, int offset) 
+	public static long bigEndian2Long(byte[] bytes, int offset) 
 	{
-		int result = 0x00;
+		long result = 0x00;
 		
 		for ( int i = 0; i < 8; i++ ) {
-			result |= bytes[offset + i] << (i * 8);
+			result |= ((long) bytes[offset + i] & 0xff) << (i * 8);
 		}
 		
 		return result;

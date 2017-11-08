@@ -82,11 +82,9 @@ public class WsUtil
 		
 		index++;
 		
-		if ( ! isMask(data[index]) ) {
-			throw new IllegalArgumentException("Mask not set");
-		}
+		boolean mask = isMask(data[index]);
 		
-		int Length = data[index] & 0x7f;
+		long Length = data[index] & 0x7f;
 		if ( Length == 0x7e ) {
 			Length = IntegerUtil.bigEndian2Short(data, index);
 			
@@ -98,15 +96,25 @@ public class WsUtil
 			index += 8;
 		}
 		
-		byte[] mask = new byte[4];
-		System.arraycopy(data, ++index, mask, 0, 4);
-		index += 3;
-
-		byte[] message = new byte[Length];
-		System.arraycopy(data, ++index, message, 0, Length);
+		byte[] masking = null;
+		
+		if ( mask ) {
+			masking = new byte[4];
+			System.arraycopy(data, ++index, masking, 0, 4);
+			index += 3;
+		}
+		
+		byte[] message = new byte[(int) Length];
+		System.arraycopy(data, ++index, message, 0, (int) Length);
 		index += Length - 1;
 		
-		frame.setData(parseMessage(message, mask));
+		if ( mask ) {
+			frame.setData(parseMessage(message, masking));
+		}
+		else {
+			frame.setData(message);
+		}
+		
 		frame.setComplete(true);
 		
 		return frame;

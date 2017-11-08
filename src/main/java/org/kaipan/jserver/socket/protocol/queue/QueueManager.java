@@ -2,7 +2,6 @@ package org.kaipan.jserver.socket.protocol.queue;
 
 import java.io.IOException;
 
-import org.iq80.leveldb.Snapshot;
 import org.kaipan.jserver.database.LevelDB;
 import org.kaipan.jserver.socket.log.Logger;
 import org.kaipan.jserver.socket.util.IntegerUtil;
@@ -60,22 +59,12 @@ public class QueueManager
 	
 	public boolean set(byte[] key, byte[] value) 
 	{
-		Snapshot snapshot = leveldb.set(key, value);
-		if ( snapshot == null ) {
-			return false;
-		}
-		
-		return true;
+		return leveldb.set(key, value);
 	}
 	
 	public boolean delete(byte[] key) 
 	{
-		Snapshot snapshot = leveldb.delete(key);
-		if ( snapshot == null ) {
-			return false;
-		}
-		
-		return true;
+		return leveldb.delete(key);
 	}
 	
 	public long getHeadIndex()
@@ -97,7 +86,7 @@ public class QueueManager
 	{
 		byte[] bytes = leveldb.get(tailIndexKey.getBytes());
 		
-		tailIndex = bytes == null ? 1 : IntegerUtil.bigEndian2Long(bytes);
+		tailIndex = bytes == null ? 120 : IntegerUtil.bigEndian2Long(bytes);
 		return tailIndex;
 	}
 

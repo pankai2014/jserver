@@ -4,23 +4,23 @@ import org.kaipan.jserver.socket.util.IntegerUtil;
 
 public class QueueUtil
 {
-	public static QueueBean parseBean(byte[] data) 
+	public static QueueBean parseBean(byte[] result) 
 	{
 		QueueBean bean = new QueueBean();
 		
-		bean.setId(IntegerUtil.bigEndian2Int(data, 0));
-		bean.setType(IntegerUtil.bigEndian2Int(data, 4));
+		bean.setId(IntegerUtil.bigEndian2Int(result, 0));
+		bean.setType(IntegerUtil.bigEndian2Int(result, 4));
 		
-		byte[] body = null;
+		byte[] data = null;
 		
-		int length = data.length - 8;
+		int length = result.length - 8;
 		if ( length > 0 ) {
-			body = new byte[length];
+			data = new byte[length];
 		}
 		
-		if ( body != null ) {
-			System.arraycopy(data, 8, body, 0, length);
-			bean.setData(body);
+		if ( data != null ) {
+			System.arraycopy(result, 8, data, 0, length);
+			bean.setData(data);
 		}
 		
 		return bean;
