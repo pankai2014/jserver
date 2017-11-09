@@ -47,8 +47,8 @@ public class Client
     private String host = null;
     
     private int port;
-    private int connectTimeOut = 10000;
-    private int socketTimeOut  = 30000;
+    private int connectTimeout = 10000;
+    private int socketTimeout  = 30000;
     
     private byte[]	   readBytes   = new byte[65535];	
     private ByteBuffer readBuffer  = ByteBuffer.wrap(readBytes);
@@ -78,8 +78,8 @@ public class Client
         
         SocketAddress address = new InetSocketAddress(host, port);
         try {
-            client.connect(address, connectTimeOut);
-            client.setSoTimeout(socketTimeOut);
+            client.connect(address, connectTimeout);
+            client.setSoTimeout(socketTimeout);
         } 
         catch (IOException e) {
             Logger.error(e.getStackTrace());
@@ -151,8 +151,8 @@ public class Client
         
         int loc = 0;
         
-        writeBuffer.put( (byte) (0 & 0x00) );         		    loc++;
-        writeBuffer.put( (byte) (ROLE_RESPONDER 	  & 0xFF)); loc++;
+        writeBuffer.put( (byte) (0 & 0x00) );         		   loc++;
+        writeBuffer.put( (byte) (ROLE_RESPONDER 	 & 0xFF)); loc++;
         writeBuffer.put( (byte) ((keepAlive ? 1 : 0) & 0xFF)); loc++;
         
         for ( int i =  loc; i < HEADER_LEN; i++ ) {

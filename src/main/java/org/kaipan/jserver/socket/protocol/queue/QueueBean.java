@@ -7,14 +7,14 @@ public class QueueBean
 	public final static int QUEUE_ACK_TYPE   = 3;
 	public final static int QUEUE_STATS_TYPE = 4;
 	
-	private int id;
+	private int Id;
 	private int type;
 	
 	private byte[] data;
 
-	public QueueBean setId(int id) 
+	public QueueBean setId(int Id) 
 	{
-		this.id = id;
+		this.Id = Id;
 		
 		return this;
 	}
@@ -35,7 +35,7 @@ public class QueueBean
 	
 	public int getId() 
 	{
-		return id;
+		return Id;
 	}
 	
 	public int getType() 
@@ -52,7 +52,7 @@ public class QueueBean
 	{
 		StringBuilder builder = new StringBuilder();
 		
-		builder.append(id).append("|")
+		builder.append(Id).append("|")
 			.append(type).append("|")
 			.append(new String(data));
 		
