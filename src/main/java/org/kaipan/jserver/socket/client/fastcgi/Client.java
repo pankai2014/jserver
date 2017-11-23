@@ -11,7 +11,9 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import org.kaipan.jserver.socket.core.Message;
 import org.kaipan.jserver.socket.log.Logger;
@@ -168,9 +170,10 @@ public class Client
     private void buildParamsPacket(int requestId, Map<String, String> params) 
     {
     	if ( params != null ) {
-    	     for ( Map.Entry<String, String> entry : params.entrySet() ) {
-    	        buildNvpair(entry.getKey(), entry.getValue());
-    	     }
+    		Set<Entry<String, String>> entries = params.entrySet();
+    		for ( Entry<String, String> entry : entries ) {
+    			buildNvpair(entry.getKey(), entry.getValue());
+    		}
     	}
     	
     	readBuffer.flip();
